@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2023-12-24 13:27:07 by Eclipse SUMO sumo Version 1.17.0
+-->
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="../../../../../OneDrive%20-%20Technion/Studies/Theza/Merge/Simple/merge.net.xml"/>
+        <route-files value="../../../../../OneDrive%20-%20Technion/Studies/Theza/Merge/Simple/merge.rou.xml"/>
+		<junction-taz value="true"/>
+    </input>
+
+</configuration>

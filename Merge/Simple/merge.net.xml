@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2023-12-24 14:33:56 by Eclipse SUMO netedit Version 1.17.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumocfg-file value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Merge\Merge.sumocfg"/>
+        <route-files value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Merge\merge.rou.xml"/>
+        <sumo-net-file value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Merge\merge.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Merge\merge.net.xml"/>
+    </output>
+
+    <processing>
+        <offset.disable-normalization value="true"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+    </junctions>
+
+    <netedit>
+        <new-network value="false"/>
+    </netedit>
+
+</configuration>
+-->
+
+<net version="1.16" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-95.79,41.71,52.49,83.35" origBoundary="10000000000.00,10000000000.00,-10000000000.00,-10000000000.00" projParameter="!"/>
+
+    <edge id=":J1_0" function="internal">
+        <lane id=":J1_0_0" index="0" speed="9.44" length="7.67" shape="-29.69,74.30 -28.11,75.97 -26.95,77.17 -25.60,77.90 -23.45,78.16"/>
+    </edge>
+    <edge id=":J1_1" function="internal">
+        <lane id=":J1_1_0" index="0" speed="13.89" length="7.79" shape="-31.24,78.16 -23.45,78.16"/>
+        <lane id=":J1_1_1" index="1" speed="13.89" length="7.79" shape="-31.24,81.36 -23.46,81.36"/>
+    </edge>
+
+    <edge id="E0" from="J0" to="J1" priority="-1">
+        <lane id="E0_0" index="0" speed="13.89" length="64.55" shape="-95.79,78.16 -31.24,78.16"/>
+        <lane id="E0_1" index="1" speed="13.89" length="64.55" shape="-95.79,81.36 -31.24,81.36"/>
+    </edge>
+    <edge id="E1" from="J1" to="J2" priority="-1">
+        <lane id="E1_0" index="0" speed="13.89" length="75.96" shape="-23.45,78.16 52.51,78.55"/>
+        <lane id="E1_1" index="1" speed="13.89" length="75.96" shape="-23.46,81.36 52.50,81.75"/>
+    </edge>
+    <edge id="E2" from="J3" to="J1" priority="-1">
+        <lane id="E2_0" index="0" speed="13.89" length="48.72" shape="-64.83,40.56 -29.69,74.30"/>
+    </edge>
+
+    <junction id="J0" type="dead_end" x="-95.79" y="82.96" incLanes="" intLanes="" shape="-95.79,82.96 -95.79,76.56"/>
+    <junction id="J1" type="priority" x="-22.98" y="82.96" incLanes="E2_0 E0_0 E0_1" intLanes=":J1_0_0 :J1_1_0 :J1_1_1" shape="-23.47,82.96 -23.44,76.56 -25.65,76.14 -26.33,75.65 -26.95,74.98 -27.64,74.14 -28.58,73.14 -30.80,75.45 -30.34,76.07 -30.33,76.28 -30.48,76.44 -30.79,76.53 -31.24,76.56 -31.24,82.96">
+        <request index="0" response="110" foes="110" cont="0"/>
+        <request index="1" response="000" foes="001" cont="0"/>
+        <request index="2" response="000" foes="001" cont="0"/>
+    </junction>
+    <junction id="J2" type="dead_end" x="52.49" y="83.35" incLanes="E1_0 E1_1" intLanes="" shape="52.52,76.95 52.49,83.35"/>
+    <junction id="J3" type="dead_end" x="-65.94" y="41.71" incLanes="" intLanes="" shape="-65.94,41.71 -63.72,39.40"/>
+
+    <connection from="E0" to="E1" fromLane="0" toLane="0" via=":J1_1_0" dir="s" state="M"/>
+    <connection from="E0" to="E1" fromLane="1" toLane="1" via=":J1_1_1" dir="s" state="M"/>
+    <connection from="E2" to="E1" fromLane="0" toLane="0" via=":J1_0_0" dir="s" state="m"/>
+
+    <connection from=":J1_0" to="E1" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":J1_1" to="E1" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":J1_1" to="E1" fromLane="1" toLane="1" dir="s" state="M"/>
+
+</net>
