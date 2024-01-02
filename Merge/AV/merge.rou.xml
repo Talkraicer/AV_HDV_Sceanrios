@@ -8,6 +8,6 @@
     <vType id="AV" color="blue"/>
     <vType id="HD" color="red"/>
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <flow id="MajorFlow" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="180.00" vehsPerHour="500.00"/>
+    <flow id="MajorFlow" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="180.00" vehsPerHour="2500.00"/>
     <flow id="MinorFlow" begin="0.00" departLane="random" color="green" line="0" fromJunction="J3" toJunction="J2" end="180.00" vehsPerHour="500.00"/>
 </routes>
