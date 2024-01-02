@@ -1,6 +1,5 @@
 import os
 import sys
-from random import random
 import numpy as np
 import pandas as pd
 if 'SUMO_HOME' in os.environ:
@@ -10,39 +9,28 @@ import traci.constants as tc
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from multiprocessing import Pool
+from utils import *
 
 GUI = False
 
+# SIM parameters
 NUM_REPS = 10
+SIM_DURATION = 600
+
+# Traffic parameters
+MAJOR_FLOW = 1500
+AV_PROB = None # testing many AV probabilities
+
+# Controllable parameters
 DETECT_MERGING_LOC = 40
 SLOW_LOC = 35
 SLOW_LEN = 15
+DESIRED_SLOW_SPEED = None # testing many desired slow speeds
 
 sumoCfg = r"..\merge.sumocfg"
 sumoBinary = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo-gui.exe" if GUI else \
     r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
 sumoCmd = [sumoBinary, "-c", sumoCfg]
-
-
-def handle_step(t, av_prob, detect_merging_loc, slow_loc, slow_len, desired_slow_speed):
-    vehIDs = traci.vehicle.getIDList()
-    merging = False
-    for vehID in vehIDs:
-        if traci.vehicle.getTypeID(vehID) == "DEFAULT_VEHTYPE":
-            traci.vehicle.setType(vehID, "AV" if random() < av_prob else "HD")
-        speed, lane, lanePos = traci.vehicle.getSpeed(vehID), traci.vehicle.getLaneID(vehID), \
-            traci.vehicle.getLanePosition(vehID)
-        if lane == "E2_0" and lanePos > detect_merging_loc:
-            merging = True
-        # print(vehID, ": ", lane, " SPEED:", speed, " LANEPOS:", lanePos, " TYPE:", traci.vehicle.getTypeID(vehID))
-    if merging:
-        for vehID in vehIDs:
-            if traci.vehicle.getLaneID(vehID) == "E0_0" and traci.vehicle.getTypeID(vehID) == "AV" and \
-                    slow_loc < traci.vehicle.getLanePosition(vehID) < slow_loc + slow_len:
-                # Slow down the vehicle to specific period of time
-                traci.vehicle.slowDown(vehID, desired_slow_speed, 1)
-
-    return True
 
 
 
@@ -76,10 +64,12 @@ def parallel_simulation(desired_slow_speeds):
         df[avg_key] = avg_values
         df[std_key] = std_values
     df.index = np.arange(0, 1.1, 0.1)
-    df.to_csv(f"results_{NUM_REPS}_500Major.csv")
+    df.to_csv(f"results_{NUM_REPS}_{MAJOR_FLOW}Major_{SIM_DURATION}Duration.csv")
 
 if __name__ == "__main__":
     desired_slow_speeds = np.arange(0, 10, 1)
+    set_sumo_simulation(MAJOR_FLOW, SIM_DURATION)
+    # record_sumo_simulation_to_gif(MAJOR_FLOW)
     parallel_simulation(desired_slow_speeds)
 
 
