@@ -1,8 +1,0 @@
-<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
-    
-    <vType id="AV" color="blue" />
-    <vType id="HD" color="red" />
-    
-    <flow id="MajorFlow" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="600" vehsPerHour="1000" />
-    <flow id="MinorFlow" begin="0.00" departLane="random" color="green" line="0" fromJunction="J3" toJunction="J2" end="600" vehsPerHour="500.00" />
-</routes>
