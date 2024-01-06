@@ -4,12 +4,10 @@ import numpy as np
 import pandas as pd
 if 'SUMO_HOME' in os.environ:
     sys.path.append(os.path.join(os.environ['SUMO_HOME'], 'tools'))
-import traci
-import traci.constants as tc
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 from multiprocessing import Pool
-from utils import *
+import traci
+from utils import handle_step, set_sumo_simulation, record_sumo_simulation_to_gif
 
 GUI = False
 
@@ -18,7 +16,7 @@ NUM_REPS = 10
 SIM_DURATION = 600
 
 # Traffic parameters
-MAJOR_FLOW = 1500
+MAJOR_FLOW = 2500
 AV_PROB = None # testing many AV probabilities
 
 # Controllable parameters
