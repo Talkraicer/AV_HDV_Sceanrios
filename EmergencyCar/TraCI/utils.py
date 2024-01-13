@@ -3,7 +3,7 @@ import traci
 import imageio
 from random import random
 import xml.etree.ElementTree as ET
-
+import pandas as pd
 exp_name = "emergency"
 
 GUI = True
@@ -12,9 +12,6 @@ sumoBinary = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo-gui.exe" if GUI else
     r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
 sumoCmd = [sumoBinary, "-c", sumoCfg]
 
-# Parameters that should be given from simulation_run.py
-MajorFlow_vehsPerHour = 5000
-sim_duration = 300
 
 def handle_step(t, av_prob, policy_name = "Nothing"):
     vehIDs = traci.vehicle.getIDList()
@@ -106,8 +103,66 @@ def record_sumo_simulation_to_gif(major_rate, policy_name, record_duration=180, 
     # Create a GIF from the captured frames
     imageio.mimsave(f"results_gifs/{exp_name}_{major_rate}Major_{desired_slow_speed}DSS_{av_prob}AVprob_{policy_name}.gif", frames, fps=10)
 
+def output_file_to_df(output_file):
+    # Parse the XML file into pd dataframe
+    tree = ET.parse(output_file)
+    root = tree.getroot()
+
+    dict = {"id":[], "depart":[], "arrival":[], "duration":[], "departDelay":[], "routeLength":[], "vType":[], "timeLoss":[]}
+    for tripinfo in root.findall('tripinfo'):
+        for key in dict.keys():
+            dict[key].append(tripinfo.get(key))
+    df = pd.DataFrame(dict)
+    df["avg_speed"] = df.routeLength.astype(float) / df.duration.astype(float)
+    return df
+
+def calc_stats(df):
+    # Calculate statistics per vType
+    stats = {}
+    for vType in df.vType.unique():
+        stats[vType] = {}
+        # mean and std
+        stats[vType]["avg_trip_duration"] = df[df.vType == vType].duration.astype(float).mean()
+        stats[vType]["std_trip_duration"] = df[df.vType == vType].duration.astype(float).std()
+        stats[vType]["avg_depart_delay"] = df[df.vType == vType].departDelay.astype(float).mean()
+        stats[vType]["std_depart_delay"] = df[df.vType == vType].departDelay.astype(float).std()
+        stats[vType]["avg_speed"] = df[df.vType == vType].avg_speed.astype(float).mean()
+        stats[vType]["std_speed"] = df[df.vType == vType].avg_speed.astype(float).std()
+        stats[vType]["avg_timeloss"] = df[df.vType == vType].timeLoss.astype(float).mean()
+        stats[vType]["std_timeloss"] = df[df.vType == vType].timeLoss.astype(float).std()
+    return pd.DataFrame(stats)
+
+
+def parse_output_files(av_rates, num_reps, policy_name, flow):
+    # Aggregate all output files into one dataframe, divided by vType
+
+    # set MultiIndex for df - each vType will be a column in df with all the stats
+    stats_names = ["avg_trip_duration", "std_trip_duration", "avg_depart_delay",
+                  "std_depart_delay", "avg_speed", "std_speed", "avg_timeloss", "std_timeloss"]
+    vType_names = ["AV", "HD", "emergency"]
+    df = pd.DataFrame(columns = pd.MultiIndex.from_product([vType_names, stats_names],names = ['stat', 'vType']), index = av_rates)
+
+    for av_rate in av_rates:
+        df_av_rate = pd.DataFrame()
+        for i in range(num_reps):
+            output_file = f"results_reps/{policy_name}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+            df_rep = output_file_to_df(output_file)
+            df_av_rate = pd.concat([df_av_rate, df_rep])
+        # Calculate statistics per vType
+        stats_av_rate = calc_stats(df_av_rate)
+        # Add to df
+        for vType in vType_names:
+            if vType not in stats_av_rate.columns:
+                continue
+            for stat in stats_names:
+                df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
+    # Save df to csv
+    df.to_csv(f"results_csvs/{policy_name}_flow_{flow}.csv")
+
+
+
+
 
 if __name__ == '__main__':
     # Example usage
-    set_sumo_simulation(MajorFlow_vehsPerHour, sim_duration)
-    record_sumo_simulation_to_gif(MajorFlow_vehsPerHour,"Nothing")
+    parse_output_files([0.0, 0.1, 0.2, 0.3, 0.4, 0.5,0.6,0.7,0.8,0.9,1.0], 10, "ClearLeft", 1000)
