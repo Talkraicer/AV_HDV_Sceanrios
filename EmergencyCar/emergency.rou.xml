@@ -6,6 +6,6 @@
     
     <route id="r_0" edges="E0" />
     
-    <flow id="MajorFlow" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="400" vehsPerHour="1000" />
+    <flow id="MajorFlow" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="400" vehsPerHour="5000" />
     <vehicle id="emergencyCar" type="emergency" depart="100.00" departLane="2" departSpeed="20.00" arrivalSpeed="20.00" color="magenta" route="r_0" />
 </routes>

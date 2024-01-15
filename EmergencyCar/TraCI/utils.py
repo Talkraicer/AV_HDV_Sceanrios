@@ -11,7 +11,7 @@ sumoCfg = fr"..\{exp_name}.sumocfg"
 sumoBinary = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo-gui.exe" if GUI else \
     r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
 sumoCmd = [sumoBinary, "-c", sumoCfg]
-
+NUM_REPS = 10
 
 def handle_step(t, av_prob, policy_name = "Nothing"):
     vehIDs = traci.vehicle.getIDList()
@@ -108,13 +108,19 @@ def output_file_to_df(output_file):
     tree = ET.parse(output_file)
     root = tree.getroot()
 
-    dict = {"id":[], "depart":[], "arrival":[], "duration":[], "departDelay":[], "routeLength":[], "vType":[], "timeLoss":[]}
+    dict = {"duration":[], "departDelay":[], "routeLength":[], "vType":[], "timeLoss":[]}
     for tripinfo in root.findall('tripinfo'):
         for key in dict.keys():
             dict[key].append(tripinfo.get(key))
     df = pd.DataFrame(dict)
     df["avg_speed"] = df.routeLength.astype(float) / df.duration.astype(float)
-    return df
+    # convert to float except vType
+    for col in df.columns:
+        if col != "vType":
+            df[col] = df[col].astype(float)
+    return df.groupby(by="vType").mean().reset_index()
+
+
 
 def calc_stats(df):
     # Calculate statistics per vType
@@ -140,7 +146,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     stats_names = ["avg_trip_duration", "std_trip_duration", "avg_depart_delay",
                   "std_depart_delay", "avg_speed", "std_speed", "avg_timeloss", "std_timeloss"]
     vType_names = ["AV", "HD", "emergency"]
-    df = pd.DataFrame(columns = pd.MultiIndex.from_product([vType_names, stats_names],names = ['stat', 'vType']), index = av_rates)
+    df = pd.DataFrame(columns = pd.MultiIndex.from_product([vType_names, stats_names],names = ['vType', 'stat']), index = av_rates)
 
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
@@ -158,6 +164,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
     df.to_csv(f"results_csvs/{policy_name}_flow_{flow}.csv")
+    df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}.pkl")
 
 
 
@@ -165,4 +172,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
 
 if __name__ == '__main__':
     # Example usage
-    parse_output_files([0.0, 0.1, 0.2, 0.3, 0.4, 0.5,0.6,0.7,0.8,0.9,1.0], 10, "ClearLeft", 1000)
+    for major_flow in [1000,2000,3000,4000,5000]:
+        av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        for policy_name in ["ClearLeft", "ClearLeftWhenEmergency", "ClearFront", "Nothing"]:
+            parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)
