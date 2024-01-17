@@ -114,11 +114,19 @@ def output_file_to_df(output_file):
             dict[key].append(tripinfo.get(key))
     df = pd.DataFrame(dict)
     df["avg_speed"] = df.routeLength.astype(float) / df.duration.astype(float)
+    df["delay"] = df.departDelay.astype(float) + df.timeLoss.astype(float)
+    df.drop(columns=["departDelay", "routeLength", "timeLoss"], inplace=True)
     # convert to float except vType
     for col in df.columns:
         if col != "vType":
             df[col] = df[col].astype(float)
-    return df.groupby(by="vType").mean().reset_index()
+    df_results = df.groupby(by="vType").mean().reset_index()
+    # append vType column of all vehicles
+    df_all = df.drop(columns=["vType"]).mean()
+    df_all["vType"] = "all"
+    df_all = pd.DataFrame(df_all).transpose()
+    df_results = pd.concat([df_results, df_all]).reset_index(drop=True)
+    return df_results
 
 
 
@@ -130,12 +138,11 @@ def calc_stats(df):
         # mean and std
         stats[vType]["avg_trip_duration"] = df[df.vType == vType].duration.astype(float).mean()
         stats[vType]["std_trip_duration"] = df[df.vType == vType].duration.astype(float).std()
-        stats[vType]["avg_depart_delay"] = df[df.vType == vType].departDelay.astype(float).mean()
-        stats[vType]["std_depart_delay"] = df[df.vType == vType].departDelay.astype(float).std()
         stats[vType]["avg_speed"] = df[df.vType == vType].avg_speed.astype(float).mean()
         stats[vType]["std_speed"] = df[df.vType == vType].avg_speed.astype(float).std()
-        stats[vType]["avg_timeloss"] = df[df.vType == vType].timeLoss.astype(float).mean()
-        stats[vType]["std_timeloss"] = df[df.vType == vType].timeLoss.astype(float).std()
+        stats[vType]["avg_delay"] = df[df.vType == vType].delay.astype(float).mean()
+        stats[vType]["std_delay"] = df[df.vType == vType].delay.astype(float).std()
+
     return pd.DataFrame(stats)
 
 
@@ -143,10 +150,10 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     # Aggregate all output files into one dataframe, divided by vType
 
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = ["avg_trip_duration", "std_trip_duration", "avg_depart_delay",
-                  "std_depart_delay", "avg_speed", "std_speed", "avg_timeloss", "std_timeloss"]
-    vType_names = ["AV", "HD", "emergency"]
-    df = pd.DataFrame(columns = pd.MultiIndex.from_product([vType_names, stats_names],names = ['vType', 'stat']), index = av_rates)
+    stats_names = ["avg_trip_duration", "std_trip_duration", "avg_speed", "std_speed", "avg_delay", "std_delay"]
+    vType_names = ["AV", "HD", "emergency", "all"]
+    df = pd.DataFrame(columns = pd.MultiIndex.from_product([vType_names, stats_names],names = ['vType', 'stat']),
+                      index =av_rates)
 
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
