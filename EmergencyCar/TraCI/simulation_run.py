@@ -3,8 +3,8 @@ import sys
 import numpy as np
 import pandas as pd
 
-if 'SUMO_HOME' in os.environ:
-    sys.path.append(os.path.join(os.environ['SUMO_HOME'], 'tools'))
+
+
 from tqdm import tqdm
 from multiprocessing import Pool
 from utils import *
@@ -22,8 +22,13 @@ EMERGENCY_PROB = 0.003
 AV_PROB = None  # testing many AV probabilities
 
 sumoCfg = fr"..\{exp_name}.sumocfg"
-sumoBinary = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo-gui.exe" if GUI else \
-    r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
+if 'SUMO_HOME' in os.environ:
+    sumo_path = os.environ['SUMO_HOME']
+    sys.path.append(os.path.join(sumo_path, 'tools'))
+    sumoBinary = os.path.join(sumo_path, 'bin', 'sumo-gui.exe') if GUI else \
+        os.path.join(sumo_path, 'bin', 'sumo.exe')
+else:
+    sys.exit("please declare environment variable 'SUMO_HOME'")
 sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
 
 
