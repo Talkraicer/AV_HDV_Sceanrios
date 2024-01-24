@@ -25,8 +25,13 @@ sumoCfg = fr"..\{exp_name}.sumocfg"
 if 'SUMO_HOME' in os.environ:
     sumo_path = os.environ['SUMO_HOME']
     sys.path.append(os.path.join(sumo_path, 'tools'))
-    sumoBinary = os.path.join(sumo_path, 'bin', 'sumo-gui.exe') if GUI else \
-        os.path.join(sumo_path, 'bin', 'sumo.exe')
+    # check operational system - if it is windows, use sumo.exe if linux, use sumo
+    if os.name == 'nt':
+        sumoBinary = os.path.join(sumo_path, 'bin', 'sumo-gui.exe') if GUI else \
+            os.path.join(sumo_path, 'bin', 'sumo.exe')
+    else:
+        sumoBinary = os.path.join(sumo_path, 'bin', 'sumo-gui') if GUI else \
+            os.path.join(sumo_path, 'bin', 'sumo')
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
