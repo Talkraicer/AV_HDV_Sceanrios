@@ -160,12 +160,12 @@ def calc_stats(df):
         stats[vType] = {}
         for metric in metrics:
             stats[vType][f"avg_{metric}"] = df_vType[metric].mean()
-            stats[vType][f"std_{metric}"] = df_vType[metric].std()
+            stats[vType][f"std_{metric}"] = df_vType[metric].std(ddof=1)
     if "all" not in stats.keys():
         stats["all"] = {}
         for metric in metrics:
             stats["all"][f"avg_{metric}"] = df[metric].mean()
-            stats["all"][f"std_{metric}"] = df[metric].std()
+            stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
     return pd.DataFrame(stats)
 
 
@@ -208,4 +208,4 @@ if __name__ == '__main__':
     for major_flow in [1000, 2000, 3000, 4000, 5000]:
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         for policy_name in ["ClearFront", "Nothing"]:
-            parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow, long=True)
+            parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)
