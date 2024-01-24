@@ -28,7 +28,6 @@ def handle_step(t, av_prob, emergency_prob, policy_name, randomizer):
             elif rand < emergency_prob + av_prob:
                 traci.vehicle.setType(vehID, "emergency")
                 traci.vehicle.setSpeedFactor(vehID, 3)
-                traci
             else:
                 traci.vehicle.setType(vehID, "HD")
         speed, lane, lanePos = traci.vehicle.getSpeed(vehID), traci.vehicle.getLaneID(vehID), \
