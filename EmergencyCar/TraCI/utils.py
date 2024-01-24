@@ -8,10 +8,8 @@ import numpy as np
 exp_name = "emergency"
 NUM_REPS = 1
 GUI = True
-sumoCfg = fr"..\{exp_name}.sumocfg"
-sumoBinary = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo-gui.exe" if GUI else \
-    r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
-sumoCmd = [sumoBinary, "-c", sumoCfg]
+sumoCfg = fr"../{exp_name}.sumocfg"
+
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
 def add_emergency_car(id, depart_time):
