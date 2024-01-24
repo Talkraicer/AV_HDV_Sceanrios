@@ -21,7 +21,7 @@ EMERGENCY_PROB = 0.003
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
 
-sumoCfg = fr"..\{exp_name}.sumocfg"
+sumoCfg = fr"../{exp_name}.sumocfg"
 if 'SUMO_HOME' in os.environ:
     sumo_path = os.environ['SUMO_HOME']
     sys.path.append(os.path.join(sumo_path, 'tools'))
