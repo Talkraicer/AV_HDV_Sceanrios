@@ -14,7 +14,7 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 7200
-NUM_PROCESSES = 11
+NUM_PROCESSES = 2
 NUM_REPS = 1
 EMERGENCY_PROB = 0.003
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     for major_flow in [1000, 2000, 3000, 4000, 5000]:
         set_sumo_simulation(major_flow, SIM_DURATION)
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        seed = str(np.random.randint(0, 1000000))
+        seed = str(np.random.randint(0, 10000))
         for policy_name in ["ClearFront", "Nothing"]:
             parallel_simulation(av_rates,major_flow, policy_name=policy_name, seed=seed)
             parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)
