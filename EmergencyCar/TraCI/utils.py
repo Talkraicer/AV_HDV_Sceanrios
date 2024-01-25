@@ -12,9 +12,6 @@ sumoCfg = fr"../{exp_name}.sumocfg"
 
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
-def add_emergency_car(id, depart_time):
-    traci.vehicle.add(f"emergencyCar{id}", routeID="r_0", typeID="emergency", depart=str(depart_time),
-                      departLane="random")
 
 
 def handle_step(t, av_prob, emergency_prob, policy_name, randomizer):
@@ -23,11 +20,11 @@ def handle_step(t, av_prob, emergency_prob, policy_name, randomizer):
     for vehID in vehIDs:
         if traci.vehicle.getTypeID(vehID) == "DEFAULT_VEHTYPE":
             rand = randomizer.uniform(0, 1)
-            if rand < av_prob:
-                traci.vehicle.setType(vehID, "AV")
-            elif rand < emergency_prob + av_prob:
+            if rand < emergency_prob:
                 traci.vehicle.setType(vehID, "emergency")
                 traci.vehicle.setSpeedFactor(vehID, 3)
+            elif rand < av_prob + emergency_prob:
+                traci.vehicle.setType(vehID, "AV")
             else:
                 traci.vehicle.setType(vehID, "HD")
         speed, lane, lanePos = traci.vehicle.getSpeed(vehID), traci.vehicle.getLaneID(vehID), \
