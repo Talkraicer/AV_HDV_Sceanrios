@@ -68,7 +68,10 @@ if __name__ == "__main__":
         seed = str(np.random.randint(0, 10000))
         args = []
         for policy_name in POLICIES:
-            args += [(av_rate, policy_name, major_flow, seed) for av_rate in av_rates]
+            if policy_name == "Nothing":
+                args += [(av_rate, policy_name, major_flow, seed) for av_rate in [0.0]]
+            else:
+                args += [(av_rate, policy_name, major_flow, seed) for av_rate in av_rates]
         parallel_simulation(args)
         for policy_name in POLICIES:
             parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)

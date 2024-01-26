@@ -119,7 +119,7 @@ def output_file_to_df(output_file, num_reps):
     tree = ET.parse(output_file)
     root = tree.getroot()
 
-    dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": []}
+    dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": [], "id": []}
     for tripinfo in root.findall('tripinfo'):
         for key in dict.keys():
             dict[key].append(tripinfo.get(key))
@@ -129,7 +129,7 @@ def output_file_to_df(output_file, num_reps):
     df.drop(columns=["routeLength"], inplace=True)
     # convert to float except vType
     for col in df.columns:
-        if col != "vType":
+        if col != "vType" and col != "id":
             df[col] = df[col].astype(float)
     if num_reps > 1:
         df = calc_mean(df)
@@ -146,18 +146,21 @@ def calc_mean(df):
     return df_results
 
 
-def calc_stats(df):
+def calc_stats(df, diff=False):
     # Calculate statistics per vType
+    metrics_stats = metrics
+    if diff:
+        metrics_stats = [f"{metric}_diff" for metric in metrics]
     stats = {}
     for vType in df.vType.unique():
         df_vType = df[df.vType == vType]
         stats[vType] = {}
-        for metric in metrics:
+        for metric in metrics_stats:
             stats[vType][f"avg_{metric}"] = df_vType[metric].mean()
             stats[vType][f"std_{metric}"] = df_vType[metric].std(ddof=1)
     if "all" not in stats.keys():
         stats["all"] = {}
-        for metric in metrics:
+        for metric in metrics_stats:
             stats["all"][f"avg_{metric}"] = df[metric].mean()
             stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
     return pd.DataFrame(stats)
@@ -197,9 +200,62 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}.pkl")
 
 
+def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_name2="Nothing"):
+    # set MultiIndex for df - each vType will be a column in df with all the stats
+    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics]
+    vType_names = ["AV", "HD", "emergency", "all"]
+    df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
+                      index=av_rates)
+
+    for av_rate in av_rates:
+        df_av_rate = pd.DataFrame()
+        for i in range(num_reps):
+            output_file1 = f"results_reps/{policy_name1}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+            output_file2 = f"results_reps/{policy_name2}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+            if num_reps == 1:
+                output_file1 = f"results_reps_long_server/{policy_name1}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+                output_file2 = f"results_reps_long_server/{policy_name2}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+            df_rep1 = output_file_to_df(output_file1, num_reps)
+            df_rep2 = output_file_to_df(output_file2, num_reps)
+            df_rep = pd.merge(df_rep1, df_rep2, on=["id","vType"], suffixes=[f"_{policy_name1}", f"_{policy_name2}"],
+                              how="inner")
+            # calculate difference
+            try:
+                assert len (df_rep) == len(df_rep1) == len(df_rep2)
+            except:
+                print(f"len(df_rep) = {len(df_rep)}, len(df_rep1) = {len(df_rep1)}, len(df_rep2) = {len(df_rep2)}")
+                # print the ids that are not in both dataframes and the vTypes
+                print(df_rep1[~df_rep1.id.isin(df_rep.id)][["id","vType"]])
+                print("*"*50)
+                print(df_rep2[~df_rep2.id.isin(df_rep.id)][["id","vType"]])
+                print("*"*50)
+
+            for metric in metrics:
+                df_rep[f"{metric}_diff"] = df_rep[f"{metric}_{policy_name1}"] - df_rep[f"{metric}_{policy_name2}"]
+            df_rep.drop(columns=[f"{metric}_{policy_name1}" for metric in metrics], inplace=True)
+            df_rep.drop(columns=[f"{metric}_{policy_name2}" for metric in metrics], inplace=True)
+            df_av_rate = pd.concat([df_av_rate, df_rep])
+        # Calculate statistics per vType
+        stats_av_rate = calc_stats(df_av_rate, diff=True)
+        # Add to df
+        for vType in vType_names:
+            if vType not in stats_av_rate.columns:
+                continue
+            for stat in stats_names:
+                df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
+    # Save df to csv
+    if num_reps == 1:
+        df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}_long.csv")
+        df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}_long.pkl")
+        return
+    df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.csv")
+    df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
+
+
+
 if __name__ == '__main__':
     # Example usage
     for major_flow in [1000, 2000, 3000, 4000, 5000]:
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        for policy_name in ["ClearFront", "Nothing"]:
-            parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)
+        for policy_name in ["ClearFront"]:
+            parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
