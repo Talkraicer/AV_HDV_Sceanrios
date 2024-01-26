@@ -14,12 +14,14 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 7200
-NUM_PROCESSES = 2
+NUM_PROCESSES = 22
 NUM_REPS = 1
 EMERGENCY_PROB = 0.003
+POLICIES = ["ClearFront", "Nothing"]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
+
 
 sumoCfg = fr"../{exp_name}.sumocfg"
 if 'SUMO_HOME' in os.environ:
@@ -53,17 +55,20 @@ def simulate(arg):
         traci.close()
 
 
-def parallel_simulation(av_rates, major_flow, policy_name,seed):
-    args = [(av_rate, policy_name,major_flow, seed) for av_rate in av_rates]
+def parallel_simulation(args):
     with Pool(NUM_PROCESSES) as pool:  # 10 processes
-        results = list(tqdm(pool.imap(simulate, args), total=len(av_rates)))
+        results = list(tqdm(pool.imap(simulate, args), total=len(args)))
 
 
 if __name__ == "__main__":
-    for major_flow in [1000, 2000, 3000, 4000, 5000]:
+    for major_flow in [1000, 2000, 3000, 4000, 5000]: # Can't multiprocess
+        # this loop because setting sumo config is not thread safe
         set_sumo_simulation(major_flow, SIM_DURATION)
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         seed = str(np.random.randint(0, 10000))
-        for policy_name in ["ClearFront", "Nothing"]:
-            parallel_simulation(av_rates,major_flow, policy_name=policy_name, seed=seed)
+        args = []
+        for policy_name in POLICIES:
+            args += [(av_rate, policy_name, major_flow, seed) for av_rate in av_rates]
+        parallel_simulation(args)
+        for policy_name in POLICIES:
             parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)
