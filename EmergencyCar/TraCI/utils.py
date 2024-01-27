@@ -193,8 +193,8 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
         for i in range(num_reps):
-            output_file1 = f"results_reps/{policy_name1}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
-            output_file2 = f"results_reps/{policy_name2}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+            output_file1 = f"results_reps/{policy_name1}_emergency_flow{flow}_av{av_rate}_emer{0.003}.xml"
+            output_file2 = f"results_reps/{policy_name2}_emergency_flow{flow}_av{av_rate}_emer{0.003}.xml"
             if num_reps == 1:
                 output_file1 = f"results_reps_long/{policy_name1}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
                 output_file2 = f"results_reps_long/{policy_name2}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
