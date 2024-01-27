@@ -6,8 +6,8 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="emergency.net.xml"/>
-        <route-files value="emergency.rou.xml"/>
+        <net-file value="../emergency.net.xml"/>
+        <route-files value="../rou_files/emergency.rou.xml"/>
         <junction-taz value="true"/>
     </input>
 	

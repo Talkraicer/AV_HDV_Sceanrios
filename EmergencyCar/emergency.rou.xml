@@ -1,10 +1,12 @@
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
-    
-    <vType id="AV" color="blue" />
-    <vType id="HD" color="red" />
-    <vType id="emergency" speedFactor="normc(3.00,0.00)" vClass="emergency" carFollowModel="KraussPS" accel="5.2" decel="9" color="magenta" />
-    
+
+	<vTypeDistribution id="vehicleDist">
+	<vType id="AV" color="blue" probability="0.5" />
+	<vType id="HD" color="red" probability="0.4"/>
+	<vType id="emergency" probability="0.1" speedFactor="normc(3.00,0.00)" vClass="emergency" carFollowModel="KraussPS" accel="5.2" decel="9" color="magenta" />
+	</vTypeDistribution>
+	
     <route id="r_0" edges="E0" />
     
-    <flow id="MajorFlow" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="7200" vehsPerHour="1000" departSpeed="random" />
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="7200" vehsPerHour="1000" departSpeed="random" />
 </routes>

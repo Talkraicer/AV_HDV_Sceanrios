@@ -22,8 +22,6 @@ POLICIES = ["ClearFront", "Nothing"]
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
 
-
-sumoCfg = fr"../{exp_name}.sumocfg"
 if 'SUMO_HOME' in os.environ:
     sumo_path = os.environ['SUMO_HOME']
     sys.path.append(os.path.join(sumo_path, 'tools'))
@@ -36,10 +34,10 @@ if 'SUMO_HOME' in os.environ:
             os.path.join(sumo_path, 'bin', 'sumo')
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
-sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
 
 
 def simulate(arg):
+    sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
     av_rate, policy_name, major_flow, seed = arg
     randomizer = np.random.default_rng(seed=int(seed))
     for i in range(NUM_REPS):
@@ -61,9 +59,7 @@ def parallel_simulation(args):
 
 
 if __name__ == "__main__":
-    for major_flow in [1000, 2000, 3000, 4000, 5000]: # Can't multiprocess
-        # this loop because setting sumo config is not thread safe
-        set_sumo_simulation(major_flow, SIM_DURATION)
+    for major_flow in [1000, 2000, 3000, 4000, 5000]:
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         seed = str(np.random.randint(0, 10000))
         args = []
