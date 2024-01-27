@@ -21,7 +21,7 @@ def handle_step(t, policy_name):
     for vehID in vehIDs:
         lane = traci.vehicle.getLaneID(vehID)
         if traci.vehicle.getTypeID(vehID) == "emergency":
-            if policy_name == "ClearFront":
+            if policy_name == "ClearFront" or policy_name == "ClearFront_HD50":
                 # clear all vehicles in front of the emergency vehicle
                 leader = traci.vehicle.getLeader(vehID, 0)
                 while leader:
@@ -30,7 +30,18 @@ def handle_step(t, policy_name):
                         to_lane = 1 if lane.endswith("2") else 0
                         traci.vehicle.changeLane(frontVehID, to_lane, 1)
                     leader = traci.vehicle.getLeader(frontVehID, 0)
-
+            if policy_name == "ClearFront_HD50" or policy_name == "HD50":
+                # clear also HD vehicles in front of the emergency vehicle (up to 50m)
+                leader = traci.vehicle.getLeader(vehID, 0)
+                dist_emer = 0
+                while leader and dist_emer < 50:
+                    frontVehID, dist = leader
+                    dist_emer += dist
+                    if traci.vehicle.getTypeID(frontVehID) != "emergency" and traci.vehicle.getLaneID(frontVehID)\
+                            == lane and dist_emer < 50:
+                        to_lane = 1 if lane.endswith("2") else 0
+                        traci.vehicle.changeLane(frontVehID, to_lane, 1)
+                    leader = traci.vehicle.getLeader(frontVehID, 0)
     return has_emergency
 
 

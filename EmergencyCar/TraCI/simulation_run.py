@@ -14,10 +14,10 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 7200
-NUM_PROCESSES = 1
+NUM_PROCESSES = 70
 NUM_REPS = 1
 EMERGENCY_PROB = 0.003
-POLICIES = ["ClearFront", "Nothing"]
+POLICIES = ["HD50", "ClearFront_HD50"]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
