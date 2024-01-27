@@ -30,7 +30,18 @@ def handle_step(t, policy_name):
                         to_lane = 1 if lane.endswith("2") else 0
                         traci.vehicle.changeLane(frontVehID, to_lane, 1)
                     leader = traci.vehicle.getLeader(frontVehID, 0)
-            if policy_name == "ClearFront_HD50" or policy_name == "HD50":
+            if policy_name == "ClearFront500" or policy_name == "ClearFront500_HD50":
+                leader = traci.vehicle.getLeader(vehID, 0)
+                dist_emer = 0
+                while leader and dist_emer < 500:
+                    frontVehID, dist = leader
+                    dist_emer += dist
+                    if traci.vehicle.getTypeID(frontVehID) == "AV" and traci.vehicle.getLaneID(frontVehID) == lane and \
+                            dist_emer < 500:
+                        to_lane = 1 if lane.endswith("2") else 0
+                        traci.vehicle.changeLane(frontVehID, to_lane, 1)
+                    leader = traci.vehicle.getLeader(frontVehID, 0)
+            if policy_name == "ClearFront_HD50" or policy_name == "HD50" or policy_name == "ClearFront500_HD50":
                 # clear also HD vehicles in front of the emergency vehicle (up to 50m)
                 leader = traci.vehicle.getLeader(vehID, 0)
                 dist_emer = 0
@@ -250,7 +261,7 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
 def parse_all_pairwise():
     for major_flow in tqdm([1000, 2000, 3000, 4000, 5000]):
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.997]
-        for policy_name in ["HD50", "ClearFront_HD50"]:
+        for policy_name in ["ClearFront500", "ClearFront500_HD50"]:
             parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
 
 

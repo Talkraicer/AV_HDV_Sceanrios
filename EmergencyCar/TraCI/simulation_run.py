@@ -17,7 +17,7 @@ SIM_DURATION = 7200
 NUM_PROCESSES = 70
 NUM_REPS = 1
 EMERGENCY_PROB = 0.003
-POLICIES = ["HD50", "ClearFront_HD50"]
+POLICIES = ["ClearFront500", "ClearFront500_HD50"]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
