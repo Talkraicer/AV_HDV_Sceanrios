@@ -196,8 +196,8 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
             output_file1 = f"results_reps/{policy_name1}_emergency_flow{flow}_av{av_rate}_emer{0.003}.xml"
             output_file2 = f"results_reps/{policy_name2}_emergency_flow{flow}_av{av_rate}_emer{0.003}.xml"
             if num_reps == 1:
-                output_file1 = f"results_reps_long/{policy_name1}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
-                output_file2 = f"results_reps_long/{policy_name2}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
+                output_file1 = f"results_reps_long/{policy_name1}_emergency_flow{flow}_av{av_rate}_emer{0.003}.xml"
+                output_file2 = f"results_reps_long/{policy_name2}_emergency_flow{flow}_av{av_rate}_emer{0.003}.xml"
             df_rep1 = output_file_to_df(output_file1, num_reps)
             df_rep2 = output_file_to_df(output_file2, num_reps)
             df_rep = pd.merge(df_rep1, df_rep2, on=["id","vType"], suffixes=[f"_{policy_name1}", f"_{policy_name2}"],
