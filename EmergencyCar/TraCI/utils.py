@@ -139,11 +139,13 @@ def calc_stats(df, diff=False):
         for metric in metrics_stats:
             stats[vType][f"avg_{metric}"] = df_vType[metric].mean()
             stats[vType][f"std_{metric}"] = df_vType[metric].std(ddof=1)
+        stats[vType]["count"] = len(df_vType)
     if "all" not in stats.keys():
         stats["all"] = {}
         for metric in metrics_stats:
             stats["all"][f"avg_{metric}"] = df[metric].mean()
             stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
+        stats["all"]["count"] = len(df)
     return pd.DataFrame(stats)
 
 
@@ -151,7 +153,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     # Aggregate all output files into one dataframe, divided by vType
 
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics]
+    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics]+ ["count"]
     vType_names = ["AV", "HD", "emergency", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
@@ -183,7 +185,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
 
 def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_name2="Nothing"):
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics]
+    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "emergency", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
