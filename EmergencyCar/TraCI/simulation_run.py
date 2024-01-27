@@ -65,3 +65,4 @@ if __name__ == "__main__":
 
     args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
     parallel_simulation(args)
+    parse_all_pairwise()

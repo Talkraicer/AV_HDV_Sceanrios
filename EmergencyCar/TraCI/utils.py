@@ -234,11 +234,13 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
     df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.csv")
     df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
 
+def parse_all_pairwise():
+    for major_flow in [1000, 2000, 3000, 4000, 5000]:
+        av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.997]
+        for policy_name in ["ClearFront"]:
+            parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
 
 
 if __name__ == '__main__':
     # Example usage
-    for major_flow in [1000, 2000, 3000, 4000, 5000]:
-        av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        for policy_name in ["ClearFront"]:
-            parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
+    parse_all_pairwise()
