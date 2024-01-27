@@ -214,7 +214,7 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
                 print("*"*50)
 
             for metric in metrics:
-                df_rep[f"{metric}_diff"] = df_rep[f"{metric}_{policy_name1}"] - df_rep[f"{metric}_{policy_name2}"]
+                df_rep[f"{metric}_diff"] = (df_rep[f"{metric}_{policy_name1}"] - df_rep[f"{metric}_{policy_name2}"])/df_rep[f"{metric}_{policy_name2}"]
             df_rep.drop(columns=[f"{metric}_{policy_name1}" for metric in metrics], inplace=True)
             df_rep.drop(columns=[f"{metric}_{policy_name2}" for metric in metrics], inplace=True)
             df_av_rate = pd.concat([df_av_rate, df_rep])
