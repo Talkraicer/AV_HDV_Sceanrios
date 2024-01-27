@@ -14,7 +14,7 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 7200
-NUM_PROCESSES = 22
+NUM_PROCESSES = 1
 NUM_REPS = 1
 EMERGENCY_PROB = 0.003
 POLICIES = ["ClearFront", "Nothing"]
@@ -39,7 +39,6 @@ else:
 def simulate(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-
     exp_output_name = "results_reps_long/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
 
     sumoCmd.append(exp_output_name)
@@ -61,7 +60,7 @@ if __name__ == "__main__":
     sumoCfgPaths = []
     for sumoCfg in os.listdir("../cfg_files"):
         if sumoCfg.endswith(".sumocfg"):
-            sumoCfgPath = os.path.join("../cfg_files", sumoCfg)
+            sumoCfgPath = f"../cfg_files/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
 
     args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
