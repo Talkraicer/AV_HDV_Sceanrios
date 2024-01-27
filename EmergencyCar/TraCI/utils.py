@@ -4,6 +4,7 @@ import imageio
 import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 exp_name = "emergency"
 NUM_REPS = 1
@@ -235,7 +236,7 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
     df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
 
 def parse_all_pairwise():
-    for major_flow in [1000, 2000, 3000, 4000, 5000]:
+    for major_flow in tqdm([1000, 2000, 3000, 4000, 5000]):
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.997]
         for policy_name in ["ClearFront"]:
             parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
