@@ -25,6 +25,8 @@ def set_rou_file(flow, av_prob, emergency_prob):
         elif vtype.get('id') == 'HD':
             vtype.set('probability', str(1 - av_prob - emergency_prob))
 
+
+
     # Save the changes back to the file
     tree.write(f'{exp_name}_flow{flow}_av{av_prob}_emer{emergency_prob}.rou.xml')
 

@@ -14,23 +14,12 @@ metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
 
 
-def handle_step(t, av_prob, emergency_prob, policy_name, randomizer):
+def handle_step(t, policy_name):
     vehIDs = traci.vehicle.getIDList()
     has_emergency = False
     for vehID in vehIDs:
-        if traci.vehicle.getTypeID(vehID) == "DEFAULT_VEHTYPE":
-            rand = randomizer.uniform(0, 1)
-            if rand < emergency_prob:
-                traci.vehicle.setType(vehID, "emergency")
-                traci.vehicle.setSpeedFactor(vehID, 3)
-            elif rand < av_prob + emergency_prob:
-                traci.vehicle.setType(vehID, "AV")
-            else:
-                traci.vehicle.setType(vehID, "HD")
-        speed, lane, lanePos = traci.vehicle.getSpeed(vehID), traci.vehicle.getLaneID(vehID), \
-            traci.vehicle.getLanePosition(vehID)
+        lane = traci.vehicle.getLaneID(vehID)
         if traci.vehicle.getTypeID(vehID) == "emergency":
-            has_emergency = True
             if policy_name == "ClearFront":
                 # clear all vehicles in front of the emergency vehicle
                 leader = traci.vehicle.getLeader(vehID, 0)
@@ -40,15 +29,7 @@ def handle_step(t, av_prob, emergency_prob, policy_name, randomizer):
                         to_lane = 1 if lane.endswith("2") else 0
                         traci.vehicle.changeLane(frontVehID, to_lane, 1)
                     leader = traci.vehicle.getLeader(frontVehID, 0)
-    if policy_name == "ClearLeft" or policy_name == "ClearLeftWhenEmergency":
-        for vehID in vehIDs:
-            if traci.vehicle.getTypeID(vehID) == "AV":
-                if policy_name == "ClearLeft":
-                    if lane.endswith("2"):
-                        traci.vehicle.changeLane(vehID, 1, 1)
-                elif policy_name == "ClearLeftWhenEmergency":
-                    if lane.endswith("2") and has_emergency:
-                        traci.vehicle.changeLane(vehID, 1, 1)
+
     return has_emergency
 
 

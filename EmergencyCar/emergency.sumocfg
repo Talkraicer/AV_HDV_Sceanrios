@@ -10,7 +10,9 @@
         <route-files value="../rou_files/emergency.rou.xml"/>
         <junction-taz value="true"/>
     </input>
-	
+    <random_number>
+        <seed value="6242"/>
+    </random_number>
 
 
 	

@@ -37,20 +37,19 @@ else:
 
 
 def simulate(arg):
+    policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    av_rate, policy_name, major_flow, seed = arg
-    randomizer = np.random.default_rng(seed=int(seed))
-    for i in range(NUM_REPS):
-        sumoCmdRep = sumoCmd.copy()
-        rep_output_path = f"results_reps_long/{policy_name}_flow_{major_flow}_av_rate_{av_rate}_rep_{i}.xml"
-        sumoCmdRep += [rep_output_path, "--seed", seed]
-        traci.start(sumoCmdRep)
-        step = 0
-        while traci.simulation.getMinExpectedNumber() > 0:
-            handle_step(step, av_rate, EMERGENCY_PROB, policy_name, randomizer)
-            traci.simulationStep(step)
-            step += 1
-        traci.close()
+
+    exp_output_name = "results_reps_long/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
+
+    sumoCmd.append(exp_output_name)
+    traci.start(sumoCmd)
+    step = 0
+    while traci.simulation.getMinExpectedNumber() > 0:
+        handle_step(step, policy_name)
+        traci.simulationStep(step)
+        step += 1
+    traci.close()
 
 
 def parallel_simulation(args):
@@ -59,15 +58,11 @@ def parallel_simulation(args):
 
 
 if __name__ == "__main__":
-    for major_flow in [1000, 2000, 3000, 4000, 5000]:
-        av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        seed = str(np.random.randint(0, 10000))
-        args = []
-        for policy_name in POLICIES:
-            if policy_name == "Nothing":
-                args += [(av_rate, policy_name, major_flow, seed) for av_rate in [0.0]]
-            else:
-                args += [(av_rate, policy_name, major_flow, seed) for av_rate in av_rates]
-        parallel_simulation(args)
-        for policy_name in POLICIES:
-            parse_output_files(av_rates, policy_name=policy_name, num_reps=NUM_REPS, flow=major_flow)
+    sumoCfgPaths = []
+    for sumoCfg in os.listdir("../cfg_files"):
+        if sumoCfg.endswith(".sumocfg"):
+            sumoCfgPath = os.path.join("../cfg_files", sumoCfg)
+            sumoCfgPaths.append(sumoCfgPath)
+
+    args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
+    parallel_simulation(args)
