@@ -17,7 +17,7 @@ SIM_DURATION = 7200
 NUM_PROCESSES = 70
 NUM_REPS = 1
 EMERGENCY_PROB = 0.003
-POLICIES = ["ClearFront500", "ClearFront500_HD50"]
+POLICIES = ["ClearFront500", "ClearFront500_HD50","ClearFront","HD50","ClearFront_HD50"]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -58,9 +58,9 @@ def parallel_simulation(args):
 
 if __name__ == "__main__":
     sumoCfgPaths = []
-    for sumoCfg in os.listdir("../cfg_files"):
+    for sumoCfg in os.listdir("../cfg_files_large"):
         if sumoCfg.endswith(".sumocfg"):
-            sumoCfgPath = f"../cfg_files/{sumoCfg}"
+            sumoCfgPath = f"../cfg_files_large/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
 
     args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
