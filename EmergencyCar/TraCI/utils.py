@@ -261,7 +261,7 @@ def parse_output_files_pairwise(av_rates, num_reps,flow, policy_name1, policy_na
 def parse_all_pairwise():
     for major_flow in tqdm([6000,7000,8000,9000,10000]):
         av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.997]
-        for policy_name in ["ClearFront500", "ClearFront500_HD50"]:
+        for policy_name in ["ClearFront500", "ClearFront500_HD50","ClearFront","HD50","ClearFront_HD50"]:
             parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
 
 
