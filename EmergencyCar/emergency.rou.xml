@@ -8,5 +8,5 @@
 	
     <route id="r_0" edges="E0" />
     
-    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="7200" vehsPerHour="1000" departSpeed="random" />
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="86400" vehsPerHour="1000" departSpeed="random" />
 </routes>
