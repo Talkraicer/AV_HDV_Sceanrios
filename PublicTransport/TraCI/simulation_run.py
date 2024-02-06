@@ -15,8 +15,9 @@ GUI = False
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-NUM_REPS = 1
-POLICIES = ["ClearFront500", "ClearFront500_HD50","ClearFront","HD50","ClearFront_HD50","Nothing"]
+POLICIES = ["ClearFront500","ClearFront","ClearFront100","Nothing"]
+FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+AV_PROB = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -38,7 +39,7 @@ else:
 def simulate(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    exp_output_name = "results_reps_long/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
+    exp_output_name = "results_reps/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
 
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
@@ -63,5 +64,13 @@ if __name__ == "__main__":
             sumoCfgPaths.append(sumoCfgPath)
 
     args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
+    if "Nothing" in POLICIES:
+        for sumoCfg in os.listdir("../cfg_files"):
+            if sumoCfg.endswith(".sumocfg"):
+                sumoCfgPath = f"../cfg_files_DL/{sumoCfg}"
+                args.append(("NothingDL", sumoCfgPath))
     parallel_simulation(args)
-    parse_all_pairwise()
+    parse_all_pairwise(policies=POLICIES,policy_name2="Nothing",flows=FLOWS,av_rates=AV_PROB)
+
+
+
