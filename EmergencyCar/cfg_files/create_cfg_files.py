@@ -21,7 +21,7 @@ def set_cfg_file(flow, av_prob, emergency_prob, seed):
     tree.write(f'{exp_name}_flow{flow}_av{av_prob}_emer{emergency_prob}.sumocfg')
 
 if __name__ == '__main__':
-    for flow in [1000, 2000, 3000, 4000, 5000]:
+    for flow in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]:
         seed = np.random.randint(0, 10000)
         for av_prob in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
             set_cfg_file(flow, av_prob, emergency_prob=0.003, seed=seed)

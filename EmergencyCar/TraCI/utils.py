@@ -10,7 +10,7 @@ exp_name = "emergency"
 NUM_REPS = 1
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
-
+results_folder = "results_csvs_server_dur86400"
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
 
@@ -264,7 +264,25 @@ def parse_all_pairwise():
         for policy_name in ["ClearFront500", "ClearFront500_HD50","ClearFront","HD50","ClearFront_HD50"]:
             parse_output_files_pairwise(av_rates, NUM_REPS, major_flow, policy_name, policy_name2="Nothing")
 
+def convert_flows_to_av_rates():
+    # convert flows to av rates
+    flows = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+    av_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.997]
+    for policy_name in ["ClearFront500", "ClearFront500_HD50", "ClearFront", "HD50", "ClearFront_HD50"]:
+        for av_rate in av_rates:
+            stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in
+                                                                          metrics] + ["count"]
+            vType_names = ["AV", "HD", "emergency", "all"]
+            df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
+                              index=flows)
+            for flow in flows:
+                df_flow = pd.read_pickle(f"{results_folder}/{policy_name}_Nothing_flow_{flow}_long.pkl")
+                df.loc[flow] = df_flow.loc[av_rate]
+            df.to_csv(f"{results_folder}/{policy_name}_Nothing_av_rate_{av_rate}.csv")
+            df.to_pickle(f"{results_folder}/{policy_name}_Nothing_av_rate_{av_rate}.pkl")
+
+
 
 if __name__ == '__main__':
     # Example usage
-    parse_all_pairwise()
+    convert_flows_to_av_rates()
