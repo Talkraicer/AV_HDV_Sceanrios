@@ -6,6 +6,11 @@ exp_name = "PublicTransport"
 def set_rou_file(flow, av_prob, Bus_prob):
     if av_prob + Bus_prob > 1:
         av_prob = 1 - Bus_prob
+
+    # round the probabilities to 2 decimal places
+    av_prob = round(av_prob, 2)
+    Bus_prob = round(Bus_prob, 2)
+    hd_prob = round(1 - av_prob - Bus_prob, 2)
     # Load and parse the XML file
     tree = ET.parse(f'../{exp_name}.rou.xml')
     root = tree.getroot()
@@ -23,7 +28,7 @@ def set_rou_file(flow, av_prob, Bus_prob):
         elif vtype.get('id') == 'AV':
             vtype.set('probability', str(av_prob))
         elif vtype.get('id') == 'HD':
-            vtype.set('probability', str(1 - av_prob - Bus_prob))
+            vtype.set('probability', str(hd_prob))
 
 
 
