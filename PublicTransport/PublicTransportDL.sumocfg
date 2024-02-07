@@ -7,7 +7,7 @@
 
     <input>
         <net-file value="PublicTransportDL.net.xml"/>
-        <route-files value="PublicTransport.rou.xml"/>
+        <route-files value="../PublicTransport.rou.xml"/>
         <junction-taz value="true"/>
     </input>
     <random_number>
