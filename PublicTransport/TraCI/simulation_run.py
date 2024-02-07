@@ -14,7 +14,7 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 70
+NUM_PROCESSES = 1
 POLICIES = ["ClearFront500","ClearFront","ClearFront100","Nothing"]
 FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 AV_PROB = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
