@@ -10,7 +10,7 @@ exp_name = "PublicTransport"
 
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
-results_folder = "results_csvs_server_dur86400"
+results_folder = "results_csvs"
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
 def clear_front_of_vehicle(vehID, lane, limit = np.inf):
@@ -137,8 +137,8 @@ def parse_output_files_pairwise(av_rates,flow, policy_name1, policy_name2="Nothi
 
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
-        output_file1 = f"results_reps/{policy_name1}_emergency_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
-        output_file2 = f"results_reps/{policy_name2}_emergency_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
+        output_file1 = f"results_reps/{policy_name1}_PublicTransport_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
+        output_file2 = f"results_reps/{policy_name2}_PublicTransport_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
         df_rep = pd.merge(df_rep1, df_rep2, on=["id","vType"], suffixes=[f"_{policy_name1}", f"_{policy_name2}"],
@@ -191,8 +191,18 @@ def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
         df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.csv")
         df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
 
+def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
+    for policy_name in policies:
+        convert_flows_to_av_rates(policy_name, policy_name2, flows, av_rates)
 
 
 if __name__ == '__main__':
     # Example usage
-    convert_flows_to_av_rates()
+    AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    Bus_prob = 0.1
+    FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+    policies = ["ClearFront", "ClearFront500", "ClearFront100"]
+    parse_all_pairwise(policies, "Nothing", FLOWS, AV_rates)
+    parse_all_pairwise(policies, "NothingDL", FLOWS, AV_rates)
+    convert_all_flows_to_av_rates(policies, "Nothing", FLOWS, AV_rates)
+    convert_all_flows_to_av_rates(policies, "NothingDL", FLOWS, AV_rates)
