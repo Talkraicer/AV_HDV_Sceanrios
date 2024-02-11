@@ -129,7 +129,8 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}.pkl")
 
 
-def parse_output_files_pairwise(av_rates,flow, policy_name1, policy_name2="Nothing",bus_prob=0.1):
+def parse_output_files_pairwise(args, bus_prob=0.1):
+    av_rates, flow, policy_name1, policy_name2 = args
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "Bus", "all"]
@@ -178,8 +179,9 @@ def parse_all_pairwise(policies, policy_name2,flows,av_rates):
     args = [(av_rates,flow, policy_name1,policy_name2) for flow in flows for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
-            parse_output_files_pairwise,args), total=len(args)))
-def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
+            parse_output_files_pairwise, args), total=len(args)))
+def convert_flows_to_av_rates(args):
+    policy_name1, policy_name2, flows, av_rates = args
     # convert flows to av rates
     for av_rate in av_rates:
         stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in
@@ -194,9 +196,10 @@ def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
         df.to_parquet(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pt")
 
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
+    args = [(policy_name1, policy_name2, flows, av_rates) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
-        results = list(tqdm(pool.imap(lambda policy_name: convert_flows_to_av_rates(
-            policy_name, policy_name2, flows, av_rates),policies), total=len(policies)))
+        results = list(tqdm(pool.imap(
+            convert_flows_to_av_rates, args), total=len(args)))
 
 
 
