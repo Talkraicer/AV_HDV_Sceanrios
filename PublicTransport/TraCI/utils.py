@@ -5,9 +5,10 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from multiprocessing import Pool
 
 exp_name = "PublicTransport"
-
+NUM_PROCESSES = 70
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
@@ -173,10 +174,12 @@ def parse_output_files_pairwise(av_rates,flow, policy_name1, policy_name2="Nothi
     df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
 
 def parse_all_pairwise(policies, policy_name2,flows,av_rates):
-    for major_flow in tqdm(flows):
-        for policy_name in policies:
-            parse_output_files_pairwise(av_rates, major_flow, policy_name, policy_name2=policy_name2)
-
+    # run with pool for all flows and policies
+    flows_policies = [(flow, policy_name1) for flow in flows for policy_name1 in policies]
+    with Pool(NUM_PROCESSES) as pool:
+        results = list(tqdm(pool.imap(
+            lambda flow, policy_name1: parse_output_files_pairwise(
+                av_rates,flow, policy_name1, policy_name2),flows_policies), total=len(flows)*len(policies)))
 def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
     # convert flows to av rates
     for av_rate in av_rates:
@@ -192,8 +195,10 @@ def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
         df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
 
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
-    for policy_name in policies:
-        convert_flows_to_av_rates(policy_name, policy_name2, flows, av_rates)
+    with Pool(NUM_PROCESSES) as pool:
+        results = list(tqdm(pool.imap(lambda policy_name: convert_flows_to_av_rates(
+            policy_name, policy_name2, flows, av_rates),policies), total=len(policies)))
+
 
 
 if __name__ == '__main__':

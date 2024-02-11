@@ -17,7 +17,7 @@ SIM_DURATION = 86400
 NUM_PROCESSES = 70
 POLICIES = ["ClearFront500","ClearFront","ClearFront100","Nothing"]
 FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-AV_PROB = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -70,7 +70,10 @@ if __name__ == "__main__":
                 sumoCfgPath = f"../cfg_files_DL/{sumoCfg}"
                 args.append(("NothingDL", sumoCfgPath))
     parallel_simulation(args)
-    parse_all_pairwise(policies=POLICIES,policy_name2="Nothing",flows=FLOWS,av_rates=AV_PROB)
-
+    policies_clean = [policy for policy in POLICIES if policy != "Nothing"]
+    parse_all_pairwise(policies_clean, "Nothing", FLOWS, AV_rates)
+    parse_all_pairwise(policies_clean, "NothingDL", FLOWS, AV_rates)
+    convert_all_flows_to_av_rates(policies, "Nothing", FLOWS, AV_rates)
+    convert_all_flows_to_av_rates(policies, "NothingDL", FLOWS, AV_rates)
 
 
