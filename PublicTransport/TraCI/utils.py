@@ -179,7 +179,7 @@ def parse_all_pairwise(policies, policy_name2,flows,av_rates):
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             lambda flow, policy_name1: parse_output_files_pairwise(
-                av_rates,flow, policy_name1, policy_name2),flows_policies), total=len(flows)*len(policies)))
+                av_rates,flow, policy_name1, policy_name2),flows_policies), total=len(flows_policies)))
 def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
     # convert flows to av rates
     for av_rate in av_rates:
