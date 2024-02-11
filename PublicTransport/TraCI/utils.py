@@ -130,6 +130,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
 
 
 def parse_output_files_pairwise(av_rates,flow, policy_name1, policy_name2="Nothing",bus_prob=0.1):
+    global df
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "Bus", "all"]
