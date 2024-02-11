@@ -130,7 +130,6 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
 
 
 def parse_output_files_pairwise(av_rates,flow, policy_name1, policy_name2="Nothing",bus_prob=0.1):
-    global df
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "Bus", "all"]
@@ -172,13 +171,13 @@ def parse_output_files_pairwise(av_rates,flow, policy_name1, policy_name2="Nothi
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
     df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.csv")
-    df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
+    df.to_parquet(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pt")
 
 def parse_all_pairwise(policies, policy_name2,flows,av_rates):
     # run with pool for all flows and policies
     flows_policies = [(flow, policy_name1) for flow in flows for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
-        results = list(tqdm(pool.starmap(
+        results = list(tqdm(pool.imap(
             lambda flow, policy_name1: parse_output_files_pairwise(
                 av_rates,flow, policy_name1, policy_name2),flows_policies), total=len(flows_policies)))
 def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
