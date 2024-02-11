@@ -172,7 +172,7 @@ def parse_output_files_pairwise(args, bus_prob=0.1):
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
     df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.csv")
-    df.to_parquet(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pt")
+    df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
 
 def parse_all_pairwise(policies, policy_name2,flows,av_rates):
     # run with pool for all flows and policies
@@ -193,7 +193,7 @@ def convert_flows_to_av_rates(args):
             df_flow = pd.read_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
             df.loc[flow] = df_flow.loc[av_rate]
         df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.csv")
-        df.to_parquet(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pt")
+        df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
 
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
     args = [(policy_name1, policy_name2, flows, av_rates) for policy_name1 in policies]
