@@ -192,7 +192,7 @@ def convert_flows_to_av_rates(policy_name1, policy_name2, flows, av_rates):
             df_flow = pd.read_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
             df.loc[flow] = df_flow.loc[av_rate]
         df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.csv")
-        df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
+        df.to_parquet(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pt")
 
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
     with Pool(NUM_PROCESSES) as pool:
