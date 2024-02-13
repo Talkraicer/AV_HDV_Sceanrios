@@ -15,7 +15,7 @@ GUI = False
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["ClearFront500","ClearFront","ClearFront100","Nothing"]
+POLICIES = ["ClearFront500DL","ClearFrontDL","ClearFront100DL"]
 FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
@@ -62,13 +62,12 @@ if __name__ == "__main__":
         if sumoCfg.endswith(".sumocfg"):
             sumoCfgPath = f"../cfg_files/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
-
-    args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
-    if "Nothing" in POLICIES:
-        for sumoCfg in os.listdir("../cfg_files"):
-            if sumoCfg.endswith(".sumocfg"):
-                sumoCfgPath = f"../cfg_files_DL/{sumoCfg}"
-                args.append(("NothingDL", sumoCfgPath))
+    args = []
+    for policy in POLICIES:
+        for sumoCfg in sumoCfgPaths:
+            if policy.endswith("DL"):
+                sumoCfg = sumoCfg.replace("cfg_files", "cfg_files_DL")
+            args.append((policy, sumoCfg))
     parallel_simulation(args)
     policies_clean = [policy for policy in POLICIES if policy != "Nothing"]
     parse_all_pairwise(policies_clean, "Nothing", FLOWS, AV_rates)

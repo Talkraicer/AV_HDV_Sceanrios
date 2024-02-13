@@ -29,6 +29,7 @@ def clear_front_of_vehicle(vehID, lane, limit = np.inf):
 def handle_step(t, policy_name):
     vehIDs = traci.vehicle.getIDList()
     has_emergency = False
+    policy_name = policy_name.split("DL")[0]
     for vehID in vehIDs:
         lane = traci.vehicle.getLaneID(vehID)
         if traci.vehicle.getTypeID(vehID) == "Bus":
