@@ -11,6 +11,6 @@
     </vTypeDistribution>
     <!-- Routes -->
     <route id="r_0" edges="E0"/>
-	<flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="3600" vehsPerHour="5000" departSpeed="random" />
+	<flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="1000" vehsPerHour="5000" departSpeed="random" />
 
 </routes>
