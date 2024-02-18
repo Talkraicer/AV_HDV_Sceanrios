@@ -16,6 +16,7 @@ def set_cfg_file(flow, av_prob, seed):
     seed_element.set('value', str(seed))
 
     # Save the changes back to the file
+    tree.write(f'{exp_name}_flow{flow}_av{av_prob}.sumocfg')
 
 if __name__ == '__main__':
     for flow in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]:
