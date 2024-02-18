@@ -55,6 +55,8 @@ def handle_step(t, policy_name, dist_slow=0, dist_fast=0, slow_rate=0, stopping_
     global chosen_avs
     if t == 0:
         traci.vehicle.add(vehID="stopping", routeID="r_0")
+    if "stopping" not in traci.vehicle.getIDList():
+        return
     if t >= 35:
         traci.vehicle.setSpeed("stopping", 0)
         traci.vehicle.changeLane("stopping", stopping_lane, 0)
