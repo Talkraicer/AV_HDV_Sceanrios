@@ -37,5 +37,5 @@ def set_rou_file(flow, av_prob, Bus_prob):
 
 if __name__ == '__main__':
     for flow in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]:
-        for av_prob in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-            set_rou_file(flow, av_prob, Bus_prob=0.1)
+        for av_prob in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1]:
+            set_rou_file(flow, av_prob, Bus_prob=0.01)
