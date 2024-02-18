@@ -209,8 +209,8 @@ if __name__ == '__main__':
     AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     Bus_prob = 0.1
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-    policies = ["ClearFront", "ClearFront500", "ClearFront100"]
-    parse_all_pairwise(policies, "Nothing", FLOWS, AV_rates)
-    parse_all_pairwise(policies, "NothingDL", FLOWS, AV_rates)
+    policies = ["ClearFront500DL", "ClearFrontDL", "ClearFront100DL"]
+    # parse_all_pairwise(policies, "Nothing", FLOWS, AV_rates)
+    # parse_all_pairwise(policies, "NothingDL", FLOWS, AV_rates)
     convert_all_flows_to_av_rates(policies, "Nothing", FLOWS, AV_rates)
     convert_all_flows_to_av_rates(policies, "NothingDL", FLOWS, AV_rates)

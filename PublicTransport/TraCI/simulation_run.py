@@ -72,7 +72,7 @@ if __name__ == "__main__":
     policies_clean = [policy for policy in POLICIES if policy != "Nothing"]
     parse_all_pairwise(policies_clean, "Nothing", FLOWS, AV_rates)
     parse_all_pairwise(policies_clean, "NothingDL", FLOWS, AV_rates)
-    convert_all_flows_to_av_rates(policies, "Nothing", FLOWS, AV_rates)
-    convert_all_flows_to_av_rates(policies, "NothingDL", FLOWS, AV_rates)
+    convert_all_flows_to_av_rates(policies_clean, "Nothing", FLOWS, AV_rates)
+    convert_all_flows_to_av_rates(policies_clean, "NothingDL", FLOWS, AV_rates)
 
 
