@@ -19,6 +19,7 @@ POLICIES = ["SlowDown","Nothing"]
 DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
 DIST_FAST_RANGE = [40, 60, 80, 100, 120, 140, 160, 180, 200]
 SLOW_RATE_RANGE = [0.2, 0.4, 0.6, 0.8, 1.0]
+STOPPING_LANES = [0,1,2]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -38,16 +39,18 @@ else:
 
 
 def simulate(arg):
-    policy_name, sumoCfg, dist_slow, dist_fast, slow_rate = arg
+    policy_name, sumoCfg,stopping_lane, dist_slow, dist_fast, slow_rate = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    policy_name_output = policy_name+"_dist_slow_"+str(dist_slow)+"_dist_fast_"+str(dist_fast)+"_slow_rate_"+str(slow_rate)
+    policy_name_output = policy_name+"_dist_slow_"+str(dist_slow)+"_dist_fast_"+str(dist_fast)+\
+                         "_slow_rate_"+str(slow_rate)+"_stopping_lane_"+str(stopping_lane)
     exp_output_name = "results_reps/"+policy_name_output+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
 
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        handle_step(step, policy_name, dist_slow, dist_fast, slow_rate)
+        handle_step(t=step, policy_name=policy_name, stopping_lane=stopping_lane,
+                    dist_slow=dist_slow, dist_fast=dist_fast, slow_rate=slow_rate)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -66,13 +69,14 @@ if __name__ == "__main__":
             sumoCfgPaths.append(sumoCfgPath)
     args = []
     for policy_name in POLICIES:
-        if policy_name == "SlowDown":
-            for dist_slow in DIST_SLOW_RANGE:
-                for dist_fast in DIST_FAST_RANGE:
-                    for slow_rate in SLOW_RATE_RANGE:
-                        for sumoCfg in sumoCfgPaths:
-                            args.append((policy_name, sumoCfg, dist_slow, dist_fast, slow_rate))
-        else:
-            for sumoCfg in sumoCfgPaths:
-                args.append((policy_name, sumoCfg, 0, 0, 0))
+        for stopping_lane in STOPPING_LANES:
+            if policy_name == "SlowDown":
+                for dist_slow in DIST_SLOW_RANGE:
+                    for dist_fast in DIST_FAST_RANGE:
+                        for slow_rate in SLOW_RATE_RANGE:
+                            for sumoCfg in sumoCfgPaths:
+                                args.append((policy_name, sumoCfg,stopping_lane, dist_slow, dist_fast, slow_rate))
+            else:
+                for sumoCfg in sumoCfgPaths:
+                    args.append((policy_name, sumoCfg,stopping_lane, 0, 0, 0))
     parallel_simulation(args)
