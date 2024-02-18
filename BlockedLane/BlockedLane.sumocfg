@@ -7,7 +7,7 @@
 
     <input>
         <net-file value="BlockedLane.net.xml"/>
-        <route-files value="BlockedLane.rou.xml"/>
+        <route-files value="../BlockedLane.rou.xml"/>
         <junction-taz value="true"/>
     </input>
     <random_number>
