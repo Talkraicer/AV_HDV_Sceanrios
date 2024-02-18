@@ -59,7 +59,7 @@ def parallel_simulation(args):
 if __name__ == "__main__":
     sumoCfgPaths = []
     for sumoCfg in os.listdir("../cfg_files"):
-        if sumoCfg.endswith(".sumocfg"):
+        if sumoCfg.endswith(".sumocfg") and "Bus0.01" in sumoCfg:
             sumoCfgPath = f"../cfg_files/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
     args = []
