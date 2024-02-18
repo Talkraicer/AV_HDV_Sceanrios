@@ -17,9 +17,9 @@ SIM_DURATION = 86400
 NUM_PROCESSES = 70
 POLICIES = ["SlowDown","Nothing"]
 DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
-DIST_FAST_RANGE = [40, 60, 80, 100, 120, 140, 160, 180, 200]
-SLOW_RATE_RANGE = [0.2, 0.4, 0.6, 0.8, 1.0]
-STOPPING_LANES = [0,1,2]
+DIST_FAST_RANGE = [70]
+SLOW_RATE_RANGE = [0.6, 0.8]
+STOPPING_LANES = [1]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
