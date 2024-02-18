@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2024-01-06 22:09:12 by Eclipse SUMO netedit Version 1.17.0
+<!-- generated on 2024-02-17 19:46:02 by Eclipse SUMO netedit Version 1.17.0
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- VTypes -->
-    <vType id="DEFAULT_VEHTYPE" impatience="1.00" latAlignment="left" lcPushy="1" lcImpatience="1" lcTimeToImpatience="1" lcAccelLat="1" carFollowModel="KraussPS"/>
-    <!-- Vehicles, persons and containers (sorted by depart) -->
-    <flow id="flow" begin="0.00" departLane="random" departSpeed="10.00" from="E0" to="E2" via="E1" end="3600.00" number="100000"/>
+    <vTypeDistribution id="vehicleDist">
+        <vType id="AV" probability="0.3" color="blue"/>
+        <vType id="LaneChanger" probability="0.7" color="red" lcPushy="1"/>
+    </vTypeDistribution>
+    <!-- Routes -->
+    <route id="r_0" edges="E0"/>
+	<flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="3600" vehsPerHour="5000" departSpeed="random" />
+
 </routes>
