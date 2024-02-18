@@ -14,7 +14,8 @@ sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
-def clear_front_of_vehicle(vehID, lane, limit = np.inf):
+
+def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
     while leader and dist_emer < limit:
@@ -25,6 +26,7 @@ def clear_front_of_vehicle(vehID, lane, limit = np.inf):
             to_lane = 1 if lane.endswith("2") else 0 if lane.endswith("1") else 1
             traci.vehicle.changeLane(frontVehID, to_lane, 1)
         leader = traci.vehicle.getLeader(frontVehID, 0)
+
 
 def handle_step(t, policy_name):
     vehIDs = traci.vehicle.getIDList()
@@ -100,7 +102,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     # Aggregate all output files into one dataframe, divided by vType
 
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics]+ ["count"]
+    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "Bus", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
@@ -133,7 +135,8 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
 def parse_output_files_pairwise(args, bus_prob=0.1):
     av_rates, flow, policy_name1, policy_name2 = args
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
+    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + [
+        "count"]
     vType_names = ["AV", "HD", "Bus", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
@@ -144,22 +147,22 @@ def parse_output_files_pairwise(args, bus_prob=0.1):
         output_file2 = f"results_reps/{policy_name2}_PublicTransport_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
-        df_rep = pd.merge(df_rep1, df_rep2, on=["id","vType"], suffixes=[f"_{policy_name1}", f"_{policy_name2}"],
+        df_rep = pd.merge(df_rep1, df_rep2, on=["id", "vType"], suffixes=[f"_{policy_name1}", f"_{policy_name2}"],
                           how="inner")
         # calculate difference
         try:
-            assert len (df_rep) == len(df_rep1) == len(df_rep2)
+            assert len(df_rep) == len(df_rep1) == len(df_rep2)
         except:
             print(f"len(df_rep) = {len(df_rep)}, len(df_rep1) = {len(df_rep1)}, len(df_rep2) = {len(df_rep2)}")
             # print the ids that are not in both dataframes and the vTypes
-            print(df_rep1[~df_rep1.id.isin(df_rep.id)][["id","vType"]])
-            print("*"*50)
-            print(df_rep2[~df_rep2.id.isin(df_rep.id)][["id","vType"]])
-            print("*"*50)
+            print(df_rep1[~df_rep1.id.isin(df_rep.id)][["id", "vType"]])
+            print("*" * 50)
+            print(df_rep2[~df_rep2.id.isin(df_rep.id)][["id", "vType"]])
+            print("*" * 50)
 
         for metric in metrics:
-            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{policy_name1}"] - df_rep[f"{metric}_{policy_name2}"])/\
-                                       df_rep[f"{metric}_{policy_name2}"]) * 100
+            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{policy_name1}"] - df_rep[f"{metric}_{policy_name2}"]) /
+                                        df_rep[f"{metric}_{policy_name2}"]) * 100
         df_rep.drop(columns=[f"{metric}_{policy_name1}" for metric in metrics], inplace=True)
         df_rep.drop(columns=[f"{metric}_{policy_name2}" for metric in metrics], inplace=True)
         df_av_rate = pd.concat([df_av_rate, df_rep])
@@ -175,12 +178,15 @@ def parse_output_files_pairwise(args, bus_prob=0.1):
     df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.csv")
     df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
 
-def parse_all_pairwise(policies, policy_name2,flows,av_rates):
+
+def parse_all_pairwise(policies, policy_name2, flows, av_rates):
     # run with pool for all flows and policies
-    args = [(av_rates,flow, policy_name1,policy_name2) for flow in flows for policy_name1 in policies]
+    args = [(av_rates, flow, policy_name1, policy_name2) for flow in flows for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             parse_output_files_pairwise, args), total=len(args)))
+
+
 def convert_flows_to_av_rates(args):
     policy_name1, policy_name2, flows, av_rates = args
     # convert flows to av rates
@@ -196,12 +202,12 @@ def convert_flows_to_av_rates(args):
         df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.csv")
         df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
 
+
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
     args = [(policy_name1, policy_name2, flows, av_rates) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             convert_flows_to_av_rates, args), total=len(args)))
-
 
 
 if __name__ == '__main__':
