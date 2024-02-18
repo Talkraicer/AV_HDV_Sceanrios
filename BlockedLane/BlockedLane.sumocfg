@@ -6,8 +6,8 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="BlockedLane.net.xml"/>
-        <route-files value="../BlockedLane.rou.xml"/>
+        <net-file value="../BlockedLane.net.xml"/>
+        <route-files value="BlockedLane.rou.xml"/>
         <junction-taz value="true"/>
     </input>
     <random_number>
