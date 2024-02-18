@@ -14,8 +14,11 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 1
-POLICIES = ["ClearFront500", "ClearFront500_HD50","ClearFront","HD50","ClearFront_HD50","Nothing"]
+NUM_PROCESSES = 70
+POLICIES = ["SlowDown","Nothing"]
+DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
+DIST_FAST_RANGE = [40, 60, 80, 100, 120, 140, 160, 180, 200]
+SLOW_RATE_RANGE = [0.2, 0.4, 0.6, 0.8, 1.0]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -35,15 +38,16 @@ else:
 
 
 def simulate(arg):
-    policy_name, sumoCfg = arg
+    policy_name, sumoCfg, dist_slow, dist_fast, slow_rate = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    exp_output_name = "results_reps/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
+    policy_name_output = policy_name+"_dist_slow_"+str(dist_slow)+"_dist_fast_"+str(dist_fast)+"_slow_rate_"+str(slow_rate)
+    exp_output_name = "results_reps/"+policy_name_output+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
 
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        handle_step(step, policy_name, dist_slow=500, dist_fast=50, slow_rate=0.5)
+        handle_step(step, policy_name, dist_slow, dist_fast, slow_rate)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -55,13 +59,20 @@ def parallel_simulation(args):
 
 
 if __name__ == "__main__":
-    parallel_simulation([("SlowDown", "../BlockedLane.sumocfg"),("stam", "../BlockedLane.sumocfg")])
-    # sumoCfgPaths = []
-    # for sumoCfg in os.listdir("../cfg_files"):
-    #     if sumoCfg.endswith(".sumocfg"):
-    #         sumoCfgPath = f"../cfg_files/{sumoCfg}"
-    #         sumoCfgPaths.append(sumoCfgPath)
-    #
-    # args = [(policy_name, sumoCfgPath) for policy_name in POLICIES for sumoCfgPath in sumoCfgPaths]
-    # parallel_simulation(args)
-    # parse_all_pairwise()
+    sumoCfgPaths = []
+    for sumoCfg in os.listdir("../cfg_files"):
+        if sumoCfg.endswith(".sumocfg"):
+            sumoCfgPath = f"../cfg_files/{sumoCfg}"
+            sumoCfgPaths.append(sumoCfgPath)
+    args = []
+    for policy_name in POLICIES:
+        if policy_name == "SlowDown":
+            for dist_slow in DIST_SLOW_RANGE:
+                for dist_fast in DIST_FAST_RANGE:
+                    for slow_rate in SLOW_RATE_RANGE:
+                        for sumoCfg in sumoCfgPaths:
+                            args.append((policy_name, sumoCfg, dist_slow, dist_fast, slow_rate))
+        else:
+            for sumoCfg in sumoCfgPaths:
+                args.append((policy_name, sumoCfg, 0, 0, 0))
+    parallel_simulation(args)
