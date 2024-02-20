@@ -132,7 +132,7 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}.pkl")
 
 
-def parse_output_files_pairwise(args, bus_prob=0.1):
+def parse_output_files_pairwise(args, bus_prob=0.01):
     av_rates, flow, policy_name1, policy_name2 = args
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + [
@@ -175,8 +175,8 @@ def parse_output_files_pairwise(args, bus_prob=0.1):
             for stat in stats_names:
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
-    df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.csv")
-    df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
+    df.to_csv(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}_Bus{bus_prob}.csv")
+    df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}_Bus{bus_prob}.pkl")
 
 
 def parse_all_pairwise(policies, policy_name2, flows, av_rates):
@@ -187,7 +187,7 @@ def parse_all_pairwise(policies, policy_name2, flows, av_rates):
             parse_output_files_pairwise, args), total=len(args)))
 
 
-def convert_flows_to_av_rates(args):
+def convert_flows_to_av_rates(args,bus_prob=0.01):
     policy_name1, policy_name2, flows, av_rates = args
     # convert flows to av rates
     for av_rate in av_rates:
@@ -197,10 +197,10 @@ def convert_flows_to_av_rates(args):
         df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                           index=flows)
         for flow in flows:
-            df_flow = pd.read_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_flow_{flow}.pkl")
+            df_flow = pd.read_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_flow_{flow}_Bus{bus_prob}.pkl")
             df.loc[flow] = df_flow.loc[av_rate]
-        df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.csv")
-        df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
+        df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}_Bus{bus_prob}.csv")
+        df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}_Bus{bus_prob}.pkl")
 
 
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
@@ -213,7 +213,7 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 if __name__ == '__main__':
     # Example usage
     AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    Bus_prob = 0.1
+    Bus_prob = 0.01
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     policies = ["ClearFront500DL", "ClearFrontDL", "ClearFront100DL"]
     parse_all_pairwise(policies, "Nothing", FLOWS, AV_rates)
