@@ -132,8 +132,8 @@ def parse_output_files(av_rates, num_reps, policy_name, flow):
     df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}.pkl")
 
 
-def parse_output_files_pairwise(args, bus_prob=0.01):
-    av_rates, flow, policy_name1, policy_name2 = args
+def parse_output_files_pairwise(args):
+    av_rates, flow, policy_name1, policy_name2,bus_prob = args
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + [
         "count"]
@@ -179,16 +179,16 @@ def parse_output_files_pairwise(args, bus_prob=0.01):
     df.to_pickle(f"results_csvs/{policy_name1}_{policy_name2}_flow_{flow}_Bus{bus_prob}.pkl")
 
 
-def parse_all_pairwise(policies, policy_name2, flows, av_rates):
+def parse_all_pairwise(policies, policy_name2, flows, av_rates, bus_prob=0.01):
     # run with pool for all flows and policies
-    args = [(av_rates, flow, policy_name1, policy_name2) for flow in flows for policy_name1 in policies]
+    args = [(av_rates, flow, policy_name1, policy_name2, bus_prob) for flow in flows for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             parse_output_files_pairwise, args), total=len(args)))
 
 
-def convert_flows_to_av_rates(args,bus_prob=0.01):
-    policy_name1, policy_name2, flows, av_rates = args
+def convert_flows_to_av_rates(args):
+    policy_name1, policy_name2, flows, av_rates,bus_prob = args
     # convert flows to av rates
     for av_rate in av_rates:
         stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in
@@ -203,8 +203,8 @@ def convert_flows_to_av_rates(args,bus_prob=0.01):
         df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}_Bus{bus_prob}.pkl")
 
 
-def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
-    args = [(policy_name1, policy_name2, flows, av_rates) for policy_name1 in policies]
+def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates, bus_prob=0.01):
+    args = [(policy_name1, policy_name2, flows, av_rates, bus_prob) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             convert_flows_to_av_rates, args), total=len(args)))
@@ -212,7 +212,7 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 
 if __name__ == '__main__':
     # Example usage
-    AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,0.99]
     Bus_prob = 0.01
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     policies = ["ClearFront500DL", "ClearFrontDL", "ClearFront100DL"]
