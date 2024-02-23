@@ -238,20 +238,25 @@ def create_results_table(args):
     if vType == "LaneChanger":
         av_rates.remove(1.0)
     cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
-    df = pd.DataFrame(columns=cols, index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates] + ["Nothing"])
-    for dist_slow in dist_slows:
-        for dist_fast in dist_fasts:
-            for slow_rate in slow_rates:
-                for flow in flows:
-                    for av_rate in av_rates:
-                        relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
-                        relevant_stats = calc_stats(relevant_df)
-                        df.loc[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}", vType]
+    df = pd.DataFrame(columns=cols, index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
     for flow in flows:
         for av_rate in av_rates:
-            relevant_df = output_file_to_df(f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
-            relevant_stats = calc_stats(relevant_df)
-            df.loc["Nothing", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}", vType]
+            Nothing_df = output_file_to_df(
+                f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+            for dist_slow in dist_slows:
+                for dist_fast in dist_fasts:
+                    for slow_rate in slow_rates:
+                        relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+                        # Merge the two dataframes
+                        relevant_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=["_SlowDown", "_Nothing"],
+                                               how="inner")
+                        for metric in metrics:
+                            relevant_df[f"{metric}_diff"] = ((relevant_df[f"{metric}_SlowDown"] - relevant_df[f"{metric}_Nothing"]) / \
+                                                            relevant_df[f"{metric}_Nothing"]) * 100
+                        relevant_df.drop(columns=[f"{metric}_SlowDown" for metric in metrics], inplace=True)
+                        relevant_df.drop(columns=[f"{metric}_Nothing" for metric in metrics], inplace=True)
+                        relevant_stats = calc_stats(relevant_df, diff=True)
+                        df.loc[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}", vType]
     df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
 
 def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane=1):
