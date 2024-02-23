@@ -248,21 +248,21 @@ def create_results_table(args):
                     for slow_rate in slow_rates:
                         relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
                         # Merge the two dataframes
-                        relevant_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=["_SlowDown", "_Nothing"],
+                        joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=["_SlowDown", "_Nothing"],
                                                how="inner")
                         for metric in metrics:
-                            relevant_df[f"{metric}_diff"] = ((relevant_df[f"{metric}_SlowDown"] - relevant_df[f"{metric}_Nothing"]) / \
-                                                            relevant_df[f"{metric}_Nothing"]) * 100
-                        relevant_df.drop(columns=[f"{metric}_SlowDown" for metric in metrics], inplace=True)
-                        relevant_df.drop(columns=[f"{metric}_Nothing" for metric in metrics], inplace=True)
-                        if len(relevant_df) != len(Nothing_df):
+                            joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_SlowDown"] - joined_df[f"{metric}_Nothing"]) / \
+                                                            joined_df[f"{metric}_Nothing"]) * 100
+                        joined_df.drop(columns=[f"{metric}_SlowDown" for metric in metrics], inplace=True)
+                        joined_df.drop(columns=[f"{metric}_Nothing" for metric in metrics], inplace=True)
+                        if len(joined_df) != len(relevant_df):
                             print(f"len(relevant_df) = {len(relevant_df)}, len(Nothing_df) = {len(Nothing_df)}")
                             # print the ids that are not in both dataframes and the vTypes
                             print(relevant_df[~relevant_df.id.isin(Nothing_df.id)][["id", "vType"]])
                             print("*" * 50)
                             print(Nothing_df[~Nothing_df.id.isin(relevant_df.id)][["id", "vType"]])
                             print("*" * 50)
-                        relevant_stats = calc_stats(relevant_df, diff=True)
+                        relevant_stats = calc_stats(joined_df, diff=True)
                         df.loc[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}_diff", vType]
     df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
 
