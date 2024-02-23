@@ -8,7 +8,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 exp_name = "BlockedLane"
-NUM_PROCESSES = 1
+NUM_PROCESSES = 70
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
