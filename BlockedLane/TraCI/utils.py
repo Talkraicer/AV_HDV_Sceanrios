@@ -233,6 +233,10 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 def create_results_table(args):
     # create the results table
     metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane = args
+    if vType == "AV":
+        av_rates.remove(0)
+    if vType == "LaneChanger":
+        av_rates.remove(1.0)
     cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
     df = pd.DataFrame(columns=cols, index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates] + ["Nothing"])
     for dist_slow in dist_slows:
