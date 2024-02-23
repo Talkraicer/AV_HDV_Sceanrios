@@ -8,10 +8,11 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 exp_name = "BlockedLane"
-NUM_PROCESSES = 1
+NUM_PROCESSES = 10
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
+results_reps_folder = "results_reps"
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
 chosen_avs = {}
@@ -120,6 +121,8 @@ def output_file_to_df(output_file, num_reps=1):
 
     dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": [], "id": []}
     for tripinfo in root.findall('tripinfo'):
+        if tripinfo.get("id") == "stopping":
+            continue
         for key in dict.keys():
             dict[key].append(tripinfo.get(key))
     df = pd.DataFrame(dict)
@@ -130,20 +133,8 @@ def output_file_to_df(output_file, num_reps=1):
     for col in df.columns:
         if col != "vType" and col != "id":
             df[col] = df[col].astype(float)
-    if num_reps > 1:
-        df = calc_mean(df)
+
     return df
-
-
-def calc_mean(df):
-    df_results = df.groupby(by="vType").mean().reset_index()
-    # append vType column of all vehicles
-    df_all = df.drop(columns=["vType"]).mean()
-    df_all["vType"] = "all"
-    df_all = pd.DataFrame(df_all).transpose()
-    df_results = pd.concat([df_results, df_all]).reset_index(drop=True)
-    return df_results
-
 
 def calc_stats(df, diff=False):
     # Calculate statistics per vType
@@ -167,52 +158,18 @@ def calc_stats(df, diff=False):
     return pd.DataFrame(stats)
 
 
-def parse_output_files(av_rates, num_reps, policy_name, flow):
-    # Aggregate all output files into one dataframe, divided by vType
-
-    # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics]+ ["count"]
-    vType_names = ["AV", "HD", "Bus", "all"]
-    df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
-                      index=av_rates)
-
-    for av_rate in av_rates:
-        df_av_rate = pd.DataFrame()
-        for i in range(num_reps):
-            output_file = f"results_reps/{policy_name}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
-            if num_reps == 1:
-                output_file = f"results_reps_long/{policy_name}_flow_{flow}_av_rate_{av_rate}_rep_{i}.xml"
-            df_rep = output_file_to_df(output_file, num_reps)
-            df_av_rate = pd.concat([df_av_rate, df_rep])
-        # Calculate statistics per vType
-        stats_av_rate = calc_stats(df_av_rate)
-        # Add to df
-        for vType in vType_names:
-            if vType not in stats_av_rate.columns:
-                continue
-            for stat in stats_names:
-                df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
-    # Save df to csv
-    if num_reps == 1:
-        df.to_csv(f"results_csvs/{policy_name}_flow_{flow}_long.csv")
-        df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}_long.pkl")
-        return
-    df.to_csv(f"results_csvs/{policy_name}_flow_{flow}.csv")
-    df.to_pickle(f"results_csvs/{policy_name}_flow_{flow}.pkl")
-
-
-def parse_output_files_pairwise(args, bus_prob=0.1):
+def parse_output_files_pairwise(args):
     av_rates, flow, policy_name1, policy_name2 = args
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
-    vType_names = ["AV", "HD", "Bus", "all"]
+    vType_names = ["AV", "LaneChanger", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
 
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
-        output_file1 = f"results_reps/{policy_name1}_PublicTransport_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
-        output_file2 = f"results_reps/{policy_name2}_PublicTransport_flow{flow}_av{av_rate}_Bus{bus_prob}.xml"
+        output_file1 = f"results_reps/{policy_name1}_{exp_name}_flow{flow}_av{av_rate}.xml"
+        output_file2 = f"results_reps/{policy_name2}_{exp_name}_flow{flow}_av{av_rate}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
         df_rep = pd.merge(df_rep1, df_rep2, on=["id","vType"], suffixes=[f"_{policy_name1}", f"_{policy_name2}"],
@@ -273,15 +230,42 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
         results = list(tqdm(pool.imap(
             convert_flows_to_av_rates, args), total=len(args)))
 
+def create_results_table(args):
+    # create the results table
+    metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane = args
+    cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
+    df = pd.DataFrame(columns=cols, index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates] + ["Nothing"])
+    for dist_slow in dist_slows:
+        for dist_fast in dist_fasts:
+            for slow_rate in slow_rates:
+                for flow in flows:
+                    for av_rate in av_rates:
+                        relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+                        relevant_stats = calc_stats(relevant_df)
+                        df.loc[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}", vType]
+    for flow in flows:
+        for av_rate in av_rates:
+            relevant_df = output_file_to_df(f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+            relevant_stats = calc_stats(relevant_df)
+            df.loc["Nothing", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}", vType]
+    df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
+
+def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane=1):
+    # run over all metrics and vTypes with tqdm
+    args = [(metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane) for metric in metrics for vType in vTypes]
+    with Pool(NUM_PROCESSES) as pool:
+        results = list(tqdm(pool.imap(
+            create_results_table, args), total=len(args)))
 
 
 if __name__ == '__main__':
-    # Example usage
-    AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    Bus_prob = 0.1
+    # define the parameters
+    POLICIES = ["SlowDown", "Nothing"]
+    DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
+    DIST_FAST_RANGE = [70]
+    SLOW_RATE_RANGE = [0.6, 0.8]
+    STOPPING_LANES = [1]
+    AV_RATES = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-    policies = ["ClearFront", "ClearFront500", "ClearFront100"]
-    parse_all_pairwise(policies, "Nothing", FLOWS, AV_rates)
-    parse_all_pairwise(policies, "NothingDL", FLOWS, AV_rates)
-    convert_all_flows_to_av_rates(policies, "Nothing", FLOWS, AV_rates)
-    convert_all_flows_to_av_rates(policies, "NothingDL", FLOWS, AV_rates)
+    # create the results tables
+    create_all_results_tables(metrics, ["AV", "LaneChanger", "all"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE, SLOW_RATE_RANGE, 1)
