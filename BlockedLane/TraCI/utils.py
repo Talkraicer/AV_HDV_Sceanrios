@@ -255,6 +255,13 @@ def create_results_table(args):
                                                             relevant_df[f"{metric}_Nothing"]) * 100
                         relevant_df.drop(columns=[f"{metric}_SlowDown" for metric in metrics], inplace=True)
                         relevant_df.drop(columns=[f"{metric}_Nothing" for metric in metrics], inplace=True)
+                        if len(relevant_df) != len(Nothing_df):
+                            print(f"len(relevant_df) = {len(relevant_df)}, len(Nothing_df) = {len(Nothing_df)}")
+                            # print the ids that are not in both dataframes and the vTypes
+                            print(relevant_df[~relevant_df.id.isin(Nothing_df.id)][["id", "vType"]])
+                            print("*" * 50)
+                            print(Nothing_df[~Nothing_df.id.isin(relevant_df.id)][["id", "vType"]])
+                            print("*" * 50)
                         relevant_stats = calc_stats(relevant_df, diff=True)
                         df.loc[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}_diff", vType]
     df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
