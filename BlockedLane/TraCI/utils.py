@@ -234,7 +234,7 @@ def create_results_table(args):
     # create the results table
     metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane = args
     if vType == "AV":
-        av_rates.remove(0)
+        av_rates.remove(0.0)
     if vType == "LaneChanger":
         av_rates.remove(1.0)
     cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
