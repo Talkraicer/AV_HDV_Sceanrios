@@ -8,7 +8,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 exp_name = "BlockedLane"
-NUM_PROCESSES = 70
+NUM_PROCESSES = 1
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
@@ -133,7 +133,6 @@ def output_file_to_df(output_file, num_reps=1):
     for col in df.columns:
         if col != "vType" and col != "id":
             df[col] = df[col].astype(float)
-
     return df
 
 def calc_stats(df, metric, diff=False):
@@ -144,12 +143,12 @@ def calc_stats(df, metric, diff=False):
     for vType in df.vType.unique():
         df_vType = df[df.vType == vType]
         stats[vType] = {}
-        stats[vType][f"avg_{metric}"] = df_vType[metric].mean()
+        stats[vType][f"avg_{metric}"] = df_vType[metric].median()
         stats[vType][f"std_{metric}"] = df_vType[metric].std(ddof=1)
         stats[vType]["count"] = len(df_vType)
     if "all" not in stats.keys():
         stats["all"] = {}
-        stats["all"][f"avg_{metric}"] = df[metric].mean()
+        stats["all"][f"avg_{metric}"] = df[metric].median()
         stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
         stats["all"]["count"] = len(df)
     return pd.DataFrame(stats)
@@ -199,6 +198,10 @@ def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist
 
 
 if __name__ == '__main__':
+    # test
+    args = ["duration","all",[0.7],[8000],[200],[70],[0.6],1]
+    create_results_table(args)
+
     # define the parameters
     POLICIES = ["SlowDown", "Nothing"]
     DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
