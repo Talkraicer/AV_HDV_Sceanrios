@@ -8,7 +8,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 exp_name = "BlockedLane"
-NUM_PROCESSES = 70
+NUM_PROCESSES = 1
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
@@ -284,4 +284,4 @@ if __name__ == '__main__':
     AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     # create the results tables
-    create_all_results_tables(metrics, ["AV", "LaneChanger", "all"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE, SLOW_RATE_RANGE, 1)
+    create_all_results_tables(metrics, ["all","AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE, SLOW_RATE_RANGE, 1)
