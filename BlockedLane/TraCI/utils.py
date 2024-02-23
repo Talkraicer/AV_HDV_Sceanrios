@@ -269,7 +269,7 @@ if __name__ == '__main__':
     DIST_FAST_RANGE = [70]
     SLOW_RATE_RANGE = [0.6, 0.8]
     STOPPING_LANES = [1]
-    AV_RATES = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     # create the results tables
     create_all_results_tables(metrics, ["AV", "LaneChanger", "all"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE, SLOW_RATE_RANGE, 1)
