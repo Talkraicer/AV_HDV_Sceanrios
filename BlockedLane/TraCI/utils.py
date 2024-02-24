@@ -17,18 +17,20 @@ METRICS = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
 chosen_avs = {}
 
+
 def is_leader_AV_before_stopper(veh_id):
     # check if the vehicle is the leader of the AVs before the stopper
     if traci.vehicle.getTypeID(veh_id) == "AV":
         dist = 0
-        leader = traci.vehicle.getLeader(veh_id,0)
+        leader = traci.vehicle.getLeader(veh_id, 0)
         while leader is not None:
             frontVehID, dist_leader = leader
             dist += dist_leader
             if frontVehID == "stopping" and traci.vehicle.getLaneID(veh_id) == traci.vehicle.getLaneID(frontVehID):
                 return True, dist
-            leader = traci.vehicle.getLeader(frontVehID,0)
+            leader = traci.vehicle.getLeader(frontVehID, 0)
     return False, 0
+
 
 def get_inside_farest(possible_avs, dist_slow, dist_fast):
     # get the vehicle that is inside the slow and fast distances and is the closest to the dist slow
@@ -41,6 +43,7 @@ def get_inside_farest(possible_avs, dist_slow, dist_fast):
                 arg_min_dist_to_slow = veh_id, dist
     return arg_min_dist_to_slow
 
+
 def get_outside_closest(possible_avs, dist_slow, dist_fast):
     # get the vehicle that is outside the slow and fast distances and is the closest to the dist slow
     min_dist_to_fast = float("inf")
@@ -49,8 +52,9 @@ def get_outside_closest(possible_avs, dist_slow, dist_fast):
         if dist > dist_slow:
             if dist - dist_slow < min_dist_to_fast:
                 min_dist_to_fast = dist - dist_slow
-                arg_min_dist_to_fast = veh_id,dist
+                arg_min_dist_to_fast = veh_id, dist
     return arg_min_dist_to_fast
+
 
 def handle_step(t, policy_name, dist_slow=0, dist_fast=0, slow_rate=0, stopping_lane=1):
     global chosen_avs
@@ -106,12 +110,10 @@ def handle_step(t, policy_name, dist_slow=0, dist_fast=0, slow_rate=0, stopping_
                             # print("Slowing down vehicle: veh_id = ", veh_id, "dist = ", dist,
                             #       "from speed = ", traci.vehicle.getSpeed(veh_id), "to speed = ", slow_speed)
                             traci.vehicle.setSpeed(veh_id, slow_speed)
-                        elif chosen_speed < 0.9*slow_speed:
+                        elif chosen_speed < 0.9 * slow_speed:
                             # print("Vehicle already slowed down: veh_id = ", veh_id, "dist = ", dist)
                             traci.vehicle.setSpeed(veh_id, -1)
                 chosen_avs = new_chosen_avs
-
-
 
 
 def output_file_to_df(output_file, num_reps=1):
@@ -134,6 +136,7 @@ def output_file_to_df(output_file, num_reps=1):
         if col != "vType" and col != "id":
             df[col] = df[col].astype(float)
     return df
+
 
 def calc_stats(df, metric, diff=False):
     # Calculate statistics per vType
@@ -162,7 +165,9 @@ def create_results_table(args):
     if vType == "LaneChanger":
         av_rates.remove(1.0)
     cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
-    df = pd.DataFrame(columns=cols, index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
+    df = pd.DataFrame(columns=cols,
+                      index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in
+                             dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
     for flow in flows:
         for av_rate in av_rates:
             Nothing_df = output_file_to_df(
@@ -170,12 +175,15 @@ def create_results_table(args):
             for dist_slow in dist_slows:
                 for dist_fast in dist_fasts:
                     for slow_rate in slow_rates:
-                        relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+                        relevant_df = output_file_to_df(
+                            f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
                         # Merge the two dataframes
-                        joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=["_SlowDown", "_Nothing"],
-                                               how="inner")
-                        joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_SlowDown"] - joined_df[f"{metric}_Nothing"]) / \
-                                                        joined_df[f"{metric}_Nothing"]) * 100
+                        joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"],
+                                             suffixes=["_SlowDown", "_Nothing"],
+                                             how="inner")
+                        joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_SlowDown"] - joined_df[
+                            f"{metric}_Nothing"]) / \
+                                                       joined_df[f"{metric}_Nothing"]) * 100
                         joined_df.drop(columns=[f"{metric}_SlowDown"], inplace=True)
                         joined_df.drop(columns=[f"{metric}_Nothing"], inplace=True)
                         if len(joined_df) != len(relevant_df):
@@ -186,12 +194,16 @@ def create_results_table(args):
                             print(Nothing_df[~Nothing_df.id.isin(relevant_df.id)][["id", "vType"]])
                             print("*" * 50)
                         relevant_stats = calc_stats(joined_df, metric, diff=True)
-                        df.loc[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = relevant_stats.loc[f"avg_{metric}_diff", vType]
+                        df.loc[
+                            f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = \
+                        relevant_stats.loc[f"avg_{metric}_diff", vType]
     df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
+
 
 def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane=1):
     # run over all metrics and vTypes with tqdm
-    args = [(metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane) for metric in metrics for vType in vTypes]
+    args = [(metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane) for metric in metrics
+            for vType in vTypes]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             create_results_table, args), total=len(args)))
@@ -199,16 +211,17 @@ def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist
 
 if __name__ == '__main__':
     # test
-    args = ["duration","all",[0.7],[8000],[200],[70],[0.6],1]
+    args = ["duration", "all", [0.7], [8000], [200], [70], [0.6], 1]
     create_results_table(args)
 
     # define the parameters
     POLICIES = ["SlowDown", "Nothing"]
     DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
-    DIST_FAST_RANGE = [70]
+    DIST_FAST_RANGE = [100,150,200]
     SLOW_RATE_RANGE = [0.6, 0.8]
     STOPPING_LANES = [1]
     AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     # create the results tables
-    create_all_results_tables(METRICS, ["all","AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE, SLOW_RATE_RANGE, 1)
+    create_all_results_tables(METRICS, ["all", "AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE,
+                              SLOW_RATE_RANGE, 1)
