@@ -202,8 +202,8 @@ def create_results_table(args):
 
 def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane=1):
     # run over all metrics and vTypes with tqdm
-    args = [(metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane) for metric in metrics
-            for vType in vTypes]
+    args = [(metric, vType, av_rates, flows, dist_slows, dist_fast, slow_rates, stopping_lane) for metric in metrics
+            for vType in vTypes for dist_fast in dist_fasts]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             create_results_table, args), total=len(args)))
