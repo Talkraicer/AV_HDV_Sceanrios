@@ -211,8 +211,8 @@ def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist
 
 if __name__ == '__main__':
     # test
-    args = ["duration", "all", [0.7], [8000], [200], [70], [0.6], 1]
-    create_results_table(args)
+    # args = ["duration", "all", [0.7], [8000], [200], [70], [0.6], 1]
+    # create_results_table(args)
 
     # define the parameters
     POLICIES = ["SlowDown", "Nothing"]
