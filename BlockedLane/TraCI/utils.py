@@ -159,54 +159,36 @@ def calc_stats(df, metric, diff=False):
 
 def create_results_table(args):
     # create the results table
-    metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane = args
-    if vType == "AV":
-        av_rates.remove(0.0)
-    if vType == "LaneChanger":
-        av_rates.remove(1.0)
-    cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
-    df = pd.DataFrame(columns=cols,
-                      index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in
-                             dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
-    for flow in flows:
-        for av_rate in av_rates:
-            Nothing_df = output_file_to_df(
-                f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
-            for dist_slow in dist_slows:
-                for dist_fast in dist_fasts:
-                    for slow_rate in slow_rates:
-                        relevant_df = output_file_to_df(
-                            f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
-                        # Merge the two dataframes
-                        joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"],
-                                             suffixes=["_SlowDown", "_Nothing"],
-                                             how="inner")
-                        joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_SlowDown"] - joined_df[
-                            f"{metric}_Nothing"]) / \
-                                                       joined_df[f"{metric}_Nothing"]) * 100
-                        joined_df.drop(columns=[f"{metric}_SlowDown"], inplace=True)
-                        joined_df.drop(columns=[f"{metric}_Nothing"], inplace=True)
-                        if len(joined_df) != len(relevant_df):
-                            print(f"len(relevant_df) = {len(relevant_df)}, len(Nothing_df) = {len(Nothing_df)}")
-                            # print the ids that are not in both dataframes and the vTypes
-                            print(relevant_df[~relevant_df.id.isin(Nothing_df.id)][["id", "vType"]])
-                            print("*" * 50)
-                            print(Nothing_df[~Nothing_df.id.isin(relevant_df.id)][["id", "vType"]])
-                            print("*" * 50)
-                        relevant_stats = calc_stats(joined_df, metric, diff=True)
-                        df.loc[
-                            f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}", f"flow_{flow}_av_rate_{av_rate}"] = \
-                        relevant_stats.loc[f"avg_{metric}_diff", vType]
-    df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
+    metric, vType, av_rate, flow, dist_slow, dist_fast, slow_rate, stopping_lane = args
+    if (vType =="AV" and av_rate == 0.0) or (vType == "LaneChanger" and av_rate == 1.0):
+        return
+    Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_"
+                                   f"{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+    relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}"
+                                    f"_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}"
+                                    f"_av{av_rate}.xml")
+    # Merge the two dataframes
+    joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=["_SlowDown", "_Nothing"], how="inner")
+    joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_SlowDown"] - joined_df[f"{metric}_Nothing"]) /
+                                   joined_df[f"{metric}_Nothing"]) * 100
+    assert len(joined_df) == len(relevant_df)
+    relevant_stats = calc_stats(joined_df, metric, diff=True)
+    return relevant_stats.loc[f"avg_{metric}_diff", vType]
 
 
 def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane=1):
     # run over all metrics and vTypes with tqdm
-    args = [(metric, vType, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane) for metric in metrics
-            for vType in vTypes]
-    with Pool(NUM_PROCESSES) as pool:
-        results = list(tqdm(pool.imap(
-            create_results_table, args), total=len(args)))
+    for metric in metrics:
+        args = [(metric, vType, av_rate, flow, dist_slow, dist_fast, slow_rate, stopping_lane)
+                for vType in vTypes for av_rate in av_rates for flow in flows for dist_slow in dist_slows for dist_fast
+                in dist_fasts for slow_rate in slow_rates]
+        with Pool(NUM_PROCESSES) as pool:
+            results = list(tqdm(pool.imap(
+                create_results_table, args), total=len(args)))
+        cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
+        df = pd.DataFrame(results, columns=cols,
+                          index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in
+                                 dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
 
 
 if __name__ == '__main__':

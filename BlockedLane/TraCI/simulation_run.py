@@ -19,7 +19,7 @@ POLICIES = ["SlowDown","Nothing"]
 DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
 DIST_FAST_RANGE = [100,150,200]
 SLOW_RATE_RANGE = [0.6, 0.8]
-STOPPING_LANES = [1]
+STOPPING_LANES = [0,2]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
