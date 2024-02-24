@@ -90,6 +90,7 @@ def handle_step(t, policy_name, dist_slow=0, dist_fast=0, slow_rate=0, stopping_
                     chosen_speed = traci.vehicle.getSpeed(veh_id)
                     if chosen_speed == 0:
                         new_chosen_avs.pop(veh_id)
+                        continue
 
                     # make sure the vehicle is in the correct lane and color
                     traci.vehicle.changeLane(veh_id, stopping_lane, 0)
