@@ -209,7 +209,7 @@ if __name__ == '__main__':
     # define the parameters
     POLICIES = ["SlowDown", "Nothing"]
     DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
-    DIST_FAST_RANGE = [70, 100, 150, 200]
+    DIST_FAST_RANGE = [100, 150, 200]
     SLOW_RATE_RANGE = [0.6, 0.8]
     STOPPING_LANES = [0,2]
     AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
