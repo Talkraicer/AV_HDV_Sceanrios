@@ -162,7 +162,7 @@ def create_results_table(args):
     # create the results table
     metric, vType, av_rate, flow, dist_slow, dist_fast, slow_rate, stopping_lane = args
     if (vType == "AV" and av_rate == 0.0) or (vType == "LaneChanger" and av_rate == 1.0):
-        return
+        return (dist_slow,dist_fast,slow_rate),(flow,av_rate),0
     Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_"
                                    f"{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
     relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}"
