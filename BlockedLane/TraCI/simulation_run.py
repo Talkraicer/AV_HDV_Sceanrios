@@ -15,11 +15,11 @@ GUI = False
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["SlowDown","Nothing"]
+POLICIES = ["Nothing"]
 DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
 DIST_FAST_RANGE = [100,150,200]
 SLOW_RATE_RANGE = [0.6, 0.8]
-STOPPING_LANES = [2]
+STOPPING_LANES = [0]
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities

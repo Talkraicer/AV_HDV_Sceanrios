@@ -177,27 +177,28 @@ def create_results_table(args):
     return (dist_slow,dist_fast,slow_rate),(flow,av_rate),relevant_stats.loc[f"avg_{metric}_diff", vType]
 
 
-def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lane=1):
+def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist_fasts, slow_rates, stopping_lanes):
     # run over all metrics and vTypes with tqdm
-    for metric in tqdm(metrics):
-        for vType in tqdm(vTypes,leave=False):
-            args = [(metric, vType, av_rate, flow, dist_slow, dist_fast, slow_rate, stopping_lane)
-                    for av_rate in av_rates for flow in flows for dist_slow in dist_slows for dist_fast
-                    in dist_fasts for slow_rate in slow_rates]
-            with Pool(NUM_PROCESSES) as pool:
-                results = list(tqdm(pool.imap(
-                    create_results_table, args), total=len(args)))
-            cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
-            df = pd.DataFrame(columns=cols,
-                              index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in
-                                     dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
-            for result in results:
-                row, col, value = result
-                row_index = "dist_slow_{}_dist_fast_{}_slow_rate_{}".format(*row)
-                col_index = "flow_{}_av_rate_{}".format(*col)
-                df.loc[row_index,col_index] = value
+    for stopping_lane in stopping_lanes:
+        for metric in tqdm(metrics):
+            for vType in tqdm(vTypes,leave=False):
+                args = [(metric, vType, av_rate, flow, dist_slow, dist_fast, slow_rate, stopping_lane)
+                        for av_rate in av_rates for flow in flows for dist_slow in dist_slows for dist_fast
+                        in dist_fasts for slow_rate in slow_rates]
+                with Pool(NUM_PROCESSES) as pool:
+                    results = list(tqdm(pool.imap(
+                        create_results_table, args), total=len(args)))
+                cols = [f"flow_{flow}_av_rate_{av_rate}" for flow in flows for av_rate in av_rates]
+                df = pd.DataFrame(columns=cols,
+                                  index=[f"dist_slow_{dist_slow}_dist_fast_{dist_fast}_slow_rate_{slow_rate}" for dist_slow in
+                                         dist_slows for dist_fast in dist_fasts for slow_rate in slow_rates])
+                for result in results:
+                    row, col, value = result
+                    row_index = "dist_slow_{}_dist_fast_{}_slow_rate_{}".format(*row)
+                    col_index = "flow_{}_av_rate_{}".format(*col)
+                    df.loc[row_index,col_index] = value
 
-            df.to_csv(f"results_csvs/BlockedLane_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
+                df.to_csv(f"results_csvs/BlockedLane_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
 
 
 if __name__ == '__main__':
@@ -210,9 +211,9 @@ if __name__ == '__main__':
     DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
     DIST_FAST_RANGE = [70, 100, 150, 200]
     SLOW_RATE_RANGE = [0.6, 0.8]
-    STOPPING_LANES = [0]
+    STOPPING_LANES = [0,2]
     AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     # create the results tables
     create_all_results_tables(METRICS, ["all", "AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE,
-                              SLOW_RATE_RANGE, STOPPING_LANES[0])
+                              SLOW_RATE_RANGE, STOPPING_LANES)
