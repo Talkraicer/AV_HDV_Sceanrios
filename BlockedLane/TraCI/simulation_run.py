@@ -15,11 +15,7 @@ GUI = False
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["Nothing"]
-DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
-DIST_FAST_RANGE = [100,150,200]
-SLOW_RATE_RANGE = [0.6, 0.8]
-STOPPING_LANES = [0]
+
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -64,7 +60,7 @@ def parallel_simulation(args):
 if __name__ == "__main__":
     sumoCfgPaths = []
     for sumoCfg in os.listdir("../cfg_files"):
-        if sumoCfg.endswith(".sumocfg"):
+        if sumoCfg.endswith(".sumocfg") and exp_name in sumoCfg:
             sumoCfgPath = f"../cfg_files/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
     args = []
@@ -80,3 +76,5 @@ if __name__ == "__main__":
                 for sumoCfg in sumoCfgPaths:
                     args.append((policy_name, sumoCfg,stopping_lane, 0, 0, 0))
     parallel_simulation(args)
+    create_all_results_tables(METRICS, ["all", "AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE,
+                              SLOW_RATE_RANGE, STOPPING_LANES)

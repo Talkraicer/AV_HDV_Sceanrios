@@ -1,7 +1,7 @@
 from xml.etree import ElementTree as ET
 import numpy as np
 
-exp_name = "BlockedLane"
+exp_name = "BlockedLane5000"
 
 def set_cfg_file(flow, av_prob, seed):
     # Load and parse the XML file

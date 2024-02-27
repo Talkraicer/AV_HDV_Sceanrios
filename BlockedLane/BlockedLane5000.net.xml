@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2024-01-07 00:22:14 by Eclipse SUMO netedit Version 1.17.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <route-files value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Scenarios\EmergencyCar\emergency.rou.xml"/>
+        <sumo-net-file value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Scenarios\EmergencyCar\emergency.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="C:\Users\ASUS\OneDrive - Technion\Studies\Theza\Scenarios\EmergencyCar\emergency.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="0"/>
+    </processing>
+
+    <junctions>
+        <no-internal-links value="true"/>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.50"/>
+        <rectangular-lane-cut value="0"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="0"/>
+    </pedestrian>
+
+</configuration>
+-->
+
+<net version="1.16" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,5000.00,0.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <edge id="E0" from="J0" to="J2" priority="-1" shape="0.00,0.00 7.23,0.00 5000.00,0.00">
+        <lane id="E0_0" index="0" speed="27.78" length="5000.00" shape="0.00,-8.00 7.23,-8.00 5000.00,-8.00"/>
+        <lane id="E0_1" index="1" speed="27.78" length="5000.00" shape="0.00,-4.80 7.23,-4.80 5000.00,-4.80"/>
+        <lane id="E0_2" index="2" speed="27.78" length="5000.00" shape="0.00,-1.60 7.23,-1.60 5000.00,-1.60"/>
+    </edge>
+
+    <junction id="J0" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-9.60"/>
+    <junction id="J2" type="dead_end" x="5000.00" y="0.00" incLanes="E0_0 E0_1 E0_2" intLanes="" shape="5000.00,-9.60 5000.00,0.00"/>
+
+</net>

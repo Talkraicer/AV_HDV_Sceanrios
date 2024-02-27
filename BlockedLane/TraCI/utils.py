@@ -7,13 +7,23 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
 
-exp_name = "BlockedLane"
+exp_name = "BlockedLane5000"
+
 NUM_PROCESSES = 70
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
 results_reps_folder = "results_reps"
 METRICS = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
+
+# define the parameters
+POLICIES = ["SlowDown", "Nothing"]
+DIST_SLOW_RANGE = [500, 600, 700, 800, 900, 1000]
+DIST_FAST_RANGE = [100, 150, 200, 250, 300]
+SLOW_RATE_RANGE = [0.6, 0.8]
+STOPPING_LANES = [0, 1, 2]
+AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 
 chosen_avs = {}
 
@@ -62,7 +72,7 @@ def handle_step(t, policy_name, dist_slow=0, dist_fast=0, slow_rate=0, stopping_
         traci.vehicle.add(vehID="stopping", routeID="r_0")
     if "stopping" not in traci.vehicle.getIDList():
         return
-    if t >= 35:
+    if t >= 75: # 75 seconds to let the vehicles enter the simulation for BlockedLane, 70 seconds for BlockedLane5000
         traci.vehicle.setSpeed("stopping", 0)
         traci.vehicle.changeLane("stopping", stopping_lane, 0)
         stopping_lane_id = traci.vehicle.getLaneID("stopping")
@@ -164,9 +174,9 @@ def create_results_table(args):
     if (vType == "AV" and av_rate == 0.0) or (vType == "LaneChanger" and av_rate == 1.0):
         return (dist_slow,dist_fast,slow_rate),(flow,av_rate),0
     Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing_dist_slow_0_dist_fast_0_slow_rate_0_stopping_lane_"
-                                   f"{stopping_lane}_BlockedLane_flow{flow}_av{av_rate}.xml")
+                                   f"{stopping_lane}_{exp_name}_flow{flow}_av{av_rate}.xml")
     relevant_df = output_file_to_df(f"{results_reps_folder}/SlowDown_dist_slow_{dist_slow}_dist_fast_{dist_fast}"
-                                    f"_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_BlockedLane_flow{flow}"
+                                    f"_slow_rate_{slow_rate}_stopping_lane_{stopping_lane}_{exp_name}_flow{flow}"
                                     f"_av{av_rate}.xml")
     # Merge the two dataframes
     joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=["_SlowDown", "_Nothing"], how="inner")
@@ -198,7 +208,7 @@ def create_all_results_tables(metrics, vTypes, av_rates, flows, dist_slows, dist
                     col_index = "flow_{}_av_rate_{}".format(*col)
                     df.loc[row_index,col_index] = value
 
-                df.to_csv(f"results_csvs/BlockedLane_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
+                df.to_csv(f"results_csvs/{exp_name}_{metric}_{vType}_stopping_lane_{stopping_lane}.csv")
 
 
 if __name__ == '__main__':
@@ -206,14 +216,7 @@ if __name__ == '__main__':
     # args = ["duration", "all", [0.7], [8000], [200], [70], [0.6], 1]
     # create_results_table(args)
 
-    # define the parameters
-    POLICIES = ["SlowDown", "Nothing"]
-    DIST_SLOW_RANGE = [200, 300, 400, 500, 600, 700, 800]
-    DIST_FAST_RANGE = [100, 150, 200]
-    SLOW_RATE_RANGE = [0.6, 0.8]
-    STOPPING_LANES = [0,2]
-    AV_RATES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+
     # create the results tables
     create_all_results_tables(METRICS, ["all", "AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE,
                               SLOW_RATE_RANGE, STOPPING_LANES)
