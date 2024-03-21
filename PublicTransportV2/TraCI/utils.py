@@ -133,8 +133,8 @@ def parse_output_files_pairwise(args):
 
     for av_rate in av_rates1:
         df_av_rate = pd.DataFrame()
-        output_file1 = f"results_reps/{policy_name1}_PublicTransport_av{av_rate}.xml"
-        output_file2 = f"results_reps/{policy_name1}_PublicTransport_av{av_rate2}.xml"
+        output_file1 = f"results_reps/{policy_name1}_{exp_name}_av{av_rate}.xml"
+        output_file2 = f"results_reps/{policy_name1}_{exp_name}_av{av_rate2}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
         df_rep = pd.merge(df_rep1, df_rep2, on=["id"], suffixes=[f"_{av_rate}", f"_{av_rate2}"],
@@ -202,5 +202,5 @@ if __name__ == '__main__':
     # Example usage
     AV_rates = [0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 ,1.0]
     policies = ["Nothing"]
-    parse_output_files(AV_rates, 1, "Nothing")
+    # parse_output_files(AV_rates, 1, "Nothing")
     parse_all_pairwise(policies, AV_rates)
