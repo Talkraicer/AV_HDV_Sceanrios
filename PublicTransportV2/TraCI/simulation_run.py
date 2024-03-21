@@ -10,11 +10,11 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = True
+GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 1
+NUM_PROCESSES = 72
 POLICIES = ["Nothing"]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
 
