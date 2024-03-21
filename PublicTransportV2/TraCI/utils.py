@@ -107,12 +107,9 @@ def parse_output_files(av_rates, num_reps, policy_name):
 
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
-        for i in range(num_reps):
-            output_file = f"results_reps/{policy_name}_av_rate_{av_rate}_rep_{i}.xml"
-            if num_reps == 1:
-                output_file = f"results_reps_long/{policy_name}_av_rate_{av_rate}_rep_{i}.xml"
-            df_rep = output_file_to_df(output_file, num_reps)
-            df_av_rate = pd.concat([df_av_rate, df_rep])
+        output_file = f"results_reps/{policy_name}_av_rate_{av_rate}.xml"
+        df_rep = output_file_to_df(output_file, num_reps)
+        df_av_rate = pd.concat([df_av_rate, df_rep])
         # Calculate statistics per vType
         stats_av_rate = calc_stats(df_av_rate)
         # Add to df
@@ -122,10 +119,6 @@ def parse_output_files(av_rates, num_reps, policy_name):
             for stat in stats_names:
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
-    if num_reps == 1:
-        df.to_csv(f"results_csvs/{policy_name}_long.csv")
-        df.to_pickle(f"results_csvs/{policy_name}_long.pkl")
-        return
     df.to_csv(f"results_csvs/{policy_name}.csv")
     df.to_pickle(f"results_csvs/{policy_name}.pkl")
 
