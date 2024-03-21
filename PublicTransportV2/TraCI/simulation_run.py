@@ -65,10 +65,9 @@ if __name__ == "__main__":
         for sumoCfg in sumoCfgPaths:
             args.append((policy, sumoCfg))
     parallel_simulation(args)
-    policies_clean = [policy for policy in POLICIES if policy != "Nothing"]
-    # parse_all_pairwise(policies_clean, "Nothing", FLOWS, AV_rates,BUS_PROB)
-    # parse_all_pairwise(policies_clean, "NothingDL", FLOWS, AV_rates,BUS_PROB)
-    # convert_all_flows_to_av_rates(policies_clean, "Nothing", FLOWS, AV_rates,BUS_PROB)
-    # convert_all_flows_to_av_rates(policies_clean, "NothingDL", FLOWS, AV_rates,BUS_PROB)
+
+    parse_output_files(AV_rates, 1, "Nothing")
+    parse_all_pairwise(POLICIES, AV_rates)
+
 
 
