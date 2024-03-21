@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2024-03-21 16:14:57 by Eclipse SUMO netedit Version 1.19.0
+<!-- generated on 2024-03-21 16:46:03 by Eclipse SUMO netedit Version 1.19.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
@@ -38,15 +38,15 @@
     <location netOffset="0.00,0.00" convBoundary="0.00,0.00,9000.00,0.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
 
     <edge id="E1" from="J0" to="J1" priority="-1">
-        <lane id="E1_0" index="0" allow="bus" speed="25" length="8000.00" acceleration="1" shape="0.00,-8.00 7996.00,-8.00">
+        <lane id="E1_0" index="0" allow="bus evehicle" speed="25.00" length="8000.00" acceleration="1" shape="0.00,-8.00 7996.00,-8.00">
             <stopOffset vClasses="all" value="10.00"/>
         </lane>
-        <lane id="E1_1" index="1" speed="25" length="8000.00" shape="0.00,-4.80 7996.00,-4.80"/>
-        <lane id="E1_2" index="2" speed="25" length="8000.00" shape="0.00,-1.60 7996.00,-1.60"/>
+        <lane id="E1_1" index="1" speed="25.00" length="8000.00" shape="0.00,-4.80 7996.00,-4.80"/>
+        <lane id="E1_2" index="2" speed="25.00" length="8000.00" shape="0.00,-1.60 7996.00,-1.60"/>
     </edge>
     <edge id="E2" from="J1" to="J2" priority="-1">
-        <lane id="E2_0" index="0" allow="bus" speed="25" length="1000.00" shape="8004.00,-4.80 9000.00,-4.80"/>
-        <lane id="E2_1" index="1" speed="25" length="1000.00" shape="8004.00,-1.60 9000.00,-1.60"/>
+        <lane id="E2_0" index="0" allow="bus" speed="25.00" length="1000.00" shape="8004.00,-4.80 9000.00,-4.80"/>
+        <lane id="E2_1" index="1" speed="25.00" length="1000.00" shape="8004.00,-1.60 9000.00,-1.60"/>
     </edge>
 
     <junction id="J0" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-9.60"/>

@@ -1,7 +1,7 @@
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
 
 	<vTypeDistribution id="vehicleDist">
-	<vType id="AV" color="blue" probability="0.5" />
+	<vType id="AV" color="blue" probability="0.5" vClass="evehicle" />
 	<vType id="HD" color="red" probability="0.5"/>
 	</vTypeDistribution>
 	 
@@ -10,20 +10,20 @@
 	<vType id="Bus" guiShape="bus" vClass="bus"/>
 	
     <flow id="bus_stop21257" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J2" end="86400" departSpeed="random" vehsPerHour="32">
-                <stop busStop="21257" duration="3"/>
+                <stop busStop="21257" duration="25"/>
     </flow>
     <flow id="bus_stop21280" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J2" end="86400" departSpeed="random" vehsPerHour="31">
-                <stop busStop="21280" duration="3"/>
+                <stop busStop="21280" duration="25"/>
     </flow>
 	<flow id="bus_stop21632" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J2" end="86400" departSpeed="random" vehsPerHour="3">
-                <stop busStop="21632" duration="3"/>
+                <stop busStop="21632" duration="25"/>
     </flow>
     <flow id="bus_stop26834" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J2" end="86400" departSpeed="random" vehsPerHour="18">
-                <stop busStop="26834" duration="3"/>
+                <stop busStop="26834" duration="25"/>
     </flow>
     <flow id="bus_stop36393" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J2" end="86400" departSpeed="random" vehsPerHour="13">
-                <stop busStop="36393" duration="3"/>
-    </flow>
+                <stop busStop="36393" duration="25"/>
+    </flow> 
 	<flow id="bus_nonstop" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J2" end="86400" departSpeed="random" vehsPerHour="65" />
 
 </routes>
