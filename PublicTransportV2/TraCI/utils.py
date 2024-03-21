@@ -107,7 +107,7 @@ def parse_output_files(av_rates, num_reps, policy_name):
 
     for av_rate in av_rates:
         df_av_rate = pd.DataFrame()
-        output_file = f"results_reps/{policy_name}_{exp_name}_av_rate_{av_rate}.xml"
+        output_file = f"results_reps/{policy_name}_{exp_name}_av{av_rate}.xml"
         df_rep = output_file_to_df(output_file, num_reps)
         df_av_rate = pd.concat([df_av_rate, df_rep])
         # Calculate statistics per vType
