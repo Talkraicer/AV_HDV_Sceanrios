@@ -1,0 +1,14 @@
+Going from Bar Illan interchange to the north up to Taas + 1km. 12:00 - 15:00 stops statistics.
+Starting from bus station Bar Ilan Bridge/Road 4, Ramat Gan 21627 (Not included) - 56 stops
+21257: Giv'at Shmu'el Interchange/Road 4, Giv'at Shmu'el (1.2 km) - 97 stops
+21280: Giv'at Shmu'el/Pedestrian Bridge, Giv'at Shmu'el (1.85km) - 93 stops
+21632: Geha Interchange North (2.85km) - 9 stops
+26834: Road 4/Morasha Interchange (6.6km) - 55 stops
+36393: Taa"s (תע"ש) a(7.8km) - 39 stops
+
+Demand:
+Givat Shmuel - Bar ilan (202264 - 14/03/2022) - 12:00-15:00
+Bus - 487
+Private - 12751
+
+Speed - 90 km/h
