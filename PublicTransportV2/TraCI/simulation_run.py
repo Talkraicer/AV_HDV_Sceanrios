@@ -37,7 +37,7 @@ else:
 def simulate(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    exp_output_name = "results_reps/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+"4lanes.xml"
+    exp_output_name = "results_reps/"+policy_name+"_4Lanes"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
 
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
