@@ -37,7 +37,7 @@ else:
 def simulate(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    exp_output_name = "results_reps/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
+    exp_output_name = "results_reps/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+"4lanes.xml"
 
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
@@ -56,9 +56,9 @@ def parallel_simulation(args):
 
 if __name__ == "__main__":
     sumoCfgPaths = []
-    for sumoCfg in os.listdir("../cfg_files"):
+    for sumoCfg in os.listdir("../cfg_files_4_lanes"):
         if sumoCfg.endswith(".sumocfg"):
-            sumoCfgPath = f"../cfg_files/{sumoCfg}"
+            sumoCfgPath = f"../cfg_files_4_lanes/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
     args = []
     for policy in POLICIES:
