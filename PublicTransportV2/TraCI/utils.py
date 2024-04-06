@@ -169,8 +169,8 @@ def parse_output_files_pairwise(args):
             for stat in stats_names:
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
-    df.to_csv(f"results_csvs/{policy_name1}_baseline{av_rate2}.csv")
-    df.to_pickle(f"results_csvs/{policy_name1}_baseline{av_rate2}.pkl")
+    df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.csv")
+    df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.pkl")
 
 def parse_all_pairwise(policies,av_rates):
     # run with pool for all flows and policies
