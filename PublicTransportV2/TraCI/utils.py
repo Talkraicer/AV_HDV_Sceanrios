@@ -155,6 +155,10 @@ def parse_output_files_pairwise(args):
                                         df_rep[f"{metric}_{av_rate2}"]) * 100
         df_rep.drop(columns=[f"{metric}_{av_rate}" for metric in metrics], inplace=True)
         df_rep.drop(columns=[f"{metric}_{av_rate2}" for metric in metrics], inplace=True)
+
+        df_rep["vType"] = df_rep[f"vType_{av_rate}"]
+        df_rep.drop(columns=[f"vType_{av_rate}",f"vType_{av_rate2}"], inplace=True)
+
         df_av_rate = pd.concat([df_av_rate, df_rep])
         # Calculate statistics per vType
         stats_av_rate = calc_stats(df_av_rate, diff=True)
@@ -170,7 +174,7 @@ def parse_output_files_pairwise(args):
 
 def parse_all_pairwise(policies,av_rates):
     # run with pool for all flows and policies
-    args = [(av_rates,00.0, policy_name1) for policy_name1 in policies]
+    args = [(av_rates,0.0, policy_name1) for policy_name1 in policies]
     args += [(av_rates,1.0, policy_name1) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
@@ -202,5 +206,5 @@ if __name__ == '__main__':
     # Example usage
     AV_rates = [0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 ,1.0]
     policies = ["Nothing"]
-    parse_output_files(AV_rates, 1, "Nothing")
-    # parse_all_pairwise(policies, AV_rates)
+    # parse_output_files(AV_rates, 1, "Nothing")
+    parse_all_pairwise(policies, AV_rates)
