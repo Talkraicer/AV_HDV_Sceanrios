@@ -9,12 +9,13 @@ from multiprocessing import Pool
 
 exp_name = "PublicTransportV2Bay"
 NUM_PROCESSES = 70
-GUI = True
+GUI = False
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
 metrics = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 
-def clear_front_of_vehicle(vehID, lane, limit = np.inf):
+
+def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
     while leader and dist_emer < limit:
@@ -26,21 +27,52 @@ def clear_front_of_vehicle(vehID, lane, limit = np.inf):
             traci.vehicle.changeLane(frontVehID, to_lane, 1)
         leader = traci.vehicle.getLeader(frontVehID, 0)
 
+
+def get_stopping_buses_ids():
+    # get ids of buses that are stopping
+    vehIDs = traci.vehicle.getIDList()
+    stopping_buses = []
+    for vehID in vehIDs:
+        if traci.vehicle.getTypeID(vehID) == "Bus" and traci.vehicle.getSpeed(vehID) < 0.1:
+            stopping_buses.append(vehID)
+    return stopping_buses
+
+
+def vehicles_distance(vehID1, vehID2):
+    # get the distance between two vehicles, may be negative if vehID1 is behind vehID2
+    pos1 = traci.vehicle.getPosition(vehID1)
+    pos2 = traci.vehicle.getPosition(vehID2)
+    return pos1[0] - pos2[0]
+
+
+def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
+    # check if the vehicle is behind a bus that is stopping
+    if not stopping_buses:
+        return False
+    for busID in stopping_buses:
+        if -stop_from <= vehicles_distance(vehID, busID) <= -stop_to:
+            return True
+    return False
+
+
 def handle_step(t, policy_name):
-    # vehIDs = traci.vehicle.getIDList()
-    # has_emergency = False
-    # policy_name = policy_name.split("DL")[0]
-    # for vehID in vehIDs:
-    #     lane = traci.vehicle.getLaneID(vehID)
-    #     if traci.vehicle.getTypeID(vehID) == "Bus":
-    #         if policy_name == "ClearFront500":
-    #             clear_front_of_vehicle(vehID, lane, 500)
-    #         elif policy_name == "ClearFront":
-    #             clear_front_of_vehicle(vehID, lane)
-    #         elif policy_name == "ClearFront100":
-    #             clear_front_of_vehicle(vehID, lane, 100)
-    # return has_emergency
-    pass
+    if policy_name.startswith("DisallowBack"):
+        stop_from = int(policy_name.split("_")[1])
+        stop_to = int(policy_name.split("_")[2])
+        vehIDs = traci.vehicle.getIDList()
+        stopping_buses = get_stopping_buses_ids()
+        for vehID in vehIDs:
+            if traci.vehicle.getTypeID(vehID).startswith("AV"):
+                if check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
+                    # set type to temporalHD
+                    traci.vehicle.setType(vehID, "TemporalHD")
+                    traci.vehicle.setVehicleClass(vehID,"passenger")
+            elif traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
+                if not check_disallow_back(vehID, stopping_buses, stop_from, 0):
+                    # set type to AV
+                    traci.vehicle.setType(vehID, "AV")
+                    traci.vehicle.setVehicleClass(vehID,"evehicle")
+
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
@@ -100,7 +132,7 @@ def parse_output_files(av_rates, num_reps, policy_name):
     # Aggregate all output files into one dataframe, divided by vType
 
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics]+ ["count"]
+    stats_names = [f"avg_{metric}" for metric in metrics] + [f"std_{metric}" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "Bus", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
@@ -127,7 +159,8 @@ def parse_output_files_pairwise(args):
     av_rates1, av_rate2, policy_name1 = args
     av_rates1.remove(av_rate2)
     # set MultiIndex for df - each vType will be a column in df with all the stats
-    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
+    stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + [
+        "count"]
     vType_names = ["AV", "HD", "Bus", "all"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates1)
@@ -142,23 +175,23 @@ def parse_output_files_pairwise(args):
                           how="inner")
         # calculate difference
         try:
-            assert len (df_rep) == len(df_rep1) == len(df_rep2)
+            assert len(df_rep) == len(df_rep1) == len(df_rep2)
         except:
             print(f"len(df_rep) = {len(df_rep)}, len(df_rep1) = {len(df_rep1)}, len(df_rep2) = {len(df_rep2)}")
             # print the ids that are not in both dataframes and the vTypes
-            print(df_rep1[~df_rep1.id.isin(df_rep.id)][["id","vType"]])
-            print("*"*50)
-            print(df_rep2[~df_rep2.id.isin(df_rep.id)][["id","vType"]])
-            print("*"*50)
+            print(df_rep1[~df_rep1.id.isin(df_rep.id)][["id", "vType"]])
+            print("*" * 50)
+            print(df_rep2[~df_rep2.id.isin(df_rep.id)][["id", "vType"]])
+            print("*" * 50)
 
         for metric in metrics:
-            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{av_rate}"] - df_rep[f"{metric}_{av_rate2}"])/
+            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{av_rate}"] - df_rep[f"{metric}_{av_rate2}"]) /
                                         df_rep[f"{metric}_{av_rate2}"]) * 100
         df_rep.drop(columns=[f"{metric}_{av_rate}" for metric in metrics], inplace=True)
         df_rep.drop(columns=[f"{metric}_{av_rate2}" for metric in metrics], inplace=True)
 
         df_rep["vType"] = df_rep[f"vType_{av_rate}"]
-        df_rep.drop(columns=[f"vType_{av_rate}",f"vType_{av_rate2}"], inplace=True)
+        df_rep.drop(columns=[f"vType_{av_rate}", f"vType_{av_rate2}"], inplace=True)
 
         df_av_rate = pd.concat([df_av_rate, df_rep])
         # Calculate statistics per vType
@@ -173,13 +206,16 @@ def parse_output_files_pairwise(args):
     df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.csv")
     df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.pkl")
 
-def parse_all_pairwise(policies,av_rates):
+
+def parse_all_pairwise(policies, av_rates):
     # run with pool for all flows and policies
-    args = [(av_rates,0.0, policy_name1) for policy_name1 in policies]
-    args += [(av_rates,1.0, policy_name1) for policy_name1 in policies]
+    args = [(av_rates, 0.0, policy_name1) for policy_name1 in policies]
+    args += [(av_rates, 1.0, policy_name1) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             parse_output_files_pairwise, args), total=len(args)))
+
+
 def convert_flows_to_av_rates(args):
     policy_name1, policy_name2, flows, av_rates = args
     # convert flows to av rates
@@ -195,12 +231,12 @@ def convert_flows_to_av_rates(args):
         df.to_csv(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.csv")
         df.to_pickle(f"{results_folder}/{policy_name1}_{policy_name2}_av_rate_{av_rate}.pkl")
 
+
 def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
     args = [(policy_name1, policy_name2, flows, av_rates) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             convert_flows_to_av_rates, args), total=len(args)))
-
 
 
 if __name__ == '__main__':
