@@ -8,25 +8,25 @@
 	<vType id="TemporalHD" color="magenta"/>
 
 	
-    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J7" end="86400" vehsPerHour="4250" departSpeed="random" />
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J7" end="10800" vehsPerHour="4250" departSpeed="random" />
 
 	<vType id="Bus" guiShape="bus" vClass="bus"/>
 
-    <flow id="bus_stop21257" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="86400" departSpeed="random" vehsPerHour="32">
+    <flow id="bus_stop21257" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="10800" departSpeed="random" vehsPerHour="32">
                 <stop busStop="21257" duration="25"/>
     </flow>
-    <flow id="bus_stop21280" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="86400" departSpeed="random" vehsPerHour="31">
+    <flow id="bus_stop21280" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="10800" departSpeed="random" vehsPerHour="31">
                 <stop busStop="21280" duration="25"/>
     </flow>
-	<flow id="bus_stop21632" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="86400" departSpeed="random" vehsPerHour="3">
+	<flow id="bus_stop21632" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="10800" departSpeed="random" vehsPerHour="3">
                 <stop busStop="21632" duration="25"/>
     </flow>
-    <flow id="bus_stop26834" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="86400" departSpeed="random" vehsPerHour="18">
+    <flow id="bus_stop26834" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="10800" departSpeed="random" vehsPerHour="18">
                 <stop busStop="26834" duration="25"/>
     </flow>
-    <flow id="bus_stop36393" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="86400" departSpeed="random" vehsPerHour="13">
+    <flow id="bus_stop36393" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="10800" departSpeed="random" vehsPerHour="13">
                 <stop busStop="36393" duration="25"/>
     </flow>
-	<flow id="bus_nonstop" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="86400" departSpeed="random" vehsPerHour="65" />
+	<flow id="bus_nonstop" type="Bus" begin="0.00" departLane="random" line="bus" fromJunction="J0" toJunction="J7" end="10800" departSpeed="random" vehsPerHour="65" />
 
 </routes>
