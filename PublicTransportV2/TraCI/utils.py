@@ -125,6 +125,7 @@ def parse_output_files(av_rates, num_reps, policy_name):
 
 def parse_output_files_pairwise(args):
     av_rates1, av_rate2, policy_name1 = args
+    av_rates1.remove(av_rate2)
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in metrics] + [f"std_{metric}_diff" for metric in metrics] + ["count"]
     vType_names = ["AV", "HD", "Bus", "all"]
@@ -204,7 +205,7 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 
 if __name__ == '__main__':
     # Example usage
-    AV_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     policies = ["Nothing"]
-    # parse_output_files(AV_rates, 1, "Nothing")
+    parse_output_files(AV_rates, 1, "Nothing")
     parse_all_pairwise(policies, AV_rates)

@@ -56,9 +56,9 @@ def parallel_simulation(args):
 
 if __name__ == "__main__":
     sumoCfgPaths = []
-    for sumoCfg in os.listdir("../cfg_files_4_lanes"):
+    for sumoCfg in os.listdir("../cfg_files_Bay"):
         if sumoCfg.endswith(".sumocfg"):
-            sumoCfgPath = f"../cfg_files_4_lanes/{sumoCfg}"
+            sumoCfgPath = f"../cfg_files_Bay/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
     args = []
     for policy in POLICIES:
