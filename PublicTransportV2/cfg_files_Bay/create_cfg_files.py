@@ -1,7 +1,7 @@
 from xml.etree import ElementTree as ET
 import numpy as np
 
-exp_name = "PublicTransportV2"
+exp_name = "PublicTransportV2Bay"
 
 def set_cfg_file(av_prob, seed):
     # Load and parse the XML file
@@ -10,7 +10,7 @@ def set_cfg_file(av_prob, seed):
 
     # set route file
     route_file = root.find("input").find('route-files')
-    route_file.set('value', f'../rou_files/{exp_name}_av{av_prob}.rou.xml')
+    route_file.set('value', f'../rou_files_Bay/{exp_name}_av{av_prob}.rou.xml')
 
     # set additional files
     additional_files = root.find("input").find('additional-files')
