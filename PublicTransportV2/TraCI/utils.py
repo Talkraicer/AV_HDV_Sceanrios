@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
 
-exp_name = "PublicTransportV2"
+exp_name = "PublicTransportV2Bay"
 NUM_PROCESSES = 70
 GUI = True
 sumoCfg = fr"../{exp_name}.sumocfg"
