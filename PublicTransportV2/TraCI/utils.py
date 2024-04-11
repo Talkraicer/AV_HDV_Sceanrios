@@ -129,7 +129,23 @@ def calc_stats(df, diff=False):
             stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
         stats["all"]["count"] = len(df)
     return pd.DataFrame(stats)
-
+def calc_stats_metric(df, metric, diff=False):
+    # Calculate statistics per vType
+    if diff:
+        metric = f"{metric}_diff"
+    stats = {}
+    for vType in df.vType.unique():
+        df_vType = df[df.vType == vType]
+        stats[vType] = {}
+        stats[vType][f"avg_{metric}"] = df_vType[metric].median()
+        stats[vType][f"std_{metric}"] = df_vType[metric].std(ddof=1)
+        stats[vType]["count"] = len(df_vType)
+    if "all" not in stats.keys():
+        stats["all"] = {}
+        stats["all"][f"avg_{metric}"] = df[metric].median()
+        stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
+        stats["all"]["count"] = len(df)
+    return pd.DataFrame(stats)
 
 
 def create_results_table(args):
@@ -145,7 +161,7 @@ def create_results_table(args):
     joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_{policy_pure_name}"] - joined_df[f"{metric}_Nothing"]) /
                                    joined_df[f"{metric}_Nothing"]) * 100
     assert len(joined_df) == len(relevant_df)
-    relevant_stats = calc_stats(joined_df, metric, diff=True)
+    relevant_stats = calc_stats_metric(joined_df, metric, diff=True)
     return policy_name,av_rate,relevant_stats.loc[f"avg_{metric}_diff", vType]
 
 
