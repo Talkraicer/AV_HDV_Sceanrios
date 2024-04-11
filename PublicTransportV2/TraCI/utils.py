@@ -181,7 +181,7 @@ def create_all_results_tables(av_rates, policy_names):
                 row_index, col_index, value = result
                 df.loc[row_index,col_index] = value
             policy_pure_name = row_index.split("_")[0]
-            df.to_csv(f"{results_folder}/{policy_pure_name}/{exp_name}_{metric}_{vType}.csv")
+            df.to_csv(f"{results_folder}/{policy_pure_name}/{exp_name}_{policy_pure_name}_{metric}_{vType}.csv")
 
 
 def parse_output_files(av_rates, num_reps, policy_name):
