@@ -180,9 +180,8 @@ def create_all_results_tables(av_rates, policy_names):
             for result in results:
                 row_index, col_index, value = result
                 df.loc[row_index,col_index] = value
-
-
-            df.to_csv(f"{results_folder}/{exp_name}_{metric}_{vType}.csv")
+            policy_pure_name = row_index.split("_")[0]
+            df.to_csv(f"{results_folder}/{policy_pure_name}/{exp_name}_{metric}_{vType}.csv")
 
 
 def parse_output_files(av_rates, num_reps, policy_name):
