@@ -142,7 +142,7 @@ def create_results_table(args):
     relevant_df = output_file_to_df(f"{results_reps_folder}/{policy_name}{exp_name}_av{av_rate}.xml")
     # Merge the two dataframes
     joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=[f"_{policy_pure_name}", "_Nothing"], how="inner")
-    joined_df[f"{metric}_diff"] = ((joined_df[f"metric_{policy_pure_name}"] - joined_df[f"{metric}_Nothing"]) /
+    joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_{policy_pure_name}"] - joined_df[f"{metric}_Nothing"]) /
                                    joined_df[f"{metric}_Nothing"]) * 100
     assert len(joined_df) == len(relevant_df)
     relevant_stats = calc_stats(joined_df, metric, diff=True)
