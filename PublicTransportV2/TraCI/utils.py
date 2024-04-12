@@ -56,7 +56,6 @@ def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
             return True
     return False
 
-
 def handle_step(t, policy_name):
     if policy_name.startswith("DisallowBack"):
         stop_from = int(policy_name.split("_")[1])
@@ -75,6 +74,12 @@ def handle_step(t, policy_name):
                     traci.vehicle.setType(vehID, "AV")
                     traci.vehicle.setVehicleClass(vehID,"evehicle")
 
+            if policy_name.startswith("DisallowBackRelease"):
+                if traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
+                    if check_disallow_back(vehID, stopping_buses, 30, 0) and \
+                        (traci.vehicle.getLaneID(vehID).endswith("0") or traci.vehicle.getLaneID(vehID).find(".S") != -1):
+                        traci.vehicle.setType(vehID, "AV")
+                        traci.vehicle.setVehicleClass(vehID, "evehicle")
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
@@ -174,13 +179,14 @@ def create_all_results_tables(av_rates, policy_names):
             with Pool(NUM_PROCESSES) as pool:
                 results = list(tqdm(pool.imap(
                     create_results_table, args), total=len(args)))
-            cols = [f"av_rate_{av_rate}" for av_rate in av_rates]
+            cols = [av_rate for av_rate in av_rates]
             df = pd.DataFrame(columns=cols,
                               index=[policy_name for policy_name in policy_names])
             for result in results:
                 row_index, col_index, value = result
                 df.loc[row_index,col_index] = value
             policy_pure_name = row_index.split("_")[0]
+            os.makedirs(f"{results_folder}/{policy_pure_name}", exist_ok=True)
             df.to_csv(f"{results_folder}/{policy_pure_name}/{exp_name}_{policy_pure_name}_{metric}_{vType}.csv")
 
 

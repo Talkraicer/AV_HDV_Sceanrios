@@ -15,7 +15,7 @@ GUI = False
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["DisallowBack"]
+POLICIES = ["DisallowBackRelease30"]
 STOP_FROM_RANGE = [300,400,500,600,700,800,900,1000,1100,1200]
 STOP_TO_RANGE = [0,100,200]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     for policy in POLICIES:
         policy_name = policy
         for sumoCfg in sumoCfgPaths:
-            if policy == "DisallowBack":
+            if policy.startswith("DisallowBack"):
                 for stop_from in STOP_FROM_RANGE:
                     for stop_to in STOP_TO_RANGE:
                         policy_name = f"{policy}_{stop_from}_{stop_to}"
@@ -79,8 +79,9 @@ if __name__ == "__main__":
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)
 
-    parse_output_files(AV_rates, 1, "Nothing")
-    parse_all_pairwise(POLICIES, AV_rates)
-
+    # parse_output_files(AV_rates, 1, "Nothing")
+    # parse_all_pairwise(POLICIES, AV_rates)
+    policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
+    create_all_results_tables(AV_rates,policy_names)
 
 
