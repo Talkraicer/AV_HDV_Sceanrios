@@ -77,7 +77,8 @@ def handle_step(t, policy_name):
             if policy_name.startswith("DisallowBackRelease"):
                 if traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
                     if check_disallow_back(vehID, stopping_buses, 30, 0) and \
-                        (traci.vehicle.getLaneID(vehID).endswith("0") or traci.vehicle.getLaneID(vehID).find(".S") != -1):
+                        (traci.vehicle.getLaneID(vehID).endswith("0") or
+                         (traci.vehicle.getLaneID(vehID).find(".S") != -1 and traci.vehicle.getLaneID(vehID).endswith("1"))):
                         traci.vehicle.setType(vehID, "AV")
                         traci.vehicle.setVehicleClass(vehID, "evehicle")
 
