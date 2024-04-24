@@ -41,7 +41,7 @@ def get_stopping_buses_ids():
     vehIDs = traci.vehicle.getIDList()
     stopping_buses = []
     for vehID in vehIDs:
-        if traci.vehicle.getTypeID(vehID) == "Bus" and traci.vehicle.getSpeed(vehID) < 0.1:
+        if traci.vehicle.getTypeID(vehID) == "Bus" and traci.vehicle.getSpeed(vehID) < 0.1 and traci.vehicle.getLaneID(vehID).find(".S") != -1:
             stopping_buses.append(vehID)
     return stopping_buses
 
