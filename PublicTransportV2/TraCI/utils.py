@@ -380,7 +380,7 @@ if __name__ == '__main__':
     AV_rates = [0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
     STOP_FROM_RANGE = [900, 1000, 1100, 1200]
     STOP_TO_RANGE = [100, 200, 300]
-    policies = ["DisallowBackRelease30" + f"{stop_from}_{stop_to}" for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
+    policies = ["DisallowBackRelease30" + f"_{stop_from}_{stop_to}" for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     policies += ["Volunteer_Stopper"]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
