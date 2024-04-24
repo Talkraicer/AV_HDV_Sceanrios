@@ -334,6 +334,13 @@ def parse_output_files_pairwise(args):
     df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.csv")
     df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.pkl")
 
+def parse_all_output_files(av_rates, num_reps, policies):
+    # run with pool for all flows and policies
+    args = [(av_rates, num_reps, policy_name) for policy_name in policies]
+    with Pool(NUM_PROCESSES) as pool:
+        results = list(tqdm(pool.imap(
+            parse_output_files, args), total=len(args)) )
+
 
 def parse_all_pairwise(policies, av_rates):
     # run with pool for all flows and policies
@@ -370,8 +377,11 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 if __name__ == '__main__':
     # Example usage
     AV_rates = [0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
-    policies = ["DisallowBackRelease30_1000_200"]
-    parse_output_files(AV_rates, 1, policies[0])
+    STOP_FROM_RANGE = [900, 1000, 1100, 1200]
+    STOP_TO_RANGE = [100, 200, 300]
+    policies = ["DisallowBackRelease30" + f"{stop_from}_{stop_to}" for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
+    policies += ["Volunteer_Stopper"]
+    parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
     # STOP_FROM_RANGE = [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
     # STOP_TO_RANGE = [0, 100, 200]
