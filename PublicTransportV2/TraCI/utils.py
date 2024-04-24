@@ -91,9 +91,13 @@ def assign_volunteer(busID):
 
 def release_volunteer(volID):
     if volID:
-        traci.vehicle.setColor(volID, (0,0,255))
-        traci.vehicle.setMaxSpeed(volID,MAX_VEH_SPEED)
-        traci.vehicle.changeLane(volID, 0, 0)
+        try:
+            traci.vehicle.setColor(volID, (0,0,255))
+            traci.vehicle.setMaxSpeed(volID,MAX_VEH_SPEED)
+            traci.vehicle.changeLane(volID, 0, 0)
+        except:
+            with open("erros.txt","a+") as f:
+                f.write(f"volID = {volID} had error\n")
 
 
 def handle_step(t, policy_name):
