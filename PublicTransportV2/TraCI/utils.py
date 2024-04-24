@@ -15,7 +15,13 @@ results_folder = "results_csvs"
 results_reps_folder = "results_reps"
 METRICS = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 VTYPES = ["AV", "HD", "Bus", "all"]
+MAX_VEH_SPEED = 55.56
 
+MERGING_TIME_FACTOR = 1.4
+HOLDING_TIME_FACTOR = 1.2
+BUS_STOPPING_TIME = 25
+STOP_FROM = 1000
+BUSES_VOLUNTEERS = dict()
 
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
@@ -56,6 +62,40 @@ def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
             return True
     return False
 
+def switch_to_temporalHD(vehID):
+    traci.vehicle.setType(vehID, "TemporalHD")
+    traci.vehicle.setVehicleClass(vehID, "passenger")
+
+def switch_to_AV(vehID):
+    traci.vehicle.setType(vehID, "AV")
+    traci.vehicle.setVehicleClass(vehID, "evehicle")
+
+def assign_volunteer(busID):
+    vehIDs = traci.vehicle.getIDList()
+    max_estimated_time = 0
+    volunteer = None
+    for vehID in vehIDs:
+        if traci.vehicle.getTypeID(vehID).startswith("AV") and traci.vehicle.getLaneID(vehID).endswith("0"):
+            if traci.vehicle.getSpeed(vehID) == 0:
+                continue
+            estimated_time_to_reach = vehicles_distance(busID,vehID) / traci.vehicle.getSpeed(vehID)
+            if 0.5* BUS_STOPPING_TIME < estimated_time_to_reach < BUS_STOPPING_TIME:
+                if estimated_time_to_reach > max_estimated_time:
+                    max_estimated_time = estimated_time_to_reach
+                    volunteer = vehID
+    BUSES_VOLUNTEERS[busID] = volunteer
+    if volunteer:
+        traci.vehicle.setColor(volunteer, (0, 255,0))
+        traci.vehicle.changeLane(volunteer, 0, BUS_STOPPING_TIME*HOLDING_TIME_FACTOR)
+        traci.vehicle.setMaxSpeed(volunteer, vehicles_distance(busID,volunteer) / (BUS_STOPPING_TIME * MERGING_TIME_FACTOR))
+
+def release_volunteer(volID):
+    if volID:
+        traci.vehicle.setColor(volID, (0,0,255))
+        traci.vehicle.setMaxSpeed(volID,MAX_VEH_SPEED)
+        traci.vehicle.changeLane(volID, 0, 0)
+
+
 def handle_step(t, policy_name):
     if policy_name.startswith("DisallowBack"):
         stop_from = int(policy_name.split("_")[1])
@@ -66,21 +106,46 @@ def handle_step(t, policy_name):
             if traci.vehicle.getTypeID(vehID).startswith("AV"):
                 if check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
                     # set type to temporalHD
-                    traci.vehicle.setType(vehID, "TemporalHD")
-                    traci.vehicle.setVehicleClass(vehID,"passenger")
+                    switch_to_temporalHD(vehID)
             elif traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
                 if not check_disallow_back(vehID, stopping_buses, stop_from, 0):
                     # set type to AV
-                    traci.vehicle.setType(vehID, "AV")
-                    traci.vehicle.setVehicleClass(vehID,"evehicle")
-
+                    switch_to_AV(vehID)
             if policy_name.startswith("DisallowBackRelease"):
                 if traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
-                    if check_disallow_back(vehID, stopping_buses, 30, 0) and \
-                        (traci.vehicle.getLaneID(vehID).endswith("0") or
-                         (traci.vehicle.getLaneID(vehID).find(".S") != -1 and traci.vehicle.getLaneID(vehID).endswith("1"))):
-                        traci.vehicle.setType(vehID, "AV")
-                        traci.vehicle.setVehicleClass(vehID, "evehicle")
+                    if (traci.vehicle.getLaneID(vehID).find(".S") != -1 and traci.vehicle.getLaneID(vehID).endswith("1")) or \
+                            (check_disallow_back(vehID, stopping_buses, 30, 0) and traci.vehicle.getLaneID(vehID).endswith("0")):
+                        switch_to_AV(vehID)
+
+    if policy_name == "Volunteer_Stopper":
+        vehIDs = traci.vehicle.getIDList()
+        stopping_buses = get_stopping_buses_ids()
+        for bus in stopping_buses:
+            if bus not in BUSES_VOLUNTEERS.keys():
+                assign_volunteer(bus)
+        to_del = []
+        for bus in BUSES_VOLUNTEERS.keys():
+            if bus not in stopping_buses:
+                release_volunteer(BUSES_VOLUNTEERS[bus])
+                to_del.append(bus)
+        for bus_del in to_del:
+            del BUSES_VOLUNTEERS[bus_del]
+        for vehID in vehIDs:
+            if not traci.vehicle.getLaneID(vehID).endswith("0"):
+                if traci.vehicle.getTypeID(vehID).startswith("AV"):
+                    if check_disallow_back(vehID, stopping_buses, STOP_FROM, 0):
+                        # set type to temporalHD
+                        switch_to_temporalHD(vehID)
+                elif traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
+                    if not check_disallow_back(vehID, stopping_buses, STOP_FROM, 0):
+                        # set type to AV
+                        switch_to_AV(vehID)
+                if traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
+                    if (traci.vehicle.getLaneID(vehID).find(".S") != -1 and traci.vehicle.getLaneID(vehID).endswith("1")) or \
+                            (check_disallow_back(vehID, stopping_buses, 30, 0) and traci.vehicle.getLaneID(vehID).endswith("0")):
+                        switch_to_AV(vehID)
+
+
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
@@ -273,7 +338,7 @@ def parse_output_files_pairwise(args):
 def parse_all_pairwise(policies, av_rates):
     # run with pool for all flows and policies
     args = [(av_rates, 0.0, policy_name1) for policy_name1 in policies]
-    args += [(av_rates, 1.0, policy_name1) for policy_name1 in policies]
+    # args += [(av_rates, 1.0, policy_name1) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
             parse_output_files_pairwise, args), total=len(args)))
