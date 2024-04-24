@@ -256,7 +256,8 @@ def create_all_results_tables(av_rates, policy_names):
             df.to_csv(f"{results_folder}/{policy_pure_name}/{exp_name}_{policy_pure_name}_{metric}_{vType}.csv")
 
 
-def parse_output_files(av_rates, num_reps, policy_name):
+def parse_output_files(args):
+    av_rates, num_reps, policy_name = args
     # Aggregate all output files into one dataframe, divided by vType
 
     # set MultiIndex for df - each vType will be a column in df with all the stats
