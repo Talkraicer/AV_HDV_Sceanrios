@@ -20,6 +20,7 @@ MAX_VEH_SPEED = 55.56
 MERGING_TIME_FACTOR = 1.4
 HOLDING_TIME_FACTOR = 1.2
 BUS_STOPPING_TIME = 25
+MAX_ALLOWED_SPEED = 25
 STOP_FROM = 1000
 BUSES_VOLUNTEERS = dict()
 
@@ -66,6 +67,10 @@ def switch_to_temporalHD(vehID):
     traci.vehicle.setType(vehID, "TemporalHD")
     traci.vehicle.setVehicleClass(vehID, "passenger")
 
+def switch_to_allowedTemporalHD(vehID):
+    traci.vehicle.setType(vehID, "AllowedTemporalHD")
+    traci.vehicle.setVehicleClass(vehID, "private")
+
 def switch_to_AV(vehID):
     traci.vehicle.setType(vehID, "AV")
     traci.vehicle.setVehicleClass(vehID, "evehicle")
@@ -79,7 +84,7 @@ def assign_volunteer(busID):
             if traci.vehicle.getSpeed(vehID) == 0:
                 continue
             estimated_time_to_reach = vehicles_distance(busID,vehID) / traci.vehicle.getSpeed(vehID)
-            if 0.5* BUS_STOPPING_TIME < estimated_time_to_reach < BUS_STOPPING_TIME:
+            if 0.5* BUS_STOPPING_TIME < estimated_time_to_reach < BUS_STOPPING_TIME*1.2:
                 if estimated_time_to_reach > max_estimated_time:
                     max_estimated_time = estimated_time_to_reach
                     volunteer = vehID
@@ -107,19 +112,21 @@ def handle_step(t, policy_name):
         vehIDs = traci.vehicle.getIDList()
         stopping_buses = get_stopping_buses_ids()
         for vehID in vehIDs:
-            if traci.vehicle.getTypeID(vehID).startswith("AV"):
+            laneID = traci.vehicle.getLaneID(vehID)
+            typeID = traci.vehicle.getTypeID(vehID)
+            if typeID.startswith("AV"):
                 if check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
-                    # set type to temporalHD
-                    switch_to_temporalHD(vehID)
-            elif traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
-                if not check_disallow_back(vehID, stopping_buses, stop_from, 0):
-                    # set type to AV
+                    if laneID.endswith("0"):
+                        switch_to_allowedTemporalHD(vehID)
+                    elif laneID.find(".S") == -1:
+                        switch_to_temporalHD(vehID)
+            elif typeID.find("TemporalHD") != -1:
+                if not check_disallow_back(vehID, stopping_buses, stop_from, 0)\
+                        or (laneID.find(".S") != -1 and laneID.endswith("1")):
                     switch_to_AV(vehID)
-            if policy_name.startswith("DisallowBackRelease"):
-                if traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
-                    if (traci.vehicle.getLaneID(vehID).find(".S") != -1 and traci.vehicle.getLaneID(vehID).endswith("1")) or \
-                            (check_disallow_back(vehID, stopping_buses, 30, 0) and traci.vehicle.getLaneID(vehID).endswith("0")):
-                        switch_to_AV(vehID)
+                elif typeID.find("AllowedTemporalHD") != -1 and \
+                      (laneID.endswith("1") or laneID.endswith("2")):
+                    switch_to_temporalHD(vehID)
 
     if policy_name == "Volunteer_Stopper":
         vehIDs = traci.vehicle.getIDList()
@@ -135,19 +142,25 @@ def handle_step(t, policy_name):
         for bus_del in to_del:
             del BUSES_VOLUNTEERS[bus_del]
         for vehID in vehIDs:
-            if not traci.vehicle.getLaneID(vehID).endswith("0"):
-                if traci.vehicle.getTypeID(vehID).startswith("AV"):
-                    if check_disallow_back(vehID, stopping_buses, STOP_FROM, 0):
-                        # set type to temporalHD
+            laneID = traci.vehicle.getLaneID(vehID)
+            typeID = traci.vehicle.getTypeID(vehID)
+            was_THD = False
+            if typeID.find("TemporalHD") != -1:
+                switch_to_AV(vehID)
+                was_THD = True
+            if typeID.startswith("AV") or was_THD:
+                for stopped_bus in BUSES_VOLUNTEERS:
+                    if BUSES_VOLUNTEERS[stopped_bus]:
+                        if vehicles_distance(vehID, BUSES_VOLUNTEERS[stopped_bus]) > 0 and \
+                                vehicles_distance(vehID, stopped_bus) < 0 and \
+                                not laneID.endswith("0"):
+                            switch_to_temporalHD(vehID)
+                            break
+                    elif (0 < vehicles_distance(stopped_bus,vehID) < BUS_STOPPING_TIME*MAX_ALLOWED_SPEED and
+                          not laneID.endswith("0") and vehID not in BUSES_VOLUNTEERS.values()):
+
                         switch_to_temporalHD(vehID)
-                elif traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
-                    if not check_disallow_back(vehID, stopping_buses, STOP_FROM, 0):
-                        # set type to AV
-                        switch_to_AV(vehID)
-                if traci.vehicle.getTypeID(vehID).startswith("TemporalHD"):
-                    if (traci.vehicle.getLaneID(vehID).find(".S") != -1 and traci.vehicle.getLaneID(vehID).endswith("1")) or \
-                            (check_disallow_back(vehID, stopping_buses, 30, 0) and traci.vehicle.getLaneID(vehID).endswith("0")):
-                        switch_to_AV(vehID)
+                        break
 
 
 
