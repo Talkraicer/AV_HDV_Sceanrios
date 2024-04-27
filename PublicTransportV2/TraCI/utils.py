@@ -50,10 +50,14 @@ def get_stopping_buses_ids():
 
 def vehicles_distance(vehID1, vehID2):
     # get the distance between two vehicles, may be negative if vehID1 is behind vehID2
-    pos1 = traci.vehicle.getPosition(vehID1)
-    pos2 = traci.vehicle.getPosition(vehID2)
-    return pos1[0] - pos2[0]
-
+    try:
+        pos1 = traci.vehicle.getPosition(vehID1)
+        pos2 = traci.vehicle.getPosition(vehID2)
+        return pos1[0] - pos2[0]
+    except:
+        with open("errors.txt","a+") as f:
+            f.write(f"vehID1 = {vehID1}, vehID2 = {vehID2} had error\n")
+        return np.inf
 
 def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
     # check if the vehicle is behind a bus that is stopping
