@@ -42,7 +42,8 @@ def get_stopping_buses_ids():
     vehIDs = traci.vehicle.getIDList()
     stopping_buses = []
     for vehID in vehIDs:
-        if traci.vehicle.getTypeID(vehID) == "Bus" and traci.vehicle.getSpeed(vehID) < 0.1 and traci.vehicle.getLaneID(vehID).find(".S") != -1:
+        if traci.vehicle.getTypeID(vehID) == "Bus" and traci.vehicle.getSpeed(vehID) == 0 and traci.vehicle.getLaneID(vehID).find(".S") != -1\
+                and traci.vehicle.getLaneID(vehID).find("0") != -1:
             stopping_buses.append(vehID)
     return stopping_buses
 
@@ -140,7 +141,7 @@ def handle_step(t, policy_name):
                 release_volunteer(BUSES_VOLUNTEERS[bus])
                 to_del.append(bus)
         for bus_del in to_del:
-            del BUSES_VOLUNTEERS[bus_del]
+            BUSES_VOLUNTEERS.pop(bus_del)
         for vehID in vehIDs:
             laneID = traci.vehicle.getLaneID(vehID)
             typeID = traci.vehicle.getTypeID(vehID)
@@ -153,14 +154,15 @@ def handle_step(t, policy_name):
                     if BUSES_VOLUNTEERS[stopped_bus]:
                         if vehicles_distance(vehID, BUSES_VOLUNTEERS[stopped_bus]) > 0 and \
                                 vehicles_distance(vehID, stopped_bus) < 0 and \
-                                not laneID.endswith("0"):
+                                not laneID.endswith("0") and \
+                                not laneID.find(".S") != -1:
                             switch_to_temporalHD(vehID)
                             break
                     elif (0 < vehicles_distance(stopped_bus,vehID) < BUS_STOPPING_TIME*MAX_ALLOWED_SPEED and
                           not laneID.endswith("0") and vehID not in BUSES_VOLUNTEERS.values()):
-
                         switch_to_temporalHD(vehID)
                         break
+        print(BUSES_VOLUNTEERS)
 
 
 
