@@ -162,8 +162,6 @@ def handle_step(t, policy_name):
                           not laneID.endswith("0") and vehID not in BUSES_VOLUNTEERS.values()):
                         switch_to_temporalHD(vehID)
                         break
-        print(BUSES_VOLUNTEERS)
-
 
 
 def output_file_to_df(output_file, num_reps=1):
