@@ -128,9 +128,9 @@ def handle_step(t, policy_name):
                         switch_to_temporalHD(vehID)
             elif typeID.find("TemporalHD") != -1:
                 if not check_disallow_back(vehID, stopping_buses, stop_from, 0)\
-                        or (laneID.find(".S") != -1 and laneID.endswith("1")):
+                        or laneID.endswith("S_1"):
                     switch_to_AV(vehID)
-                elif typeID.find("AllowedTemporalHD") != -1 and \
+                elif typeID.find("AllowedTemporalHD") != -1 and laneID.find("S") == -1 and \
                       (laneID.endswith("1") or laneID.endswith("2")):
                     switch_to_temporalHD(vehID)
 
