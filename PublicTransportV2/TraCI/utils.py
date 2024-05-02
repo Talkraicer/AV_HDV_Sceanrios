@@ -42,8 +42,7 @@ def get_stopping_buses_ids():
     vehIDs = traci.vehicle.getIDList()
     stopping_buses = []
     for vehID in vehIDs:
-        if traci.vehicle.getTypeID(vehID) == "Bus" and traci.vehicle.getSpeed(vehID) == 0 and traci.vehicle.getLaneID(vehID).find(".S") != -1\
-                and traci.vehicle.getLaneID(vehID).find("0") != -1:
+        if traci.vehicle.getTypeID(vehID).find("Bus") != -1 and traci.vehicle.getSpeed(vehID) == 0 and traci.vehicle.getLaneID(vehID).endswith("S_0"):
             stopping_buses.append(vehID)
     return stopping_buses
 
@@ -81,6 +80,7 @@ def switch_to_AV(vehID):
     traci.vehicle.setVehicleClass(vehID, "evehicle")
 
 def assign_volunteer(busID):
+    global BUSES_VOLUNTEERS
     vehIDs = traci.vehicle.getIDList()
     max_estimated_time = 0
     volunteer = None
@@ -111,6 +111,7 @@ def release_volunteer(volID):
 
 
 def handle_step(t, policy_name):
+    global BUSES_VOLUNTEERS
     if policy_name.startswith("DisallowBack"):
         stop_from = int(policy_name.split("_")[1])
         stop_to = int(policy_name.split("_")[2])
@@ -136,9 +137,13 @@ def handle_step(t, policy_name):
     if policy_name == "Volunteer_Stopper":
         vehIDs = traci.vehicle.getIDList()
         stopping_buses = get_stopping_buses_ids()
+
+        # assigr volunteers to new stopping buses
         for bus in stopping_buses:
             if bus not in BUSES_VOLUNTEERS.keys():
                 assign_volunteer(bus)
+
+        # release volunteers if the bus is not stopping anymore
         to_del = []
         for bus in BUSES_VOLUNTEERS.keys():
             if bus not in stopping_buses:
@@ -146,6 +151,8 @@ def handle_step(t, policy_name):
                 to_del.append(bus)
         for bus_del in to_del:
             BUSES_VOLUNTEERS.pop(bus_del)
+
+        # check if the AVs need to switch to TemporalHD
         for vehID in vehIDs:
             laneID = traci.vehicle.getLaneID(vehID)
             typeID = traci.vehicle.getTypeID(vehID)
