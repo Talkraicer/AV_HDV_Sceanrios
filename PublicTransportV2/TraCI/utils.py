@@ -170,7 +170,8 @@ def handle_step(t, policy_name):
                             switch_to_temporalHD(vehID)
                             break
                     elif (0 < vehicles_distance(stopped_bus,vehID) < BUS_STOPPING_TIME*MAX_ALLOWED_SPEED and
-                          not laneID.endswith("0") and vehID not in BUSES_VOLUNTEERS.values()):
+                          not laneID.endswith("0") and not laneID.find(".S") != -1
+                          and vehID not in BUSES_VOLUNTEERS.values()):
                         switch_to_temporalHD(vehID)
                         break
 
