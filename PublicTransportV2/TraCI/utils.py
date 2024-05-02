@@ -122,16 +122,15 @@ def handle_step(t, policy_name):
             typeID = traci.vehicle.getTypeID(vehID)
             if typeID.startswith("AV"):
                 if check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
-                    if laneID.endswith("0"):
+                    if laneID.endswith("0") and laneID.find(".S") == -1:
                         switch_to_allowedTemporalHD(vehID)
-                    elif laneID.find(".S") == -1:
+                    elif not laneID.endswith("0") and not laneID.endswith("S_1"):
                         switch_to_temporalHD(vehID)
             elif typeID.find("TemporalHD") != -1:
                 if not check_disallow_back(vehID, stopping_buses, stop_from, 0)\
                         or laneID.endswith("S_1"):
                     switch_to_AV(vehID)
-                elif typeID.find("AllowedTemporalHD") != -1 and laneID.find("S") == -1 and \
-                      (laneID.endswith("1") or laneID.endswith("2")):
+                elif typeID.find("AllowedTemporalHD") != -1 and not laneID.endswith("0") and not laneID.endswith("S_1"):
                     switch_to_temporalHD(vehID)
 
     if policy_name == "Volunteer_Stopper":
