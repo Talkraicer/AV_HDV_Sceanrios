@@ -17,7 +17,7 @@ METRICS = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 VTYPES = ["AV", "HD", "Bus", "all"]
 MAX_VEH_SPEED = 55.56
 
-MERGING_TIME_FACTOR = 1.4
+MERGING_TIME_FACTOR = 1.2
 HOLDING_TIME_FACTOR = 1.2
 BUS_STOPPING_TIME = 25
 MAX_ALLOWED_SPEED = 25
