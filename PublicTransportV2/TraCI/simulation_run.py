@@ -15,7 +15,7 @@ GUI = False
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["Nothing"]
+POLICIES = ["Nothing","Volunteer_Stopper","DisallowBack"]
 STOP_FROM_RANGE = [900,1000,1100,1200]
 STOP_TO_RANGE = [100,200,300]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
