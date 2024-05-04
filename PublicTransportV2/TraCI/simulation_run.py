@@ -85,5 +85,7 @@ if __name__ == "__main__":
                     for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     policy_names += [policy for policy in POLICIES if not policy.startswith("DisallowBack")]
     create_all_results_tables(AV_rates,policy_names)
+    parse_all_output_files(AV_rates, 1, policy_names)
+    parse_all_pairwise(policy_names, AV_rates)
 
 

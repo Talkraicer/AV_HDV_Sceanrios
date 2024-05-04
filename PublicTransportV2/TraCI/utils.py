@@ -313,7 +313,7 @@ def parse_output_files(args):
 
 
 def parse_output_files_pairwise(args):
-    av_rates1, av_rate2, policy_name1 = args
+    av_rates1, av_rate2, policy_name1, policy_baseline = args
     av_rates1.remove(av_rate2)
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in METRICS] + [f"std_{metric}_diff" for metric in METRICS] + [
@@ -325,7 +325,7 @@ def parse_output_files_pairwise(args):
     for av_rate in av_rates1:
         df_av_rate = pd.DataFrame()
         output_file1 = f"results_reps/{policy_name1}{exp_name}_av{av_rate}.xml"
-        output_file2 = f"results_reps/{policy_name1}{exp_name}_av{av_rate2}.xml"
+        output_file2 = f"results_reps/{policy_baseline}{exp_name}_av{av_rate2}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
         df_rep = pd.merge(df_rep1, df_rep2, on=["id"], suffixes=[f"_{av_rate}", f"_{av_rate2}"],
@@ -360,8 +360,8 @@ def parse_output_files_pairwise(args):
             for stat in stats_names:
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
-    df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.csv")
-    df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline{av_rate2}.pkl")
+    df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.csv")
+    df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.pkl")
 
 def parse_all_output_files(av_rates, num_reps, policies):
     # run with pool for all flows and policies
@@ -371,9 +371,10 @@ def parse_all_output_files(av_rates, num_reps, policies):
             parse_output_files, args), total=len(args)) )
 
 
-def parse_all_pairwise(policies, av_rates):
+def parse_all_pairwise(policies, av_rates, policy_baseline="Nothing"):
     # run with pool for all flows and policies
-    args = [(av_rates, 0.0, policy_name1) for policy_name1 in policies]
+    args = [(av_rates, 0.0, policy_name1, policy_baseline) for policy_name1 in policies]
+    args += [(av_rates, 1.0, policy_name1, policy_baseline) for policy_name1 in policies]
     # args += [(av_rates, 1.0, policy_name1) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
@@ -412,7 +413,7 @@ if __name__ == '__main__':
     policies += ["Volunteer_Stopper"]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
-    create_all_results_tables(AV_rates, policies)
+    # create_all_results_tables(AV_rates, policies)
     # STOP_FROM_RANGE = [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
     # STOP_TO_RANGE = [0, 100, 200]
     # policies = ["DisallowBack"]
