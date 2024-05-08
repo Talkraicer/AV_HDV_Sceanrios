@@ -253,7 +253,7 @@ def create_results_table(args):
     policy_pure_name = policy_name.split("_")[0]
     if (vType == "AV" and av_rate == 0.0) or (vType == "HD" and av_rate == 1.0):
         return policy_name,av_rate, 0
-    Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing_{exp_name}_av{av_rate}.xml")
+    Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing{exp_name}_av{av_rate}.xml")
     relevant_df = output_file_to_df(f"{results_reps_folder}/{policy_name}{exp_name}_av{av_rate}.xml")
     # Merge the two dataframes
     joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=[f"_{policy_pure_name}", "_Nothing"], how="inner")
@@ -410,11 +410,11 @@ if __name__ == '__main__':
     STOP_FROM_RANGE = [900, 1000, 1100, 1200]
     STOP_TO_RANGE = [100, 200, 300]
     policies = ["DisallowBack" + f"_{stop_from}_{stop_to}" for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
-    policies += ["Volunteer_Stopper"]
+    policies += ["Volunteer_Stopper", "Nothing"]
     # policies = ["Nothing"]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
-    # create_all_results_tables(AV_rates, policies)
+    create_all_results_tables(AV_rates, policies)
     # STOP_FROM_RANGE = [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
     # STOP_TO_RANGE = [0, 100, 200]
     # policies = ["DisallowBack"]
