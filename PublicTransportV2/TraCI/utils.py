@@ -407,8 +407,8 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 if __name__ == '__main__':
     # Example usage
     AV_rates = [0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
-    STOP_FROM_RANGE = [900, 1000, 1100, 1200]
-    STOP_TO_RANGE = [100, 200, 300]
+    STOP_FROM_RANGE = [50, 100, 200, 400, 600, 800, 1000, 1200]
+    STOP_TO_RANGE = [0]
     policies = ["DisallowBack" + f"_{stop_from}_{stop_to}" for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     policies += ["Volunteer_Stopper", "Nothing"]
     # policies = ["Nothing"]
