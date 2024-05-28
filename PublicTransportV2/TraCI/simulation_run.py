@@ -10,7 +10,7 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = True
+GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
