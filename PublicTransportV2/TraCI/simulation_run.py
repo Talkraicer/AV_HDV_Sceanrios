@@ -10,16 +10,16 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = False
+GUI = True
 
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["Nothing", "DisallowBack","Volunteer_Stopper"]
-STOP_FROM_RANGE = [50,100,200,400, 600, 800, 1000, 1200]
-STOP_TO_RANGE = [0]
+POLICIES = ["Nothing","DisallowBack","Volunteer_Stopper"]
+STOP_FROM_RANGE = [800, 1000, 1200]
+STOP_TO_RANGE = [0,100,200]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
-EXP_NAME_TAG = "TL"
+EXP_NAME_TAG = "PublicTransportV3"
 
 if GUI:
     NUM_PROCESSES = 1
