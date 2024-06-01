@@ -20,7 +20,7 @@ STOP_FROM_RANGE = [800, 1000, 1200]
 STOP_TO_RANGE = [0,100,200]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
 
-Features_Dist = ["1000"]
+Features_Dist = ["1200"]
 Max_AVS = ["5","10","15","20"]
 Max_Buses = ["0","1","2"]
 
