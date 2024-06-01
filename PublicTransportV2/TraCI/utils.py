@@ -414,7 +414,8 @@ if __name__ == '__main__':
     policies += ["Nothing"]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
-    create_all_results_tables(AV_rates, policies-["Nothing"])
+    policies.remove("Nothing")
+    create_all_results_tables(AV_rates, policies)
     # STOP_FROM_RANGE = [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
     # STOP_TO_RANGE = [0, 100, 200]
     # policies = ["DisallowBack"]
