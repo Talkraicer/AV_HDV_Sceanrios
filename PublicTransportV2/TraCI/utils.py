@@ -453,11 +453,11 @@ if __name__ == '__main__':
     AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     # policies = ["DisallowBack" + f"_{stop_from}_{stop_to}" for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     # policies += ["Volunteer_Stopper"]
-    # policies += ["Nothing"]
+    policies = ["Nothing"]
     Features_Dist = ["1000"]
     Max_AVS = ["5", "10", "15", "20"]
     Max_Buses = ["0", "1", "2"]
-    policies = [f"FastLane_{dist}_{max_avs}_{max_buses}" for dist in Features_Dist for max_avs in Max_AVS for max_buses in Max_Buses]
+    policies += [f"FastLane_{dist}_{max_avs}_{max_buses}" for dist in Features_Dist for max_avs in Max_AVS for max_buses in Max_Buses]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
     policies.remove("Nothing")
