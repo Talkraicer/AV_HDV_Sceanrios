@@ -10,15 +10,20 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = False
+GUI = True
 
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["Nothing","DisallowBack","Volunteer_Stopper"]
+POLICIES = ["FastLane"]
 STOP_FROM_RANGE = [800, 1000, 1200]
 STOP_TO_RANGE = [0,100,200]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
+
+Features_Dist = ["1000"]
+Max_AVS = ["5","10","15","20"]
+Max_Buses = ["0","1","2"]
+
 EXP_NAME_TAG = "PublicTransportV3"
 
 if GUI:
@@ -76,6 +81,12 @@ if __name__ == "__main__":
                     for stop_to in STOP_TO_RANGE:
                         policy_name = f"{policy}_{stop_from}_{stop_to}"
                         args.append((policy_name, sumoCfg))
+            elif policy.startswith("FastLane"):
+                for feature_dist in Features_Dist:
+                    for max_avs in Max_AVS:
+                        for max_buses in Max_Buses:
+                            policy_name = f"{policy}_{feature_dist}_{max_avs}_{max_buses}"
+                            args.append((policy_name, sumoCfg))
             else:
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)

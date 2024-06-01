@@ -6,7 +6,7 @@
 	</vTypeDistribution>
 	
 	<vType id="TemporalHD" color="magenta"/>
-	<vType id="AllowedTemporalHD" color="orange"/>
+	<vType id="AllowedTemporalHD" color="orange" vClass="private"/>
 
 	
     <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="Start" toJunction="J8" end="10800" vehsPerHour="4250" departSpeed="0" />

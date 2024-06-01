@@ -22,6 +22,7 @@ HOLDING_TIME_FACTOR = 1.2
 BUS_STOPPING_TIME = 25
 MAX_ALLOWED_SPEED = 25
 STOP_FROM = 1000
+
 BUSES_VOLUNTEERS = dict()
 
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
@@ -69,11 +70,9 @@ def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
 
 def switch_to_temporalHD(vehID):
     traci.vehicle.setType(vehID, "TemporalHD")
-    traci.vehicle.setVehicleClass(vehID, "passenger")
 
 def switch_to_allowedTemporalHD(vehID):
     traci.vehicle.setType(vehID, "AllowedTemporalHD")
-    traci.vehicle.setVehicleClass(vehID, "private")
 
 def switch_to_AV(vehID):
     traci.vehicle.setType(vehID, "AV")
@@ -109,6 +108,19 @@ def release_volunteer(volID):
             with open("erros.txt","a+") as f:
                 f.write(f"volID = {volID} had error\n")
 
+def count_avs_buses(dist):
+    # count the number of AVs and buses in the range (0,dist). Count non-stopping buses as AVs
+    vehIDs = traci.vehicle.getIDList()
+    num_AVs = 0
+    num_buses = 0
+    for vehID in vehIDs:
+        pos = traci.vehicle.getPosition(vehID)
+        if 0 < pos[0] < dist:
+            if traci.vehicle.getTypeID(vehID).startswith("AV") or vehID.startswith("bus_nonstop"):
+                num_AVs += 1
+            elif vehID.startswith("bus_stop"):
+                num_buses += 1
+    return num_AVs, num_buses
 
 def handle_step(t, policy_name):
     global BUSES_VOLUNTEERS
@@ -137,7 +149,7 @@ def handle_step(t, policy_name):
         vehIDs = traci.vehicle.getIDList()
         stopping_buses = get_stopping_buses_ids()
 
-        # assigr volunteers to new stopping buses
+        # assign volunteers to new stopping buses
         for bus in stopping_buses:
             if bus not in BUSES_VOLUNTEERS.keys():
                 assign_volunteer(bus)
@@ -173,6 +185,36 @@ def handle_step(t, policy_name):
                           and vehID not in BUSES_VOLUNTEERS.values()):
                         switch_to_temporalHD(vehID)
                         break
+    if policy_name.startswith("FastLane"):
+        dist_features = int(policy_name.split("_")[1])
+        num_avs_max = int(policy_name.split("_")[2])
+        num_buses_max = int(policy_name.split("_")[3])
+        num_avs, num_buses = count_avs_buses(dist_features)
+        insert_vehicles = num_avs <= num_avs_max and num_buses <= num_buses_max
+
+        for vehID in traci.vehicle.getIDList():
+            pos = traci.vehicle.getPosition(vehID)[0]
+            vType = traci.vehicle.getTypeID(vehID)
+            laneID = traci.vehicle.getLaneID(vehID)
+            if vType.startswith("AV") and pos < 7800:
+                if 100 < pos  and not laneID.endswith("0"):
+                    switch_to_temporalHD(vehID)
+                else:
+                    if insert_vehicles:
+                        if not laneID.endswith("0"):
+                            traci.vehicle.changeLane(vehID, 0, 1)
+                        elif pos > 0:
+                            switch_to_allowedTemporalHD(vehID)
+                    else:
+                        switch_to_temporalHD(vehID)
+            if vType.find("TemporalHD") != -1 and pos > 7800:
+                switch_to_AV(vehID)
+
+
+
+
+
+
 
 
 def output_file_to_df(output_file, num_reps=1):
