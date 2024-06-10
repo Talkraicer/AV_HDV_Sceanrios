@@ -1,7 +1,7 @@
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
 
 	<vTypeDistribution id="vehicleDist">
-	<vType id="AV" color="blue" probability="0.5" vClass="evehicle" speedFactor="normc(1.00,0.25,0.1,2)" />
+	<vType id="AV" color="blue" probability="0.5" vClass="evehicle"  />
 	<vType id="HD" color="red" probability="0.5"/>
 	</vTypeDistribution>
 	
