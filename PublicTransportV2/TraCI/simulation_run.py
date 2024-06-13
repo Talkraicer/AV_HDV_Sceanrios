@@ -14,7 +14,7 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 70
+NUM_PROCESSES = 10
 POLICIES = ["Nothing"]
 STOP_FROM_RANGE = [800, 1000, 1200]
 STOP_TO_RANGE = [0,100,200]
@@ -24,7 +24,7 @@ Features_Dist = ["1200"]
 Max_AVS = ["5","10","15","20"]
 Max_Buses = ["0","1","2"]
 
-EXP_NAME_TAG = "PublicTransportV3"
+EXP_NAME_TAG = "Left"
 
 if GUI:
     NUM_PROCESSES = 1
@@ -91,14 +91,14 @@ if __name__ == "__main__":
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)
 
-    # parse_output_files(AV_rates, 1, "Nothing")
+    parse_output_files((AV_rates, 1, "Nothing"))
     # parse_all_pairwise(POLICIES, AV_rates)
-    policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
-                    for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
-    policy_names += [f"{policy}_{feature_dist}_{max_avs}_{max_buses}" for policy in POLICIES if policy.startswith("FastLane")]
-    policy_names += [policy for policy in POLICIES if not policy.startswith("DisallowBack") and not policy.startswith("FastLane")]
-    create_all_results_tables(AV_rates,policy_names)
-    parse_all_output_files(AV_rates, 1, policy_names)
-    parse_all_pairwise(policy_names, AV_rates)
+    # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
+    #                 for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
+    # policy_names += [f"{policy}_{feature_dist}_{max_avs}_{max_buses}" for policy in POLICIES if policy.startswith("FastLane")]
+    # policy_names += [policy for policy in POLICIES if not policy.startswith("DisallowBack") and not policy.startswith("FastLane")]
+    # create_all_results_tables(AV_rates,policy_names)
+    # parse_all_output_files(AV_rates, 1, policy_names)
+    # parse_all_pairwise(policy_names, AV_rates)
 
 

@@ -7,8 +7,8 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
 
-exp_name = "PublicTransportV3"
-NUM_PROCESSES = 70
+exp_name = "Left"
+NUM_PROCESSES = 10
 GUI = False
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
