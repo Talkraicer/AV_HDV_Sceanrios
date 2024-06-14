@@ -67,35 +67,35 @@ def parallel_simulation(args):
 
 
 if __name__ == "__main__":
-    # sumoCfgPaths = []
-    # for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
-    #     if sumoCfg.endswith(".sumocfg"):
-    #         sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
-    #         sumoCfgPaths.append(sumoCfgPath)
-    # if GUI:
-    #     sumoCfgPaths = [sumoCfgPaths[5]]
-    # args = []
-    # for policy in POLICIES:
-    #     policy_name = policy
-    #     for sumoCfg in sumoCfgPaths:
-    #         if policy.startswith("DisallowBack"):
-    #             for stop_from in STOP_FROM_RANGE:
-    #                 for stop_to in STOP_TO_RANGE:
-    #                     policy_name = f"{policy}_{stop_from}_{stop_to}"
-    #                     args.append((policy_name, sumoCfg))
-    #         elif policy.startswith("FastLane"):
-    #             for feature_dist in Features_Dist:
-    #                 for max_avs in Max_AVS:
-    #                     for max_buses in Max_Buses:
-    #                         policy_name = f"{policy}_{feature_dist}_{max_avs}_{max_buses}"
-    #                         args.append((policy_name, sumoCfg))
-    #         elif policy.startswith("EnterClear"):
-    #             for enter_clear in EnterClearRange:
-    #                 policy_name = f"{policy}_{enter_clear}"
-    #                 args.append((policy_name, sumoCfg))
-    #         else:
-    #             args.append((policy_name, sumoCfg))
-    # parallel_simulation(args)
+    sumoCfgPaths = []
+    for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
+        if sumoCfg.endswith(".sumocfg"):
+            sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
+            sumoCfgPaths.append(sumoCfgPath)
+    if GUI:
+        sumoCfgPaths = [sumoCfgPaths[5]]
+    args = []
+    for policy in POLICIES:
+        policy_name = policy
+        for sumoCfg in sumoCfgPaths:
+            if policy.startswith("DisallowBack"):
+                for stop_from in STOP_FROM_RANGE:
+                    for stop_to in STOP_TO_RANGE:
+                        policy_name = f"{policy}_{stop_from}_{stop_to}"
+                        args.append((policy_name, sumoCfg))
+            elif policy.startswith("FastLane"):
+                for feature_dist in Features_Dist:
+                    for max_avs in Max_AVS:
+                        for max_buses in Max_Buses:
+                            policy_name = f"{policy}_{feature_dist}_{max_avs}_{max_buses}"
+                            args.append((policy_name, sumoCfg))
+            elif policy.startswith("EnterClear"):
+                for enter_clear in EnterClearRange:
+                    policy_name = f"{policy}_{enter_clear}"
+                    args.append((policy_name, sumoCfg))
+            else:
+                args.append((policy_name, sumoCfg))
+    parallel_simulation(args)
 
     policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
                     for enter_clear in EnterClearRange]
