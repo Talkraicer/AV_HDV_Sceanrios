@@ -97,8 +97,9 @@ if __name__ == "__main__":
     #             args.append((policy_name, sumoCfg))
     # parallel_simulation(args)
 
-    policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear") for enter_clear in EnterClearRange]
-    policy_names += "Nothing"
+    policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
+                    for enter_clear in EnterClearRange]
+    policy_names += ["Nothing"]
     parse_all_output_files(AV_rates, 1, policy_names)
     parse_all_pairwise(policy_names, AV_rates)
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
