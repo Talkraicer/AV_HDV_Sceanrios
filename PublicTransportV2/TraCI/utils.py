@@ -25,6 +25,7 @@ STOP_FROM = 1000
 
 BUSES_VOLUNTEERS = dict()
 
+
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -43,7 +44,8 @@ def get_stopping_buses_ids():
     vehIDs = traci.vehicle.getIDList()
     stopping_buses = []
     for vehID in vehIDs:
-        if traci.vehicle.getTypeID(vehID).find("Bus") != -1 and traci.vehicle.getSpeed(vehID) == 0 and traci.vehicle.getLaneID(vehID).endswith("S_0"):
+        if traci.vehicle.getTypeID(vehID).find("Bus") != -1 and traci.vehicle.getSpeed(
+                vehID) == 0 and traci.vehicle.getLaneID(vehID).endswith("S_0"):
             stopping_buses.append(vehID)
     return stopping_buses
 
@@ -55,9 +57,10 @@ def vehicles_distance(vehID1, vehID2):
         pos2 = traci.vehicle.getPosition(vehID2)
         return pos1[0] - pos2[0]
     except:
-        with open("errors.txt","a+") as f:
+        with open("errors.txt", "a+") as f:
             f.write(f"vehID1 = {vehID1}, vehID2 = {vehID2} had error\n")
         return np.inf
+
 
 def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
     # check if the vehicle is behind a bus that is stopping
@@ -68,15 +71,19 @@ def check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
             return True
     return False
 
+
 def switch_to_temporalHD(vehID):
     traci.vehicle.setType(vehID, "TemporalHD")
+
 
 def switch_to_allowedTemporalHD(vehID):
     traci.vehicle.setType(vehID, "AllowedTemporalHD")
 
+
 def switch_to_AV(vehID):
     traci.vehicle.setType(vehID, "AV")
     traci.vehicle.setVehicleClass(vehID, "evehicle")
+
 
 def assign_volunteer(busID):
     global BUSES_VOLUNTEERS
@@ -87,26 +94,29 @@ def assign_volunteer(busID):
         if traci.vehicle.getTypeID(vehID).startswith("AV") and traci.vehicle.getLaneID(vehID).endswith("0"):
             if traci.vehicle.getSpeed(vehID) == 0:
                 continue
-            estimated_time_to_reach = vehicles_distance(busID,vehID) / traci.vehicle.getSpeed(vehID)
-            if 0.5* BUS_STOPPING_TIME < estimated_time_to_reach < BUS_STOPPING_TIME*1.2:
+            estimated_time_to_reach = vehicles_distance(busID, vehID) / traci.vehicle.getSpeed(vehID)
+            if 0.5 * BUS_STOPPING_TIME < estimated_time_to_reach < BUS_STOPPING_TIME * 1.2:
                 if estimated_time_to_reach > max_estimated_time:
                     max_estimated_time = estimated_time_to_reach
                     volunteer = vehID
     BUSES_VOLUNTEERS[busID] = volunteer
     if volunteer:
-        traci.vehicle.setColor(volunteer, (0, 255,0))
-        traci.vehicle.changeLane(volunteer, 0, BUS_STOPPING_TIME*HOLDING_TIME_FACTOR)
-        traci.vehicle.setMaxSpeed(volunteer, vehicles_distance(busID,volunteer) / (BUS_STOPPING_TIME * MERGING_TIME_FACTOR))
+        traci.vehicle.setColor(volunteer, (0, 255, 0))
+        traci.vehicle.changeLane(volunteer, 0, BUS_STOPPING_TIME * HOLDING_TIME_FACTOR)
+        traci.vehicle.setMaxSpeed(volunteer,
+                                  vehicles_distance(busID, volunteer) / (BUS_STOPPING_TIME * MERGING_TIME_FACTOR))
+
 
 def release_volunteer(volID):
     if volID:
         try:
-            traci.vehicle.setColor(volID, (0,0,255))
-            traci.vehicle.setMaxSpeed(volID,MAX_VEH_SPEED)
+            traci.vehicle.setColor(volID, (0, 0, 255))
+            traci.vehicle.setMaxSpeed(volID, MAX_VEH_SPEED)
             traci.vehicle.changeLane(volID, 0, 0)
         except:
-            with open("erros.txt","a+") as f:
+            with open("erros.txt", "a+") as f:
                 f.write(f"volID = {volID} had error\n")
+
 
 def count_avs_buses(dist):
     # count the number of AVs and buses in the range (0,dist). Count non-stopping buses as AVs
@@ -121,6 +131,7 @@ def count_avs_buses(dist):
             elif vehID.startswith("bus_stop"):
                 num_buses += 1
     return num_AVs, num_buses
+
 
 def handle_step(t, policy_name):
     global BUSES_VOLUNTEERS
@@ -139,7 +150,7 @@ def handle_step(t, policy_name):
                     elif not laneID.endswith("0") and not laneID.endswith("S_1"):
                         switch_to_temporalHD(vehID)
             elif typeID.find("TemporalHD") != -1:
-                if not check_disallow_back(vehID, stopping_buses, stop_from, 0)\
+                if not check_disallow_back(vehID, stopping_buses, stop_from, 0) \
                         or laneID.endswith("S_1"):
                     switch_to_AV(vehID)
                 elif typeID.find("AllowedTemporalHD") != -1 and not laneID.endswith("0") and not laneID.endswith("S_1"):
@@ -180,7 +191,7 @@ def handle_step(t, policy_name):
                                 not laneID.find(".S") != -1:
                             switch_to_temporalHD(vehID)
                             break
-                    elif (0 < vehicles_distance(stopped_bus,vehID) < BUS_STOPPING_TIME*MAX_ALLOWED_SPEED and
+                    elif (0 < vehicles_distance(stopped_bus, vehID) < BUS_STOPPING_TIME * MAX_ALLOWED_SPEED and
                           not laneID.endswith("0") and not laneID.find(".S") != -1
                           and vehID not in BUSES_VOLUNTEERS.values()):
                         switch_to_temporalHD(vehID)
@@ -197,7 +208,7 @@ def handle_step(t, policy_name):
             vType = traci.vehicle.getTypeID(vehID)
             laneID = traci.vehicle.getLaneID(vehID)
             if vType.startswith("AV") and pos < 7800:
-                if 100 < pos  and not laneID.endswith("0"):
+                if 100 < pos and not laneID.endswith("0"):
                     switch_to_temporalHD(vehID)
                 else:
                     if insert_vehicles:
@@ -210,7 +221,8 @@ def handle_step(t, policy_name):
             if vType.find("TemporalHD") != -1 and pos > 7800:
                 switch_to_AV(vehID)
 
-    if policy_name == "EnterClear":
+    if policy_name.startswith("EnterClear"):
+        dist = int(policy_name.split("_")[1])
         vehIDs = traci.vehicle.getIDList()
         for vehID in vehIDs:
             laneID = traci.vehicle.getLaneID(vehID)
@@ -220,18 +232,13 @@ def handle_step(t, policy_name):
                 for vehID2 in vehIDs:
                     typeID2 = traci.vehicle.getTypeID(vehID2)
                     pos2 = traci.vehicle.getPosition(vehID2)[0]
-                    if typeID2.startswith("AV") and -450 < pos2 < 50:
+                    if typeID2.startswith("AV") and pos < pos2 < pos + dist:
                         switch_to_temporalHD(vehID2)
                 break
-
-
-
-
-
-
-
-
-
+        for vehID in vehIDs:
+            typeID = traci.vehicle.getTypeID(vehID)
+            if typeID.find("TemporalHD") != -1 and traci.vehicle.getPosition(vehID)[0] > 1500:
+                switch_to_AV(vehID)
 
 
 def output_file_to_df(output_file, num_reps=1):
@@ -287,6 +294,8 @@ def calc_stats(df, diff=False):
             stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
         stats["all"]["count"] = len(df)
     return pd.DataFrame(stats)
+
+
 def calc_stats_metric(df, metric, diff=False):
     # Calculate statistics per vType
     if diff:
@@ -311,22 +320,23 @@ def create_results_table(args):
     metric, vType, av_rate, policy_name = args
     policy_pure_name = policy_name.split("_")[0]
     if (vType == "AV" and av_rate == 0.0) or (vType == "HD" and av_rate == 1.0):
-        return policy_name,av_rate, 0
+        return policy_name, av_rate, 0
     Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing{exp_name}_av{av_rate}.xml")
     relevant_df = output_file_to_df(f"{results_reps_folder}/{policy_name}{exp_name}_av{av_rate}.xml")
     # Merge the two dataframes
-    joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=[f"_{policy_pure_name}", "_Nothing"], how="inner")
+    joined_df = pd.merge(relevant_df, Nothing_df, on=["id", "vType"], suffixes=[f"_{policy_pure_name}", "_Nothing"],
+                         how="inner")
     joined_df[f"{metric}_diff"] = ((joined_df[f"{metric}_{policy_pure_name}"] - joined_df[f"{metric}_Nothing"]) /
                                    joined_df[f"{metric}_Nothing"]) * 100
     assert len(joined_df) == len(relevant_df)
     relevant_stats = calc_stats_metric(joined_df, metric, diff=True)
-    return policy_name,av_rate,relevant_stats.loc[f"avg_{metric}_diff", vType]
+    return policy_name, av_rate, relevant_stats.loc[f"avg_{metric}_diff", vType]
 
 
 def create_all_results_tables(av_rates, policy_names):
     # run over all metrics and vTypes with tqdm
     for metric in tqdm(METRICS):
-        for vType in tqdm(VTYPES,leave=False):
+        for vType in tqdm(VTYPES, leave=False):
             args = [(metric, vType, av_rate, policy_name)
                     for av_rate in av_rates for policy_name in policy_names]
             with Pool(NUM_PROCESSES) as pool:
@@ -337,7 +347,7 @@ def create_all_results_tables(av_rates, policy_names):
                               index=[policy_name for policy_name in policy_names])
             for result in results:
                 row_index, col_index, value = result
-                df.loc[row_index,col_index] = value
+                df.loc[row_index, col_index] = value
             policy_pure_name = row_index.split("_")[0]
             os.makedirs(f"{results_folder}/{policy_pure_name}", exist_ok=True)
             df.to_csv(f"{results_folder}/{policy_pure_name}/{exp_name}_{policy_pure_name}_{metric}_{vType}.csv")
@@ -422,12 +432,13 @@ def parse_output_files_pairwise(args):
     df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.csv")
     df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.pkl")
 
+
 def parse_all_output_files(av_rates, num_reps, policies):
     # run with pool for all flows and policies
     args = [(av_rates, num_reps, policy_name) for policy_name in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
-            parse_output_files, args), total=len(args)) )
+            parse_output_files, args), total=len(args)))
 
 
 def parse_all_pairwise(policies, av_rates, policy_baseline="Nothing"):
@@ -474,7 +485,8 @@ if __name__ == '__main__':
     Features_Dist = ["1000"]
     Max_AVS = ["5", "10", "15", "20"]
     Max_Buses = ["0", "1", "2"]
-    policies += [f"FastLane_{dist}_{max_avs}_{max_buses}" for dist in Features_Dist for max_avs in Max_AVS for max_buses in Max_Buses]
+    policies += [f"FastLane_{dist}_{max_avs}_{max_buses}" for dist in Features_Dist for max_avs in Max_AVS for max_buses
+                 in Max_Buses]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
     policies.remove("Nothing")
