@@ -210,6 +210,23 @@ def handle_step(t, policy_name):
             if vType.find("TemporalHD") != -1 and pos > 7800:
                 switch_to_AV(vehID)
 
+    if policy_name == "EnterClear":
+        vehIDs = traci.vehicle.getIDList()
+        for vehID in vehIDs:
+            laneID = traci.vehicle.getLaneID(vehID)
+            typeID = traci.vehicle.getTypeID(vehID)
+            pos = traci.vehicle.getPosition(vehID)[0]
+            if typeID.startswith("Bus") and pos < -450:
+                for vehID2 in vehIDs:
+                    typeID2 = traci.vehicle.getTypeID(vehID2)
+                    pos2 = traci.vehicle.getPosition(vehID2)[0]
+                    if typeID2.startswith("AV") and -450 < pos2 < 50:
+                        switch_to_temporalHD(vehID2)
+                break
+
+
+
+
 
 
 

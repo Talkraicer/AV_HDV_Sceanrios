@@ -9,7 +9,7 @@
 	<vType id="AllowedTemporalHD" color="orange"/>
 
 	
-    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J1" toJunction="J5" end="10800" vehsPerHour="6000" departSpeed="max" />
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J1" toJunction="J5" end="10800" vehsPerHour="5000" departSpeed="max" />
 
 	<vType id="Bus" guiShape="bus" vClass="bus"/>
 
