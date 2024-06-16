@@ -9,10 +9,10 @@
 	<vType id="AllowedTemporalHD" color="orange"/>
 
 	
-    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J1" toJunction="J5" end="10800" vehsPerHour="7500" departSpeed="max" />
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J0" toJunction="J5" end="10800" vehsPerHour="7500" departSpeed="max" />
 
 	<vType id="Bus" guiShape="bus" vClass="bus"/>
 
-	<flow id="bus_nonstop" type="Bus" begin="0.00" departLane="3" fromJunction="J1" toJunction="J5" end="10800" departSpeed="random" vehsPerHour="120" />
+	<flow id="bus_nonstop" type="Bus" begin="0.00" departLane="2" fromJunction="J0" toJunction="J5" end="10800" departSpeed="random" vehsPerHour="120" />
 
 </routes>
