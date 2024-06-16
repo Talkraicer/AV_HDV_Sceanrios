@@ -10,21 +10,21 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = False
+GUI = True
 
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["Nothing","EnterClear"]
+POLICIES = ["EnterClear"]
 STOP_FROM_RANGE = [800, 1000, 1200]
 STOP_TO_RANGE = [0,100,200]
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
 
 EnterClearRange = [200,300,400,500]
 
-# Features_Dist = ["1200"]
-# Max_AVS = ["5","10","15","20"]
-# Max_Buses = ["0","1","2"]
+Features_Dist = ["1200"]
+Max_AVS = ["5","10","15","20"]
+Max_Buses = ["0","1","2"]
 #
 EXP_NAME_TAG = "Left"
 
