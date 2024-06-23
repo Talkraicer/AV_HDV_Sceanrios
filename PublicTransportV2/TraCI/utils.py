@@ -8,7 +8,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 exp_name = "Left"
-NUM_PROCESSES = 10
+NUM_PROCESSES = 70
 GUI = False
 sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
@@ -135,6 +135,14 @@ def count_avs_buses(dist):
 
 def handle_step(t, policy_name):
     global BUSES_VOLUNTEERS
+    if policy_name == "Nothing" and exp_name == "Left" and t < 1:
+        for lane in traci.lane.getIDList():
+            print(traci.lane.getAllowed(lane))
+            if "bus" in traci.lane.getAllowed(lane):
+                traci.lane.setAllowed(lane, "bus")
+            print(traci.lane.getAllowed(lane))
+            print("*" * 50)
+
     if policy_name.startswith("DisallowBack"):
         stop_from = int(policy_name.split("_")[1])
         stop_to = int(policy_name.split("_")[2])
@@ -254,6 +262,8 @@ def output_file_to_df(output_file, num_reps=1):
     df["speed"] = df.routeLength.astype(float) / df.duration.astype(float)
     df["totalDelay"] = df.departDelay.astype(float) + df.timeLoss.astype(float)
     df["vType"] = df["vType"].apply(lambda x: x.split("@")[0])
+    df["numPass"] = df["vType"].apply(lambda x: x.split("_")[1])
+    df["vType"] = df["vType"].apply(lambda x: x.split("_")[0])
     df.drop(columns=["routeLength"], inplace=True)
     # convert to float except vType
     for col in df.columns:
@@ -293,6 +303,13 @@ def calc_stats(df, diff=False):
             stats["all"][f"avg_{metric}"] = df[metric].mean()
             stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
         stats["all"]["count"] = len(df)
+    if "Passenger" not in stats.keys():
+        stats["Passenger"] = {}
+        # multiply each metric by the number of passengers
+        for metric in metrics_stats:
+            stats["Passenger"][f"avg_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).mean()
+            stats["Passenger"][f"std_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).std(ddof=1)
+        stats["Passenger"]["count"] = df["numPass"].sum()
     return pd.DataFrame(stats)
 
 
@@ -312,6 +329,12 @@ def calc_stats_metric(df, metric, diff=False):
         stats["all"][f"avg_{metric}"] = df[metric].median()
         stats["all"][f"std_{metric}"] = df[metric].std(ddof=1)
         stats["all"]["count"] = len(df)
+    if "Passenger" not in stats.keys():
+        stats["Passenger"] = {}
+        # multiply each metric by the number of passengers
+        stats["Passenger"][f"avg_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).median()
+        stats["Passenger"][f"std_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).std(ddof=1)
+        stats["Passenger"]["count"] = df["numPass"].sum()
     return pd.DataFrame(stats)
 
 
@@ -319,7 +342,7 @@ def create_results_table(args):
     # create the results table
     metric, vType, av_rate, policy_name = args
     policy_pure_name = policy_name.split("_")[0]
-    if (vType == "AV" and av_rate == 0.0) or (vType == "HD" and av_rate == 1.0):
+    if (vType.startswith("AV") and av_rate == 0.0) or (vType.startswith("HD") and av_rate == 1.0):
         return policy_name, av_rate, 0
     Nothing_df = output_file_to_df(f"{results_reps_folder}/Nothing{exp_name}_av{av_rate}.xml")
     relevant_df = output_file_to_df(f"{results_reps_folder}/{policy_name}{exp_name}_av{av_rate}.xml")
@@ -359,7 +382,7 @@ def parse_output_files(args):
 
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}" for metric in METRICS] + [f"std_{metric}" for metric in METRICS] + ["count"]
-    vType_names = ["AV", "HD", "Bus", "all"]
+    vType_names = ["AV", "HD", "Bus", "all", "Passenger"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates)
 
@@ -387,7 +410,7 @@ def parse_output_files_pairwise(args):
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in METRICS] + [f"std_{metric}_diff" for metric in METRICS] + [
         "count"]
-    vType_names = ["AV", "HD", "Bus", "all"]
+    vType_names = ["AV", "HD", "Bus", "all", "Passenger"]
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                       index=av_rates1)
 
@@ -457,7 +480,7 @@ def convert_flows_to_av_rates(args):
     for av_rate in av_rates:
         stats_names = [f"avg_{metric}_diff" for metric in METRICS] + [f"std_{metric}_diff" for metric in
                                                                       METRICS] + ["count"]
-        vType_names = ["AV", "HD", "Bus", "all"]
+        vType_names = ["AV", "HD", "Bus", "all", "Passenger"]
         df = pd.DataFrame(columns=pd.MultiIndex.from_product([vType_names, stats_names], names=['vType', 'stat']),
                           index=flows)
         for flow in flows:
@@ -485,8 +508,8 @@ if __name__ == '__main__':
     Features_Dist = ["1000"]
     Max_AVS = ["5", "10", "15", "20"]
     Max_Buses = ["0", "1", "2"]
-    policies += [f"FastLane_{dist}_{max_avs}_{max_buses}" for dist in Features_Dist for max_avs in Max_AVS for max_buses
-                 in Max_Buses]
+    # policies += [f"FastLane_{dist}_{max_avs}_{max_buses}" for dist in Features_Dist for max_avs in Max_AVS for max_buses
+    #              in Max_Buses]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
     policies.remove("Nothing")

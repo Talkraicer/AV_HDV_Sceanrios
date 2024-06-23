@@ -3,28 +3,26 @@ import sys
 import numpy as np
 import pandas as pd
 
-
-
 from tqdm import tqdm
 from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = True
+GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
-POLICIES = ["EnterClear"]
+POLICIES = ["Nothing", "AllowedLeft"]
 STOP_FROM_RANGE = [800, 1000, 1200]
-STOP_TO_RANGE = [0,100,200]
-AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
+STOP_TO_RANGE = [0, 100, 200]
+AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-EnterClearRange = [200,300,400,500]
+EnterClearRange = [200, 300, 400, 500]
 
 Features_Dist = ["1200"]
-Max_AVS = ["5","10","15","20"]
-Max_Buses = ["0","1","2"]
+Max_AVS = ["5", "10", "15", "20"]
+Max_Buses = ["0", "1", "2"]
 #
 EXP_NAME_TAG = "Left"
 
@@ -50,7 +48,7 @@ else:
 def simulate(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    exp_output_name = "results_reps/"+policy_name+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
+    exp_output_name = "results_reps/" + policy_name + ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + ".xml"
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
     step = 0
@@ -109,5 +107,3 @@ if __name__ == "__main__":
     # create_all_results_tables(AV_rates,policy_names)
     # parse_all_output_files(AV_rates, 1, policy_names)
     # parse_all_pairwise(policy_names, AV_rates)
-
-
