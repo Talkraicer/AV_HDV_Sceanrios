@@ -244,7 +244,13 @@ def handle_step(t, policy_name):
             typeID = traci.vehicle.getTypeID(vehID)
             if typeID.find("TemporalHD") != -1 and traci.vehicle.getPosition(vehID)[0] > 1500:
                 switch_to_AV(vehID)
-
+    if policy_name.startswith("StaticNumPass"):
+        min_num_pass = int(policy_name.split("_")[1][0])
+        vehIDs = traci.vehicle.getIDList()
+        for vehID in vehIDs:
+            typeID = traci.vehicle.getTypeID(vehID)
+            if typeID.startswith("AV") and int(typeID.split("_")[1][0]) < min_num_pass:
+                traci.vehicle.setVehicleClass(vehID, "passenger")
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
@@ -414,11 +420,11 @@ def parse_output_files_pairwise(args):
     for av_rate in av_rates1:
         df_av_rate = pd.DataFrame()
         output_file1 = f"results_reps/{policy_name1}{exp_name}_av{av_rate}.xml"
-        output_file2 = f"results_reps/{policy_baseline}{exp_name}_av{av_rate2}.xml"
+        av_rate2_dyn = av_rate2 if av_rate2 else av_rate
+        output_file2 = f"results_reps/{policy_baseline}{exp_name}_av{av_rate2_dyn}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
-        df_rep = pd.merge(df_rep1, df_rep2, on=["id"], suffixes=[f"_{av_rate}", f"_{av_rate2}"],
-                          how="inner")
+        df_rep = pd.merge(df_rep1, df_rep2, on=["id"], suffixes=[f"_{policy_name1}{av_rate}", f"_{policy_baseline}{av_rate2_dyn}"], how="inner")
         # calculate difference
         try:
             assert len(df_rep) == len(df_rep1) == len(df_rep2)
@@ -431,10 +437,10 @@ def parse_output_files_pairwise(args):
             print("*" * 50)
 
         for metric in METRICS:
-            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{av_rate}"] - df_rep[f"{metric}_{av_rate2}"]) /
-                                        df_rep[f"{metric}_{av_rate2}"]) * 100
-        df_rep.drop(columns=[f"{metric}_{av_rate}" for metric in METRICS], inplace=True)
-        df_rep.drop(columns=[f"{metric}_{av_rate2}" for metric in METRICS], inplace=True)
+            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{policy_name1}{av_rate}"] - df_rep[f"{metric}_{policy_baseline}{av_rate2_dyn}"]) /
+                                        df_rep[f"{metric}_{policy_baseline}{av_rate2_dyn}"]) * 100
+        df_rep.drop(columns=[f"{metric}_{policy_name1}{av_rate}" for metric in METRICS], inplace=True)
+        df_rep.drop(columns=[f"{metric}_{policy_baseline}{av_rate2_dyn}" for metric in METRICS], inplace=True)
 
         df_rep["vType"] = df_rep[f"vType_{av_rate}"]
         df_rep.drop(columns=[f"vType_{av_rate}", f"vType_{av_rate2}"], inplace=True)
@@ -463,8 +469,8 @@ def parse_all_output_files(av_rates, num_reps, policies):
 
 def parse_all_pairwise(policies, av_rates, policy_baseline="Nothing"):
     # run with pool for all flows and policies
-    args = [(av_rates, 0.0, policy_name1, policy_baseline) for policy_name1 in policies]
-    args += [(av_rates, 1.0, policy_name1, policy_baseline) for policy_name1 in policies]
+    args = [(av_rates, None, policy_name1, policy_baseline) for policy_name1 in policies]
+    # args += [(av_rates, 1.0, policy_name1, policy_baseline) for policy_name1 in policies]
     # args += [(av_rates, 1.0, policy_name1) for policy_name1 in policies]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(
