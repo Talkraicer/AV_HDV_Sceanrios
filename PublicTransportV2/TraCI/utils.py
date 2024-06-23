@@ -409,7 +409,8 @@ def parse_output_files(args):
 
 def parse_output_files_pairwise(args):
     av_rates1, av_rate2, policy_name1, policy_baseline = args
-    av_rates1.remove(av_rate2)
+    if av_rate2 in av_rates1:
+        av_rates1.remove(av_rate2)
     # set MultiIndex for df - each vType will be a column in df with all the stats
     stats_names = [f"avg_{metric}_diff" for metric in METRICS] + [f"std_{metric}_diff" for metric in METRICS] + [
         "count"]
