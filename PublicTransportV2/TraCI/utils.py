@@ -137,11 +137,8 @@ def handle_step(t, policy_name):
     global BUSES_VOLUNTEERS
     if policy_name == "Nothing" and exp_name == "Left" and t < 1:
         for lane in traci.lane.getIDList():
-            print(traci.lane.getAllowed(lane))
             if "bus" in traci.lane.getAllowed(lane):
                 traci.lane.setAllowed(lane, "bus")
-            print(traci.lane.getAllowed(lane))
-            print("*" * 50)
 
     if policy_name.startswith("DisallowBack"):
         stop_from = int(policy_name.split("_")[1])
