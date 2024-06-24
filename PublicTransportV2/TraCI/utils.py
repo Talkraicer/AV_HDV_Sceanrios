@@ -507,6 +507,7 @@ if __name__ == '__main__':
 
     policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
     parse_all_output_files(AV_rates, 1, policies)
+    policies = policies.remove("Nothing")
     parse_all_pairwise(policies, AV_rates)
     # policies.remove("Nothing")
     # create_all_results_tables(AV_rates, policies)
