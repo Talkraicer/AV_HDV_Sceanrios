@@ -1,0 +1,17 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+	<vTypeDistribution id="vehicleDist">
+	</vTypeDistribution>
+	
+	<vType id="TemporalHD" color="magenta"/>
+	<vType id="AllowedTemporalHD" color="orange"/>
+
+	
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J0" toJunction="J5" end="10800" vehsPerHour="4000" departSpeed="max" />
+
+	<vTypeDistribution id="busDist">
+	</vTypeDistribution>
+
+	<flow id="busFlow" type="busDist" begin="0.00" departLane="2" fromJunction="J0" toJunction="J5" end="10800" departSpeed="random" vehsPerHour="120" personNumber="2" />
+
+</routes>
