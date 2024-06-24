@@ -8,18 +8,18 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = True
+GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = "Left"
+EXP_NAME_TAG = "Left_6000"
 
-POLICIES = ["StaticNumPass"]
+POLICIES = ["Nothing","StaticNumPass"]
 
 # parameters for StaticNumPass
-MIN_NUM_PASS = [5]
+MIN_NUM_PASS = [1,2,3,4,5]
 
 # parameters for DisallowBack
 STOP_FROM_RANGE = [800, 1000, 1200]
