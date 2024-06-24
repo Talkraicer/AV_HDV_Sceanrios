@@ -135,7 +135,7 @@ def count_avs_buses(dist):
 
 def handle_step(t, policy_name):
     global BUSES_VOLUNTEERS
-    if policy_name == "Nothing" and exp_name == "Left" and t < 1:
+    if policy_name == "Nothing" and exp_name.startswith("Left") and t < 1:
         for lane in traci.lane.getIDList():
             if "bus" in traci.lane.getAllowed(lane):
                 traci.lane.setAllowed(lane, "bus")
