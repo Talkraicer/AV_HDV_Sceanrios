@@ -104,12 +104,12 @@ if __name__ == "__main__":
             else:
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)
-
+    policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
     # policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
     #                 for enter_clear in EnterClearRange]
     # policy_names = ["Nothing"]
-    parse_all_output_files(AV_rates, 1, POLICIES)
-    parse_all_pairwise(POLICIES, AV_rates)
+    parse_all_output_files(AV_rates, 1, policies)
+    parse_all_pairwise(policies, AV_rates)
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
     #                 for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     # policy_names += [f"{policy}_{feature_dist}_{max_avs}_{max_buses}" for policy in POLICIES if policy.startswith("FastLane")]
