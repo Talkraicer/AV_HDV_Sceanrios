@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
 
-exp_name = "Left_4000"
+exp_name = "Left_6000"
 NUM_PROCESSES = 70
 GUI = False
 sumoCfg = fr"../{exp_name}.sumocfg"
@@ -503,11 +503,9 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 
 if __name__ == '__main__':
     # Example usage
-    STOP_FROM_RANGE = [800, 1000, 1200]
-    STOP_TO_RANGE = [0, 100, 200]
     AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-    policies = [f"StaticNumPass_{i}" for i in range(1, 6)]
+    policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
     parse_all_output_files(AV_rates, 1, policies)
     parse_all_pairwise(policies, AV_rates)
     # policies.remove("Nothing")
