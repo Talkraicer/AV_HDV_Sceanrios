@@ -1,0 +1,11 @@
+1. turn AV to HDV before merging of bus. Maybe in some K1-K2 RANGE 
+2. Limit the percentage of AVs in the DL (Smartly)
+3. Smart speed limit/control.
+ 3.1 Using an AV Volunteer
+ 3.2 Using infastructure dynamic speed limit.
+
+
+In The Future:
+Merging of AVs from DL into HDV Lane.
+
+Slow down AVs and buses in order to make them arrive the traffic jam later and control the capacity better.

@@ -10,11 +10,11 @@ from multiprocessing import Pool
 from utils import *
 import traci
 
-GUI = True
+GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 10
+NUM_PROCESSES = 70
 
 
 # Traffic parameters
@@ -75,8 +75,6 @@ if __name__ == "__main__":
             else:
                 for sumoCfg in sumoCfgPaths:
                     args.append((policy_name, sumoCfg,stopping_lane, 0, 0, 0))
-    if GUI:
-        parallel_simulation([args[5]])
     parallel_simulation(args)
     create_all_results_tables(METRICS, ["all", "AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE,
                               SLOW_RATE_RANGE, STOPPING_LANES)
