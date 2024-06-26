@@ -14,8 +14,11 @@ GUI = True
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 10
-
+NUM_PROCESSES = 1
+POLICIES = ["Nothing","NothingDL"]
+FLOWS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,0.99]
+BUS_PROB = 0.01
 
 # Traffic parameters
 AV_PROB = None  # testing many AV probabilities
@@ -35,18 +38,15 @@ else:
 
 
 def simulate(arg):
-    policy_name, sumoCfg,stopping_lane, dist_slow, dist_fast, slow_rate = arg
+    policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    policy_name_output = policy_name+"_dist_slow_"+str(dist_slow)+"_dist_fast_"+str(dist_fast)+\
-                         "_slow_rate_"+str(slow_rate)+"_stopping_lane_"+str(stopping_lane)
-    exp_output_name = "results_reps/"+policy_name_output+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
+    exp_output_name = "results_reps/"+policy_name+"_"+".".join(sumoCfg.split("/")[-1].split(".")[:-1])+".xml"
 
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        handle_step(t=step, policy_name=policy_name, stopping_lane=stopping_lane,
-                    dist_slow=dist_slow, dist_fast=dist_fast, slow_rate=slow_rate)
+        handle_step(step, policy_name)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -60,23 +60,20 @@ def parallel_simulation(args):
 if __name__ == "__main__":
     sumoCfgPaths = []
     for sumoCfg in os.listdir("../cfg_files"):
-        if sumoCfg.endswith(".sumocfg") and exp_name in sumoCfg:
+        if sumoCfg.endswith(".sumocfg") and f"Bus_{BUS_PROB}" in sumoCfg:
             sumoCfgPath = f"../cfg_files/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
     args = []
-    for policy_name in POLICIES:
-        for stopping_lane in STOPPING_LANES:
-            if policy_name == "SlowDown":
-                for dist_slow in DIST_SLOW_RANGE:
-                    for dist_fast in DIST_FAST_RANGE:
-                        for slow_rate in SLOW_RATE_RANGE:
-                            for sumoCfg in sumoCfgPaths:
-                                args.append((policy_name, sumoCfg,stopping_lane, dist_slow, dist_fast, slow_rate))
-            else:
-                for sumoCfg in sumoCfgPaths:
-                    args.append((policy_name, sumoCfg,stopping_lane, 0, 0, 0))
-    if GUI:
-        parallel_simulation([args[5]])
+    for policy in POLICIES:
+        for sumoCfg in sumoCfgPaths:
+            if policy.endswith("DL"):
+                sumoCfg = sumoCfg.replace("cfg_files", "cfg_files_DL")
+            args.append((policy, sumoCfg))
     parallel_simulation(args)
-    create_all_results_tables(METRICS, ["all", "AV", "LaneChanger"], AV_RATES, FLOWS, DIST_SLOW_RANGE, DIST_FAST_RANGE,
-                              SLOW_RATE_RANGE, STOPPING_LANES)
+    policies_clean = [policy for policy in POLICIES if policy not in ["NothingDL", "Nothing"]]
+    parse_all_pairwise(policies_clean, "Nothing", FLOWS, AV_rates,BUS_PROB)
+    parse_all_pairwise(policies_clean, "NothingDL", FLOWS, AV_rates,BUS_PROB)
+    convert_all_flows_to_av_rates(policies_clean, "Nothing", FLOWS, AV_rates,BUS_PROB)
+    convert_all_flows_to_av_rates(policies_clean, "NothingDL", FLOWS, AV_rates,BUS_PROB)
+
+

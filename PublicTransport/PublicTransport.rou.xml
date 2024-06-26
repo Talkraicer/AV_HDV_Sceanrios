@@ -1,0 +1,12 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+	<vTypeDistribution id="vehicleDist">
+	<vType id="AV" color="blue" probability="0.5" />
+	<vType id="HD" color="red" probability="0.4"/>
+	<vType id="Bus" probability="0.1" vClass="bus"/>
+	</vTypeDistribution>
+	
+    <route id="r_0" edges="E0" />
+    
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="86400" vehsPerHour="1000" departSpeed="random" />
+</routes>
