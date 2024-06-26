@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2024-02-17 19:46:02 by Eclipse SUMO netedit Version 1.17.0
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <!-- VTypes -->
+    <vTypeDistribution id="vehicleDist">
+        <vType id="AV" probability="0.3" color="blue"/>
+        <vType id="LaneChanger" probability="0.7" color="red" lcPushy="1"/>
+    </vTypeDistribution>
+    <!-- Routes -->
+    <route id="r_0" edges="E0"/>
+	<flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" line="0" fromJunction="J0" toJunction="J2" end="1000" vehsPerHour="5000" departSpeed="random" />
+
+</routes>
