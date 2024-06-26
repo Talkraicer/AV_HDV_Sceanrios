@@ -2,7 +2,7 @@ from xml.etree import ElementTree as ET
 import numpy as np
 
 exp_name = "PublicTransport"
-
+np.random.seed(42)
 def set_cfg_file(flow, av_prob, Bus_prob, seed, DL=False):
     if av_prob + Bus_prob > 1:
         av_prob = 1 - Bus_prob
@@ -27,5 +27,5 @@ if __name__ == '__main__':
     for flow in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]:
         seed = np.random.randint(0, 10000)
         for av_prob in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
-            set_cfg_file(flow, av_prob, Bus_prob=0.1, seed=seed)
-            set_cfg_file(flow, av_prob, Bus_prob=0.1, seed=seed, DL=True)
+            set_cfg_file(flow, av_prob, Bus_prob=0.01, seed=seed)
+            set_cfg_file(flow, av_prob, Bus_prob=0.01, seed=seed, DL=True)
