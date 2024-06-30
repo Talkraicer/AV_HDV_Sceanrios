@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
 
-exp_name = "Left_6000"
+exp_name = "LeftComp"
 NUM_PROCESSES = 70
 GUI = False
 sumoCfg = fr"../{exp_name}.sumocfg"
