@@ -1,0 +1,26 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+	<vTypeDistribution id="vehicleDist">
+	</vTypeDistribution>
+	
+	<vType id="TemporalHD" color="magenta"/>
+	<vType id="AllowedTemporalHD" color="orange"/>
+
+	
+    <flow id="MajorFlow" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J0" toJunction="J9" end="10800" vehsPerHour="4000" departSpeed="max" />
+	
+    <flow id="MajorFlow_J3" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J0" toJunction="J3" end="10800" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+    <flow id="MajorFlow_J5" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J0" toJunction="J5" end="10800" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+    <flow id="MajorFlow_J7" type="vehicleDist" begin="0.00" departLane="random" fromJunction="J0" toJunction="J7" end="10800" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	
+    <flow id="MajorFlow_J4" type="vehicleDist" begin="0.00" departLane="0" fromJunction="J4" toJunction="J9" end="10800" vehsPerHour="500" departSpeed="max" />
+    <flow id="MajorFlow_J6" type="vehicleDist" begin="0.00" departLane="0" fromJunction="J6" toJunction="J9" end="10800" vehsPerHour="500" departSpeed="max" />
+
+
+
+	<vTypeDistribution id="busDist">
+	</vTypeDistribution>
+
+	<flow id="busFlow" type="busDist" begin="0.00" departLane="2" fromJunction="J0" toJunction="J5" end="10800" departSpeed="random" vehsPerHour="120" personNumber="2" />
+
+</routes>

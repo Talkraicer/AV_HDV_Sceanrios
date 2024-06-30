@@ -6,8 +6,8 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-    <net-file value="Left_5000.net.xml"/>
-    <route-files value="Left_5000.rou.xml"/>
+    <net-file value="LeftComp.net.xml"/>
+    <route-files value="LeftComp.rou.xml"/>
         <junction-taz value="true"/>
     </input>
     <random_number>

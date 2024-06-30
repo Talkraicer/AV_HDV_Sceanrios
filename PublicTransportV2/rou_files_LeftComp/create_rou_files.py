@@ -2,7 +2,7 @@ from xml.etree import ElementTree as ET
 import numpy as np
 import scipy.stats as stats
 
-exp_name = "Left_4000"
+exp_name = "LeftComp"
 PROB_PASS_AV = {0: 0.2, 1: 0.2, 2: 0.2, 3: 0.15, 4: 0.15, 5: 0.1} # Expectation = 1.75
 PROB_PASS_HD = {1: 0.7, 2: 0.2, 3: 0.05, 4: 0.03, 5: 0.02} # Expectation = 1.47
 BUS_PASS_RANGE = range(15, 35)

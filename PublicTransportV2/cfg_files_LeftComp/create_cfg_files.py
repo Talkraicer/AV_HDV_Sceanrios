@@ -3,7 +3,7 @@ import numpy as np
 
 np.random.seed(42)
 
-exp_name = "Left_4000"
+exp_name = "LeftComp"
 
 def set_cfg_file(av_prob, seed):
     # Load and parse the XML file
@@ -12,7 +12,7 @@ def set_cfg_file(av_prob, seed):
 
     # set route file
     route_file = root.find("input").find('route-files')
-    route_file.set('value', f'../rou_files_Left_4000/Left_4000_av{av_prob}.rou.xml')
+    route_file.set('value', f'../rou_files_LeftComp/LeftComp_av{av_prob}.rou.xml')
 
 
 
