@@ -456,8 +456,12 @@ def parse_output_files_pairwise(args):
             for stat in stats_names:
                 df.loc[av_rate, (vType, stat)] = stats_av_rate.loc[stat, vType]
     # Save df to csv
-    df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.csv")
-    df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.pkl")
+    if av_rate2:
+        df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.csv")
+        df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}{av_rate2}.pkl")
+    else:
+        df.to_csv(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}.csv")
+        df.to_pickle(f"results_csvs/{exp_name}_{policy_name1}_baseline_{policy_baseline}.pkl")
 
 
 def parse_all_output_files(av_rates, num_reps, policies):
