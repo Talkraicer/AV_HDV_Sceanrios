@@ -251,6 +251,8 @@ def handle_step(t, policy_name):
             typeID = traci.vehicle.getTypeID(vehID)
             if typeID.startswith("AV") and int(typeID.split("_")[1][0]) < min_num_pass:
                 traci.vehicle.setVehicleClass(vehID, "passenger")
+            if policy_name.startswith("StaticNumPassFL") and vehID.find("_") != -1:
+                traci.vehicle.setVehicleClass(vehID, "passenger")
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe

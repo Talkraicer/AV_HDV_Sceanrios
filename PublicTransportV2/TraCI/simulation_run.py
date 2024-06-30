@@ -16,7 +16,7 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftComp"
 
-POLICIES = ["Nothing","StaticNumPass"]
+POLICIES = ["StaticNumPassFL"]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1,2,3,4,5]
@@ -104,11 +104,19 @@ if __name__ == "__main__":
             else:
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)
-    policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
+    policies = []
+    for policy in POLICIES:
+        if policy.startswith("StaticNumPass"):
+            for min_num_pass in MIN_NUM_PASS:
+                policies.append(f"{policy}_{min_num_pass}")
+        else:
+            policies.append(policy)
     # policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
     #                 for enter_clear in EnterClearRange]
     # policy_names = ["Nothing"]
     parse_all_output_files(AV_rates, 1, policies)
+    if "Nothing" in policies:
+        policies.remove("Nothing")
     parse_all_pairwise(policies, AV_rates)
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
     #                 for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
