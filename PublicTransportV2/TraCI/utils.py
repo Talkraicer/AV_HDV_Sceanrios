@@ -443,8 +443,8 @@ def parse_output_files_pairwise(args):
         df_rep.drop(columns=[f"{metric}_{policy_name1}{av_rate}" for metric in METRICS], inplace=True)
         df_rep.drop(columns=[f"{metric}_{policy_baseline}{av_rate2_dyn}" for metric in METRICS], inplace=True)
 
-        df_rep["vType"] = df_rep[f"vType_{av_rate}"]
-        df_rep.drop(columns=[f"vType_{av_rate}", f"vType_{av_rate2}"], inplace=True)
+        df_rep["vType"] = df_rep[f"vType_{policy_name1}{av_rate}"]
+        df_rep.drop(columns=[f"vType_{policy_name1}{av_rate}", f"vType_{policy_baseline}{av_rate2_dyn}"], inplace=True)
 
         df_av_rate = pd.concat([df_av_rate, df_rep])
         # Calculate statistics per vType
