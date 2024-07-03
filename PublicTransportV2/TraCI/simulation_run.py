@@ -77,7 +77,7 @@ if __name__ == "__main__":
         if sumoCfg.endswith(".sumocfg"):
             sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
-
+    sumoCfgPaths = [sumoCfgPaths[5]] # TODO: remove this line
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[5]]
     args = []
@@ -105,6 +105,7 @@ if __name__ == "__main__":
                     args.append((policy_name, sumoCfg))
             else:
                 args.append((policy_name, sumoCfg))
+
     parallel_simulation(args)
     policies = []
     for policy in POLICIES:
