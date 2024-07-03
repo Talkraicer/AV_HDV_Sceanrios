@@ -12,14 +12,14 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 70
+NUM_PROCESSES = 5
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftComp"
 
 POLICIES = ["StaticNumPassFL"]
 
 # parameters for StaticNumPass
-MIN_NUM_PASS = [1,2,3,4,5]
+MIN_NUM_PASS = [1, 2, 3, 4, 5]
 
 # parameters for DisallowBack
 STOP_FROM_RANGE = [800, 1000, 1200]
@@ -55,11 +55,12 @@ def simulate(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
     exp_output_name = "results_reps/" + policy_name + ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + ".xml"
+    av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1]
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        handle_step(step, policy_name)
+        handle_step(step, policy_name,av_rate)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -76,6 +77,7 @@ if __name__ == "__main__":
         if sumoCfg.endswith(".sumocfg"):
             sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
+
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[5]]
     args = []

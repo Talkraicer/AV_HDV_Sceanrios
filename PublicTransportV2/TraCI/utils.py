@@ -1,11 +1,11 @@
 import os
 import traci
-import imageio
 import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
+import wandb
 
 exp_name = "LeftComp"
 NUM_PROCESSES = 70
@@ -25,7 +25,8 @@ STOP_FROM = 1000
 
 BUSES_VOLUNTEERS = dict()
 
-
+# visualization effects
+PT_LANE_SPEED_GRAPH = True
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -133,7 +134,7 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
-def handle_step(t, policy_name):
+def handle_step(t, policy_name,av_rate):
     global BUSES_VOLUNTEERS
     if policy_name == "Nothing" and exp_name.startswith("Left") and t < 1:
         for lane in traci.lane.getIDList():
@@ -253,6 +254,21 @@ def handle_step(t, policy_name):
                 traci.vehicle.setVehicleClass(vehID, "passenger")
             if policy_name.startswith("StaticNumPassFL") and vehID.find("_") != -1:
                 traci.vehicle.setVehicleClass(vehID, "passenger")
+
+    if PT_LANE_SPEED_GRAPH:
+        if t == 0:
+            run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
+            wandb.init(project=exp_name, name=policy_name+"_"+str(av_rate), id=run_id)
+        # calc all vehicles speed in the road
+        vehIDs = traci.vehicle.getIDList()
+        mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
+        mean_speed_in_end_PTL = traci.lane.getLastStepMeanSpeed("E7_2")
+        num_vehs_in_PTL = sum([traci.lane.getLastStepVehicleNumber(l) for l in traci.lane.getIDList() if len(traci.lane.getAllowed(l)) > 0])
+        num_total_vehs = len(vehIDs)
+        num_hdv_in_end_PTL = traci.lane.getLastStepVehicleNumber("E7_1") + traci.lane.getLastStepVehicleNumber("E7_0")
+        wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
+                   "num_hdv_in_end_PTL": num_hdv_in_end_PTL,"mean_speed": mean_speed,
+                   "mean_speed_in_end_PTL": mean_speed_in_end_PTL})
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
