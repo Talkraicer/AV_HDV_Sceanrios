@@ -146,10 +146,11 @@ def log_features(output_file):
 
     # calc arrived passengers mean total delay
     mean_pass_delay = 0
-    df = output_file_to_df(f"{results_reps_folder}/{output_file}")
-    if len(df) > 0:
+    if len(traci.simulation.getArrivedIDList()) > 0:
+        df = output_file_to_df(f"{results_reps_folder}/{output_file}")
         total_delay = calc_stats_metric(df, "totalDelay", diff=False)
         mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
+
 
     wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
                "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
