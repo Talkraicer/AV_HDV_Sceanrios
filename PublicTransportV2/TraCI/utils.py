@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
 import wandb
+import time
 
 exp_name = "LeftComp"
 NUM_PROCESSES = 70
@@ -145,11 +146,20 @@ def log_features(output_file):
     num_hdv_in_end_PTL = traci.lane.getLastStepVehicleNumber("E7_1") + traci.lane.getLastStepVehicleNumber("E7_0")
 
     # calc arrived passengers mean total delay
+    output_file = f"{results_reps_folder}/{output_file}"
     mean_pass_delay = 0
     if len(traci.simulation.getArrivedIDList()) > 0:
-        df = output_file_to_df(f"{results_reps_folder}/{output_file}")
+        # fix end of <tripinfo> tag
+        with open(output_file, "a+") as f:
+            f.write("</tripinfos>")
+        df = output_file_to_df(output_file)
         total_delay = calc_stats_metric(df, "totalDelay", diff=False)
         mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
+        # remove the <tripinfo> tag
+        with open(output_file, "r") as f:
+            lines = f.readlines()
+        with open(output_file, "w") as f:
+            f.writelines(lines[:-1])
 
 
     wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
