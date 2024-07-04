@@ -28,6 +28,7 @@ BUSES_VOLUNTEERS = dict()
 
 # visualization effects
 LOG_RATE = 10 # Switch to zero for no logging
+START_ARRIVING = False
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -148,7 +149,7 @@ def log_features(output_file):
     # calc arrived passengers mean total delay
     output_file = f"{results_reps_folder}/{output_file}"
     mean_pass_delay = 0
-    if len(traci.simulation.getArrivedIDList()) > 0:
+    if START_ARRIVING:
         # fix end of <tripinfo> tag
         with open(output_file, "a+") as f:
             f.write("</tripinfos>")
@@ -292,6 +293,9 @@ def handle_step(t, policy_name,av_rate):
         if t == 0:
             run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
             wandb.init(project=exp_name, name=policy_name + "_" + str(av_rate), id=run_id)
+        global START_ARRIVING
+        if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
+            START_ARRIVING = True
         log_features(policy_name+exp_name+"_"+str(av_rate)+".xml")
 
 def output_file_to_df(output_file, num_reps=1):
