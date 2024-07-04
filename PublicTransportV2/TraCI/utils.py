@@ -26,7 +26,7 @@ STOP_FROM = 1000
 BUSES_VOLUNTEERS = dict()
 
 # visualization effects
-PT_LANE_SPEED_GRAPH = True
+LOG_RATE = 10 # Switch to zero for no logging
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -134,7 +134,7 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
-def log_features():
+def log_features(output_file):
     # calc all vehicles speed in the road
     vehIDs = traci.vehicle.getIDList()
     mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
@@ -145,18 +145,15 @@ def log_features():
     num_hdv_in_end_PTL = traci.lane.getLastStepVehicleNumber("E7_1") + traci.lane.getLastStepVehicleNumber("E7_0")
 
     # calc arrived passengers mean total delay
-    pass_delays = []
-    for tripinfo in traci.simulation.getArrivedIDList():
-        num_pass = int(traci.vehicle.getTypeID(tripinfo).split("_")[1])
-        delay = traci.vehicle.getTimeLoss(tripinfo) + traci.vehicle.getDepartDelay(tripinfo)
-        pass_delays.append(num_pass * delay)
-    mean_pass_delay = np.mean(pass_delays)
-    median_pass_delay = np.median(pass_delays)
+    mean_pass_delay = 0
+    df = output_file_to_df(f"{results_reps_folder}/{output_file}")
+    if len(df) > 0:
+        total_delay = calc_stats_metric(df, "totalDelay", diff=False)
+        mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
 
     wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
                "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
-               "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
-               "median_pass_delay": median_pass_delay}
+               "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay}
               )
 
 def handle_step(t, policy_name,av_rate):
@@ -280,11 +277,11 @@ def handle_step(t, policy_name,av_rate):
             if policy_name.startswith("StaticNumPassFL") and vehID.find("_") != -1:
                 traci.vehicle.setVehicleClass(vehID, "passenger")
 
-    if PT_LANE_SPEED_GRAPH:
+    if LOG_RATE and t % LOG_RATE == 0:
         if t == 0:
             run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
             wandb.init(project=exp_name, name=policy_name + "_" + str(av_rate), id=run_id)
-        log_features()
+        log_features(policy_name+exp_name+"_"+str(av_rate)+".xml")
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
