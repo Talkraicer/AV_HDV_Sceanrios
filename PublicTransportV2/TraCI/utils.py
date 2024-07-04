@@ -134,6 +134,31 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
+def log_features():
+    # calc all vehicles speed in the road
+    vehIDs = traci.vehicle.getIDList()
+    mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
+    mean_speed_in_end_PTL = traci.lane.getLastStepMeanSpeed("E7_2")
+    num_vehs_in_PTL = sum(
+        [traci.lane.getLastStepVehicleNumber(l) for l in traci.lane.getIDList() if len(traci.lane.getAllowed(l)) > 0])
+    num_total_vehs = len(vehIDs)
+    num_hdv_in_end_PTL = traci.lane.getLastStepVehicleNumber("E7_1") + traci.lane.getLastStepVehicleNumber("E7_0")
+
+    # calc arrived passengers mean total delay
+    pass_delays = []
+    for tripinfo in traci.simulation.getArrivedIDList():
+        num_pass = int(traci.vehicle.getTypeID(tripinfo).split("_")[1])
+        delay = traci.vehicle.getTimeLoss(tripinfo) + traci.vehicle.getDepartDelay(tripinfo)
+        pass_delays.append(num_pass * delay)
+    mean_pass_delay = np.mean(pass_delays)
+    median_pass_delay = np.median(pass_delays)
+
+    wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
+               "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
+               "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
+               "median_pass_delay": median_pass_delay}
+              )
+
 def handle_step(t, policy_name,av_rate):
     global BUSES_VOLUNTEERS
     if policy_name == "Nothing" and exp_name.startswith("Left") and t < 1:
@@ -258,17 +283,8 @@ def handle_step(t, policy_name,av_rate):
     if PT_LANE_SPEED_GRAPH:
         if t == 0:
             run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
-            wandb.init(project=exp_name, name=policy_name+"_"+str(av_rate), id=run_id)
-        # calc all vehicles speed in the road
-        vehIDs = traci.vehicle.getIDList()
-        mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
-        mean_speed_in_end_PTL = traci.lane.getLastStepMeanSpeed("E7_2")
-        num_vehs_in_PTL = sum([traci.lane.getLastStepVehicleNumber(l) for l in traci.lane.getIDList() if len(traci.lane.getAllowed(l)) > 0])
-        num_total_vehs = len(vehIDs)
-        num_hdv_in_end_PTL = traci.lane.getLastStepVehicleNumber("E7_1") + traci.lane.getLastStepVehicleNumber("E7_0")
-        wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
-                   "num_hdv_in_end_PTL": num_hdv_in_end_PTL,"mean_speed": mean_speed,
-                   "mean_speed_in_end_PTL": mean_speed_in_end_PTL})
+            wandb.init(project=exp_name, name=policy_name + "_" + str(av_rate), id=run_id)
+        log_features()
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
