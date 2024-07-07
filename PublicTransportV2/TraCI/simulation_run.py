@@ -16,7 +16,7 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftComp"
 
-POLICIES = ["StaticNumPassFL"]
+POLICIES = ["Nothing"]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]
