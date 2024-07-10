@@ -14,9 +14,9 @@ GUI = False
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = "LeftComp"
+EXP_NAME_TAG = "LeftCompDaily"
 
-POLICIES = ["Nothing"]
+POLICIES = ["Nothing", "StaticNumPassFL"]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]
@@ -77,7 +77,6 @@ if __name__ == "__main__":
         if sumoCfg.endswith(".sumocfg"):
             sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
-    sumoCfgPaths = [sumoCfgPaths[5]] # TODO: remove this line
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[5]]
     args = []

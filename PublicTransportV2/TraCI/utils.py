@@ -8,7 +8,7 @@ from multiprocessing import Pool
 import wandb
 import time
 
-exp_name = "LeftComp"
+exp_name = "LeftCompDaily"
 NUM_PROCESSES = 70
 GUI = False
 sumoCfg = fr"../{exp_name}.sumocfg"
@@ -27,7 +27,7 @@ STOP_FROM = 1000
 BUSES_VOLUNTEERS = dict()
 
 # visualization effects
-LOG_RATE = 10 # Switch to zero for no logging
+LOG_RATE = 100 # Switch to zero for no logging
 START_ARRIVING = False
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
@@ -292,7 +292,7 @@ def handle_step(t, policy_name,av_rate):
     if LOG_RATE and t % LOG_RATE == 0:
         if t == 0:
             run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
-            wandb.init(project=exp_name, name=policy_name + "_" + str(av_rate), id=run_id)
+            wandb.init(project=exp_name+"_" + str(av_rate), name=policy_name, id=run_id)
         global START_ARRIVING
         if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
             START_ARRIVING = True
