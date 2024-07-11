@@ -47,7 +47,7 @@ def set_rou_file(av_prob):
     # Create a flow for each hour of the day
     for hour in VEH_AMOUNT.keys():
         flow = ET.Element('flow', id=f'MajorFlow{hour}', type="vehicleDist", begin=str((hour-6) * 3600), departLane="random",
-                          fromJunction="J0", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(VEH_AMOUNT[hour]), departSpeed="max")
+                          fromJunction="J0", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(VEH_AMOUNT[hour]*(1-3*EXIT_PROP)), departSpeed="max")
         flow_J3 = ET.Element('flow', id=f'MajorFlow{hour}_J3', type="vehicleDist", begin=str((hour-6) * 3600), departLane="random",
                           fromJunction="J0", toJunction="J3",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]* EXIT_PROP)), departSpeed="max", arrivalLane="0")
         flow_J5 = ET.Element('flow', id=f'MajorFlow{hour}_J5', type="vehicleDist", begin=str((hour-6) * 3600), departLane="random",
