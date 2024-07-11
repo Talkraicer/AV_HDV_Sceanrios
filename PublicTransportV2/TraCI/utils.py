@@ -292,7 +292,19 @@ def handle_step(t, policy_name,av_rate):
     if LOG_RATE and t % LOG_RATE == 0:
         if t == 0:
             run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
-            wandb.init(project=exp_name+"_" + str(av_rate), name=policy_name, id=run_id)
+            proj_name = exp_name+"_" + str(av_rate)
+            username = "talkraicer"
+            # Retrieve the run ID (you can also manually set this if you know the ID)
+            api = wandb.Api()
+            runs = api.runs(f"{username}/{proj_name}")
+
+            # Delete the run if it exists
+            if run_id in [run.id for run in runs]:
+                run = api.run(f"{username}/{proj_name}/{run_id}")
+                run.delete()
+
+            wandb.init(project=proj_name, name=policy_name, id=run_id)
+
         global START_ARRIVING
         if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
             START_ARRIVING = True
