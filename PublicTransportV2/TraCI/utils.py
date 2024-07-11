@@ -302,6 +302,8 @@ def handle_step(t, policy_name,av_rate):
             if run_id in [run.id for run in runs]:
                 run = api.run(f"{username}/{proj_name}/{run_id}")
                 run.delete()
+            else:
+                print(f"Run {run_id} does not exist")
 
             wandb.init(project=proj_name, name=policy_name, id=run_id)
 
