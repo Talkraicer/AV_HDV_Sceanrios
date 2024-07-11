@@ -293,9 +293,9 @@ def handle_step(t, policy_name,av_rate):
         if t == 0:
             run_id = exp_name + "_" + policy_name + "_" + str(av_rate)
             proj_name = exp_name+"_" + str(av_rate)
-            username = "talkraicer"
             # Retrieve the run ID (you can also manually set this if you know the ID)
             api = wandb.Api()
+            username = api.default_entity
             runs = api.runs(f"{username}/{proj_name}")
 
             # Delete the run if it exists
