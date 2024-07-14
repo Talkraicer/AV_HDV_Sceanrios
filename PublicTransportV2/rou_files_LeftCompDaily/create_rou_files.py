@@ -1,10 +1,22 @@
 from xml.etree import ElementTree as ET
 import numpy as np
 import scipy.stats as stats
+import copy
+
+def normalize_dict(d):
+    total = sum(d.values())
+    return {k: v / total for k, v in d.items()}
 
 exp_name = "LeftCompDaily"
-PROB_PASS_AV = {0: 0.3, 1: 0.3, 2: 0.2, 3: 0.1, 4: 0.07, 5: 0.03} # Expectation = 1.1
-PROB_PASS_HD = {1: 0.8, 2: 0.1, 3: 0.05, 4: 0.03, 5: 0.02} # Expectation = 1.37
+PROB_PASS_HD = {1: 0.63, 2: 0.28, 3: 0.06, 4: 0.02, 5: 0.01}
+FACTOR_AV = 1
+PROB_PASS_AV = copy.deepcopy(PROB_PASS_HD)
+PROB_PASS_AV[1] *= FACTOR_AV
+PROB_PASS_AV = normalize_dict(PROB_PASS_AV)
+
+print("Expected number of passengers in AVs: ", sum([k*v for k,v in PROB_PASS_AV.items()]))
+print("Expected number of passengers in HDs: ", sum([k*v for k,v in PROB_PASS_HD.items()]))
+
 
 VEH_AMOUNT = {6:6163, 7:6450,8:7053,9:6443,10:6287,11:5800,12:6266,13:5428,
               14:5661,15:4644,16:4937,17:5668,18:5184,19:5126}
@@ -12,6 +24,7 @@ EXIT_PROP = 0.15
 BUS_AMOUNT = {6:62, 7:37,8:19,9:31,10:26,11:25,12:17,13:31,
               14:44,15:30,16:24,17:28,18:25,19:16}
 
+# TODO: Find bus occupancy distribution
 BUS_PASS_RANGE = range(25, 45)
 PROB_PASS_BUS = {i: 1 / len(BUS_PASS_RANGE) for i in BUS_PASS_RANGE} # Expectation = 25
 

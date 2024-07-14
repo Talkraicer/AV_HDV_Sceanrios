@@ -29,6 +29,7 @@ BUSES_VOLUNTEERS = dict()
 # visualization effects
 LOG_RATE = 100 # Switch to zero for no logging
 START_ARRIVING = False
+DELETE_OLDER = True
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -136,7 +137,7 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
-def log_features(output_file):
+def log_features(output_file,t):
     # calc all vehicles speed in the road
     vehIDs = traci.vehicle.getIDList()
     mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
@@ -156,6 +157,11 @@ def log_features(output_file):
         df = output_file_to_df(output_file)
         total_delay = calc_stats_metric(df, "totalDelay", diff=False)
         mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
+
+        df_timestamp = df[df["arrivalTime"] > t-LOG_RATE]
+        total_delay_timestamp = calc_stats_metric(df_timestamp, "totalDelay", diff=False)
+        mean_pass_delay_timestamp = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
+
         # remove the <tripinfo> tag
         with open(output_file, "r") as f:
             lines = f.readlines()
@@ -165,7 +171,8 @@ def log_features(output_file):
 
     wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
                "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
-               "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay}
+               "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
+               "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
               )
 
 def handle_step(t, policy_name,av_rate):
@@ -293,32 +300,34 @@ def handle_step(t, policy_name,av_rate):
         if t == 0:
             run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
             proj_name = exp_name+"_" + str(av_rate)
-            # Retrieve the run ID (you can also manually set this if you know the ID)
-            api = wandb.Api()
-            username = api.default_entity
-            runs = api.runs(f"{username}/{proj_name}")
 
-            # Delete the run if it exists
-            for run in runs:
-                if run.name == policy_name:
-                    run = api.run(f"{username}/{proj_name}/{run.id}")
-                    run.delete()
-                else:
-                    print(f"Run {run_name} does not exist")
+            if DELETE_OLDER:
+                # Retrieve the run ID (you can also manually set this if you know the ID)
+                api = wandb.Api()
+                username = api.default_entity
+                runs = api.runs(f"{username}/{proj_name}")
+
+                # Delete the run if it exists
+                for run in runs:
+                    if run.name == policy_name:
+                        run = api.run(f"{username}/{proj_name}/{run.id}")
+                        run.delete()
+                    else:
+                        print(f"Run {run_name} does not exist")
 
             wandb.init(project=proj_name, name=policy_name)
 
         global START_ARRIVING
         if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
             START_ARRIVING = True
-        log_features(policy_name+exp_name+"_"+str(av_rate)+".xml")
+        log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t)
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
     tree = ET.parse(output_file)
     root = tree.getroot()
 
-    dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": [], "id": []}
+    dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": [], "id": [], "depart":[]}
     for tripinfo in root.findall('tripinfo'):
         for key in dict.keys():
             dict[key].append(tripinfo.get(key))
@@ -328,6 +337,7 @@ def output_file_to_df(output_file, num_reps=1):
     df["vType"] = df["vType"].apply(lambda x: x.split("@")[0])
     df["numPass"] = df["vType"].apply(lambda x: x.split("_")[1])
     df["vType"] = df["vType"].apply(lambda x: x.split("_")[0])
+    df["arrivalTime"] = df.duration.astype(float) + df.depart.astype(float)
     df.drop(columns=["routeLength"], inplace=True)
     # convert to float except vType
     for col in df.columns:
