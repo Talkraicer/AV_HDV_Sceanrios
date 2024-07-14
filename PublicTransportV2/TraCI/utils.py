@@ -169,11 +169,11 @@ def log_features(output_file,t):
             f.writelines(lines[:-1])
 
 
-    wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
-               "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
-               "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
-               "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
-              )
+        wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
+                   "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
+                   "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
+                   "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
+                  )
 
 def handle_step(t, policy_name,av_rate):
     global BUSES_VOLUNTEERS
