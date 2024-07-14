@@ -60,7 +60,7 @@ def set_rou_file(av_prob):
     # Create a flow for each hour of the day
     for hour in VEH_AMOUNT.keys():
         flow = ET.Element('flow', id=f'MajorFlow{hour}', type="vehicleDist", begin=str((hour-6) * 3600), departLane="random",
-                          fromJunction="J0", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]*(1-3*EXIT_PROP))), departSpeed="max")
+                          fromJunction="J0", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]*(1-2*EXIT_PROP))), departSpeed="max")
         flow_J3 = ET.Element('flow', id=f'MajorFlow{hour}_J3', type="vehicleDist", begin=str((hour-6) * 3600), departLane="random",
                           fromJunction="J0", toJunction="J3",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]* EXIT_PROP)), departSpeed="max", arrivalLane="0")
         flow_J5 = ET.Element('flow', id=f'MajorFlow{hour}_J5', type="vehicleDist", begin=str((hour-6) * 3600), departLane="random",
@@ -70,13 +70,15 @@ def set_rou_file(av_prob):
 
         flow_J4 = ET.Element('flow', id=f'MajorFlow{hour}_J4', type="vehicleDist", begin=str((hour-6) * 3600), departLane="0",
                           fromJunction="J4", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]*EXIT_PROP)), departSpeed="max")
+        flow_J2 = ET.Element('flow', id=f'MajorFlow{hour}_J2', type="vehicleDist", begin=str((hour-6) * 3600), departLane="0",
+                             fromJunction="J2", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]*EXIT_PROP)), departSpeed="max")
         flow_J6 = ET.Element('flow', id=f'MajorFlow{hour}_J6', type="vehicleDist", begin=str((hour-6) * 3600), departLane="0",
                             fromJunction="J6", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(int(VEH_AMOUNT[hour]*EXIT_PROP)), departSpeed="max")
 
         flow_Bus = ET.Element('flow', id=f'busFlow{hour}', type="busDist", begin=str((hour-6) * 3600), departLane="random",
                           fromJunction="J0", toJunction="J9",end=str((hour -5) * 3600), vehsPerHour=str(BUS_AMOUNT[hour]), departSpeed="max")
 
-        for elem in [flow, flow_J3, flow_J5, flow_J7, flow_J4, flow_J6, flow_Bus]:
+        for elem in [flow, flow_J3, flow_J5, flow_J7, flow_J2, flow_J4, flow_J6, flow_Bus]:
             elem.tail = '\n\t'
             root.append(elem)
 
