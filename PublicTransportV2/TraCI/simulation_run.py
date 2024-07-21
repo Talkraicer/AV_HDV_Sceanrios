@@ -19,7 +19,7 @@ EXP_NAME_TAG = "LeftCompDaily"
 POLICIES = ["Control mean_speed_in_end_PTL"]
 
 CONTROL_SPEED_MIN = [10,13,16]
-CONTROL_SPEED_MAX = [20,23]
+CONTROL_SPEED_MAX = [16, 20,23]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]

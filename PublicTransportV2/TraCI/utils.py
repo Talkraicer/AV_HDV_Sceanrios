@@ -29,7 +29,7 @@ BUSES_VOLUNTEERS = dict()
 # visualization effects
 LOG_RATE = 100 # Switch to zero for no logging
 START_ARRIVING = False
-DELETE_OLDER = False
+DELETE_OLDER = True
 
 # Control Var Min Start
 CONTROL_MIN_START = 1
