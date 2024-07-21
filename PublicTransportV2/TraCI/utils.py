@@ -339,8 +339,8 @@ def handle_step(t, policy_name,av_rate):
                 CONTROL_MIN_START += 1
             elif log_msg[control_var] > control_var_max and CONTROL_MIN_START > 1:
                 CONTROL_MIN_START -= 1
-        log_msg["MinPassNum"] = CONTROL_MIN_START
-        wandb.log(log_msg)
+            log_msg["MinPassNum"] = CONTROL_MIN_START
+            wandb.log(log_msg)
 
 
 def output_file_to_df(output_file, num_reps=1):
