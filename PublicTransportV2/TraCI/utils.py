@@ -341,9 +341,9 @@ def handle_step(t, policy_name,av_rate):
                 CONTROL_MIN_START -= 1
         if log_msg:
             log_msg["MinPassNum"] = CONTROL_MIN_START
-            allow_min_pass(policy_name)
             wandb.log(log_msg)
-
+    if policy_name.startswith("Control"):
+        allow_min_pass(policy_name)
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
