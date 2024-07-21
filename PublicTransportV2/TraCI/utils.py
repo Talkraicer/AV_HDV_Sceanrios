@@ -29,7 +29,11 @@ BUSES_VOLUNTEERS = dict()
 # visualization effects
 LOG_RATE = 100 # Switch to zero for no logging
 START_ARRIVING = False
-DELETE_OLDER = True
+DELETE_OLDER = False
+
+# Control Var Min Start
+CONTROL_MIN_START = 1
+
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -168,12 +172,20 @@ def log_features(output_file,t):
         with open(output_file, "w") as f:
             f.writelines(lines[:-1])
 
-
-        wandb.log({"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
+        log_msg = {"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
                    "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
                    "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
                    "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
-                  )
+        return log_msg
+
+def allow_min_pass(policy_name):
+    vehIDs = traci.vehicle.getIDList()
+    for vehID in vehIDs:
+        typeID = traci.vehicle.getTypeID(vehID)
+        if typeID.startswith("AV") and int(typeID.split("_")[1][0]) < CONTROL_MIN_START:
+            traci.vehicle.setVehicleClass(vehID, "passenger")
+        if (policy_name.startswith("StaticNumPassFL") or policy_name.startswith("Control")) and vehID.find("_") != -1:
+            traci.vehicle.setVehicleClass(vehID, "passenger")
 
 def handle_step(t, policy_name,av_rate):
     global BUSES_VOLUNTEERS
@@ -286,16 +298,11 @@ def handle_step(t, policy_name,av_rate):
             typeID = traci.vehicle.getTypeID(vehID)
             if typeID.find("TemporalHD") != -1 and traci.vehicle.getPosition(vehID)[0] > 1500:
                 switch_to_AV(vehID)
+    global CONTROL_MIN_START  
     if policy_name.startswith("StaticNumPass"):
         min_num_pass = int(policy_name.split("_")[1][0])
-        vehIDs = traci.vehicle.getIDList()
-        for vehID in vehIDs:
-            typeID = traci.vehicle.getTypeID(vehID)
-            if typeID.startswith("AV") and int(typeID.split("_")[1][0]) < min_num_pass:
-                traci.vehicle.setVehicleClass(vehID, "passenger")
-            if policy_name.startswith("StaticNumPassFL") and vehID.find("_") != -1:
-                traci.vehicle.setVehicleClass(vehID, "passenger")
-
+        CONTROL_MIN_START = min_num_pass
+        allow_min_pass(policy_name)
     if LOG_RATE and t % LOG_RATE == 0:
         if t == 0:
             run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
@@ -308,19 +315,33 @@ def handle_step(t, policy_name,av_rate):
                 runs = api.runs(f"{username}/{proj_name}")
 
                 # Delete the run if it exists
+                deleted = False
                 for run in runs:
                     if run.name == policy_name:
                         run = api.run(f"{username}/{proj_name}/{run.id}")
                         run.delete()
-                    else:
-                        print(f"Run {run_name} does not exist")
-
+                        deleted = True
+                        break
+                if not deleted:
+                    print(f"Run {policy_name} not found")
             wandb.init(project=proj_name, name=policy_name)
 
         global START_ARRIVING
         if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
             START_ARRIVING = True
-        log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t)
+        log_msg = log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t)
+        
+        if policy_name.startswith("Control"):
+            control_var = policy_name.split()[1]
+            control_var_min = int(policy_name.split()[2])
+            control_var_max = int(policy_name.split()[3])
+            if log_msg[control_var] < control_var_min and CONTROL_MIN_START < 6:
+                CONTROL_MIN_START += 1
+            elif log_msg[control_var] > control_var_max and CONTROL_MIN_START > 1:
+                CONTROL_MIN_START -= 1
+        log_msg["MinPassNum"] = CONTROL_MIN_START
+        wandb.log(log_msg)
+
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
