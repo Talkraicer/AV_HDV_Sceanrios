@@ -88,5 +88,5 @@ def set_rou_file(av_prob):
 
 
 if __name__ == '__main__':
-    for av_prob in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+    for av_prob in [0.2,0.4,0.6,0.8]:
         set_rou_file(av_prob)
