@@ -331,7 +331,7 @@ def handle_step(t, policy_name,av_rate):
             START_ARRIVING = True
         log_msg = log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t)
         
-        if policy_name.startswith("Control"):
+        if policy_name.startswith("Control") and log_msg:
             control_var = policy_name.split()[1]
             control_var_min = int(policy_name.split()[2])
             control_var_max = int(policy_name.split()[3])
