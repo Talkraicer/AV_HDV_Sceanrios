@@ -340,6 +340,7 @@ def handle_step(t, policy_name,av_rate):
             elif log_msg[control_var] > control_var_max and CONTROL_MIN_START > 1:
                 CONTROL_MIN_START -= 1
             log_msg["MinPassNum"] = CONTROL_MIN_START
+            allow_min_pass(policy_name)
             wandb.log(log_msg)
 
 
