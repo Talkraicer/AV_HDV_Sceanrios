@@ -16,7 +16,7 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftCompDaily"
 
-POLICIES = ["Control mean_speed_in_end_PTL","Nothing","StaticNumPassFL"]
+POLICIES = ["StaticNumPassFL"]
 
 CONTROL_SPEED_MIN = [10,13]
 CONTROL_SPEED_MAX = [16, 20]
