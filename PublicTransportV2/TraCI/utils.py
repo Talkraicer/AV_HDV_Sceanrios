@@ -182,10 +182,13 @@ def allow_min_pass(policy_name):
     vehIDs = traci.vehicle.getIDList()
     for vehID in vehIDs:
         typeID = traci.vehicle.getTypeID(vehID)
-        if typeID.startswith("AV") and int(typeID.split("_")[1][0]) < CONTROL_MIN_START:
-            traci.vehicle.setVehicleClass(vehID, "passenger")
-        if (policy_name.startswith("StaticNumPassFL") or policy_name.startswith("Control")) and vehID.find("_") != -1:
-            traci.vehicle.setVehicleClass(vehID, "passenger")
+        if typeID.startswith("AV") and int(typeID.split("_")[1][0]) >= CONTROL_MIN_START:
+            if policy_name.startswith("Control") or policy_name.startswith("StaticNumPassFL"):
+                loc = traci.vehicle.getPosition(vehID)[0]
+                if loc < 500:
+                    traci.vehicle.setVehicleClass(vehID, "passenger")
+            else:
+                traci.vehicle.setVehicleClass(vehID, "passenger")
 
 def handle_step(t, policy_name,av_rate):
     global BUSES_VOLUNTEERS

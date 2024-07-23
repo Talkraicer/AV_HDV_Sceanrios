@@ -46,37 +46,37 @@
         <lane id=":J2_0_0" index="0" speed="25.00" length="8.00" shape="496.00,-11.20 504.00,-11.20"/>
         <lane id=":J2_0_1" index="1" speed="25.00" length="8.00" shape="496.00,-8.00 504.00,-8.00"/>
         <lane id=":J2_0_2" index="2" speed="25.00" length="8.00" shape="496.00,-4.80 504.00,-4.80"/>
-        <lane id=":J2_0_3" index="3" allow="bus evehicle" speed="25.00" length="8.00" shape="496.00,-1.60 504.00,-1.60"/>
+        <lane id=":J2_0_3" index="3" allow="bus passenger" speed="25.00" length="8.00" shape="496.00,-1.60 504.00,-1.60"/>
     </edge>
     <edge id=":J3_0" function="internal">
         <lane id=":J3_0_0" index="0" speed="25.00" length="8.00" shape="996.00,-11.20 1004.00,-11.20"/>
         <lane id=":J3_0_1" index="1" speed="25.00" length="8.00" shape="996.00,-8.00 1004.00,-8.00"/>
         <lane id=":J3_0_2" index="2" speed="25.00" length="8.00" shape="996.00,-4.80 1004.00,-4.80"/>
-        <lane id=":J3_0_3" index="3" allow="bus evehicle" speed="25.00" length="8.00" shape="996.00,-1.60 1004.00,-1.60"/>
+        <lane id=":J3_0_3" index="3" allow="bus passenger" speed="25.00" length="8.00" shape="996.00,-1.60 1004.00,-1.60"/>
     </edge>
     <edge id=":J4_0" function="internal">
         <lane id=":J4_0_0" index="0" speed="25.00" length="8.00" shape="1496.00,-11.20 1504.00,-11.20"/>
         <lane id=":J4_0_1" index="1" speed="25.00" length="8.00" shape="1496.00,-8.00 1504.00,-8.00"/>
         <lane id=":J4_0_2" index="2" speed="25.00" length="8.00" shape="1496.00,-4.80 1504.00,-4.80"/>
-        <lane id=":J4_0_3" index="3" allow="bus evehicle" speed="25.00" length="8.00" shape="1496.00,-1.60 1504.00,-1.60"/>
+        <lane id=":J4_0_3" index="3" allow="bus passenger" speed="25.00" length="8.00" shape="1496.00,-1.60 1504.00,-1.60"/>
     </edge>
     <edge id=":J5_0" function="internal">
         <lane id=":J5_0_0" index="0" speed="25.00" length="8.00" shape="1996.00,-11.20 2004.00,-11.20"/>
         <lane id=":J5_0_1" index="1" speed="25.00" length="8.00" shape="1996.00,-8.00 2004.00,-8.00"/>
         <lane id=":J5_0_2" index="2" speed="25.00" length="8.00" shape="1996.00,-4.80 2004.00,-4.80"/>
-        <lane id=":J5_0_3" index="3" allow="bus evehicle" speed="25.00" length="8.00" shape="1996.00,-1.60 2004.00,-1.60"/>
+        <lane id=":J5_0_3" index="3" allow="bus passenger" speed="25.00" length="8.00" shape="1996.00,-1.60 2004.00,-1.60"/>
     </edge>
     <edge id=":J6_0" function="internal">
         <lane id=":J6_0_0" index="0" speed="25.00" length="8.00" shape="2496.00,-11.20 2504.00,-11.20"/>
         <lane id=":J6_0_1" index="1" speed="25.00" length="8.00" shape="2496.00,-8.00 2504.00,-8.00"/>
         <lane id=":J6_0_2" index="2" speed="25.00" length="8.00" shape="2496.00,-4.80 2504.00,-4.80"/>
-        <lane id=":J6_0_3" index="3" allow="bus evehicle" speed="25.00" length="8.00" shape="2496.00,-1.60 2504.00,-1.60"/>
+        <lane id=":J6_0_3" index="3" allow="bus passenger" speed="25.00" length="8.00" shape="2496.00,-1.60 2504.00,-1.60"/>
     </edge>
     <edge id=":J7_0" function="internal">
         <lane id=":J7_0_0" index="0" speed="25.00" length="8.00" shape="2996.00,-11.20 3004.00,-11.20"/>
         <lane id=":J7_0_1" index="1" speed="25.00" length="8.00" shape="2996.00,-8.00 3004.00,-8.00"/>
         <lane id=":J7_0_2" index="2" speed="25.00" length="8.00" shape="2996.00,-4.80 3004.00,-4.80"/>
-        <lane id=":J7_0_3" index="3" allow="bus evehicle" speed="25.00" length="8.00" shape="2996.00,-1.60 3004.00,-1.60"/>
+        <lane id=":J7_0_3" index="3" allow="bus passenger" speed="25.00" length="8.00" shape="2996.00,-1.60 3004.00,-1.60"/>
     </edge>
     <edge id=":J8_0" function="internal">
         <lane id=":J8_0_0" index="0" speed="25.00" length="8.00" shape="3496.00,-11.20 3504.00,-11.40"/>
@@ -95,20 +95,20 @@
         <lane id="E1_1" index="1" speed="25.00" length="492.00" shape="504.00,-11.20 996.00,-11.20"/>
         <lane id="E1_2" index="2" speed="25.00" length="492.00" shape="504.00,-8.00 996.00,-8.00"/>
         <lane id="E1_3" index="3" speed="25.00" length="492.00" shape="504.00,-4.80 996.00,-4.80"/>
-        <lane id="E1_4" index="4" allow="bus evehicle" speed="25.00" length="492.00" shape="504.00,-1.60 996.00,-1.60"/>
+        <lane id="E1_4" index="4" allow="bus passenger" speed="25.00" length="492.00" shape="504.00,-1.60 996.00,-1.60"/>
     </edge>
     <edge id="E2" from="J3" to="J4" priority="-1">
         <lane id="E2_0" index="0" speed="25.00" length="492.00" shape="1004.00,-11.20 1496.00,-11.20"/>
         <lane id="E2_1" index="1" speed="25.00" length="492.00" shape="1004.00,-8.00 1496.00,-8.00"/>
         <lane id="E2_2" index="2" speed="25.00" length="492.00" shape="1004.00,-4.80 1496.00,-4.80"/>
-        <lane id="E2_3" index="3" allow="bus evehicle" speed="25.00" length="492.00" shape="1004.00,-1.60 1496.00,-1.60"/>
+        <lane id="E2_3" index="3" allow="bus passenger" speed="25.00" length="492.00" shape="1004.00,-1.60 1496.00,-1.60"/>
     </edge>
     <edge id="E3" from="J4" to="J5" priority="-1">
         <lane id="E3_0" index="0" speed="25.00" length="492.00" shape="1504.00,-14.40 1996.00,-14.40"/>
         <lane id="E3_1" index="1" speed="25.00" length="492.00" shape="1504.00,-11.20 1996.00,-11.20"/>
         <lane id="E3_2" index="2" speed="25.00" length="492.00" shape="1504.00,-8.00 1996.00,-8.00"/>
         <lane id="E3_3" index="3" speed="25.00" length="492.00" shape="1504.00,-4.80 1996.00,-4.80"/>
-        <lane id="E3_4" index="4" allow="bus evehicle" speed="25.00" length="492.00" shape="1504.00,-1.60 1996.00,-1.60"/>
+        <lane id="E3_4" index="4" allow="bus passenger" speed="25.00" length="492.00" shape="1504.00,-1.60 1996.00,-1.60"/>
     </edge>
     <edge id="E4" from="J0" to="J1" priority="-1" length="6.16">
         <lane id="E4_0" index="0" speed="25.00" length="6.16" shape="-510.03,-11.20 -500.17,-11.23"/>
@@ -120,20 +120,20 @@
         <lane id="E5_0" index="0" speed="25.00" length="492.00" shape="2004.00,-11.20 2496.00,-11.20"/>
         <lane id="E5_1" index="1" speed="25.00" length="492.00" shape="2004.00,-8.00 2496.00,-8.00"/>
         <lane id="E5_2" index="2" speed="25.00" length="492.00" shape="2004.00,-4.80 2496.00,-4.80"/>
-        <lane id="E5_3" index="3" allow="bus evehicle" speed="25.00" length="492.00" shape="2004.00,-1.60 2496.00,-1.60"/>
+        <lane id="E5_3" index="3" allow="bus passenger" speed="25.00" length="492.00" shape="2004.00,-1.60 2496.00,-1.60"/>
     </edge>
     <edge id="E6" from="J6" to="J7" priority="-1">
         <lane id="E6_0" index="0" speed="25.00" length="492.00" shape="2504.00,-14.40 2996.00,-14.40"/>
         <lane id="E6_1" index="1" speed="25.00" length="492.00" shape="2504.00,-11.20 2996.00,-11.20"/>
         <lane id="E6_2" index="2" speed="25.00" length="492.00" shape="2504.00,-8.00 2996.00,-8.00"/>
         <lane id="E6_3" index="3" speed="25.00" length="492.00" shape="2504.00,-4.80 2996.00,-4.80"/>
-        <lane id="E6_4" index="4" allow="bus evehicle" speed="25.00" length="492.00" shape="2504.00,-1.60 2996.00,-1.60"/>
+        <lane id="E6_4" index="4" allow="bus passenger" speed="25.00" length="492.00" shape="2504.00,-1.60 2996.00,-1.60"/>
     </edge>
     <edge id="E7" from="J7" to="J8" priority="-1">
         <lane id="E7_0" index="0" speed="25.00" length="492.00" shape="3004.00,-11.20 3496.00,-11.20"/>
         <lane id="E7_1" index="1" speed="25.00" length="492.00" shape="3004.00,-8.00 3496.00,-8.00"/>
         <lane id="E7_2" index="2" speed="25.00" length="492.00" shape="3004.00,-4.80 3496.00,-4.80"/>
-        <lane id="E7_3" index="3" allow="bus evehicle" speed="25.00" length="492.00" shape="3004.00,-1.60 3496.00,-1.60"/>
+        <lane id="E7_3" index="3" allow="bus passenger" speed="25.00" length="492.00" shape="3004.00,-1.60 3496.00,-1.60"/>
     </edge>
     <edge id="E8" from="J8" to="J9" priority="-1" shape="3500.00,-3.40 4000.00,-3.40">
         <lane id="E8_0" index="0" speed="25.00" length="496.00" shape="3504.00,-11.40 4000.00,-11.40"/>

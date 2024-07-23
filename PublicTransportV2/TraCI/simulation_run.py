@@ -81,7 +81,7 @@ if __name__ == "__main__":
             sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
     if GUI:
-        sumoCfgPaths = [sumoCfgPaths[5]]
+        sumoCfgPaths = [sumoCfgPaths[3]]
     args = []
     for policy in POLICIES:
         policy_name = policy
