@@ -18,8 +18,7 @@ EXP_NAME_TAG = "LeftCompDaily"
 
 POLICIES = ["Control mean_speed_in_end_PTL","Nothing","StaticNumPassFL"]
 
-CONTROL_SPEED_MIN = [16,14]
-CONTROL_SPEED_MAX = [18, 20]
+CONTROL_SPEED_RANGES = [(10,20),(12,20),(14,20),(16,22),(8,20),(8,18),(8,15), (10,18)]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]
@@ -106,10 +105,9 @@ if __name__ == "__main__":
                     policy_name = f"{policy}_{min_num_pass}"
                     args.append((policy_name, sumoCfg))
             elif policy.startswith("Control"):
-                for min_speed in CONTROL_SPEED_MIN:
-                    for max_speed in CONTROL_SPEED_MAX:
-                        policy_name = f"{policy} {min_speed} {max_speed}"
-                        args.append((policy_name, sumoCfg))
+                for min_speed, max_speed in CONTROL_SPEED_RANGES:
+                    policy_name = f"{policy} {min_speed} {max_speed}"
+                    args.append((policy_name, sumoCfg))
             else:
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)
@@ -119,9 +117,8 @@ if __name__ == "__main__":
             for min_num_pass in MIN_NUM_PASS:
                 policies.append(f"{policy}_{min_num_pass}")
         elif policy.startswith("Control"):
-            for min_speed in CONTROL_SPEED_MIN:
-                for max_speed in CONTROL_SPEED_MAX:
-                    policies.append(f"{policy} {min_speed} {max_speed}")
+            for min_speed, max_speed in CONTROL_SPEED_RANGES:
+                policies.append(f"{policy} {min_speed} {max_speed}")
         else:
             policies.append(policy)
     # policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
