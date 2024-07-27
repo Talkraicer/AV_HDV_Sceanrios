@@ -9,7 +9,7 @@ import traci
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
 
-ACT_RATE = 100
+ACT_RATE = 300
 TrainTimeSteps = 100000
 # DECISION VARיIABLE
 MIN_NUM_PASS = 1
@@ -80,6 +80,10 @@ class LeftLaneENV(gym.Env):
         self.av_rate = float(self.av_rate[2:])
         self.state = [0] * len(OBSERVATIONS)
         self.state[-1] = self.av_rate
+
+        for i in range (20):
+            ACTIONS[5](self.state, self.policy_name)
+
         return self.observation(), {}
 
     def step(self, action):
@@ -106,7 +110,7 @@ def train_agent(sumoCfg):
         max_episode_steps=1000,
     )
 
-    env = gym.make('LeftLaneENV-v0', policy_name="DQNAgent", sumoCfg=sumoCfg)
+    env = gym.make('LeftLaneENV-v0', policy_name="DQNAgentV2", sumoCfg=sumoCfg)
     model = DQN("MlpPolicy", env, verbose=1)
 
     model.learn(total_timesteps=TrainTimeSteps)
