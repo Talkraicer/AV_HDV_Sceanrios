@@ -102,7 +102,7 @@ class LeftLaneENV(gym.Env):
         self.log = ''
 
 
-def train_agent(sumoCfg):
+def train_agent(sumoCfg,policy_name = "DQNAgentV2"):
     # Register the environment with Gym
     gym.envs.registration.register(
         id='LeftLaneENV-v0',
@@ -110,7 +110,7 @@ def train_agent(sumoCfg):
         max_episode_steps=1000,
     )
 
-    env = gym.make('LeftLaneENV-v0', policy_name="DQNAgentV2", sumoCfg=sumoCfg)
+    env = gym.make('LeftLaneENV-v0', policy_name=policy_name, sumoCfg=sumoCfg)
     model = DQN("MlpPolicy", env, verbose=1)
 
     model.learn(total_timesteps=TrainTimeSteps)
@@ -118,7 +118,7 @@ def train_agent(sumoCfg):
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
     print(f"Mean reward: {mean_reward} +/- {std_reward}")
 
-    agent_name = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + "_DQN"
+    agent_name = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + policy_name
     model.save(agent_name)
 
     env.close()
