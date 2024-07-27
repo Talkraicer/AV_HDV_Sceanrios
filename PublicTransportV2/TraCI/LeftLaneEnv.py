@@ -105,8 +105,7 @@ def train_agent(sumoCfg):
         entry_point=LeftLaneENV,
         max_episode_steps=1000,
     )
-    # env = make_vec_env('LeftLaneENV-v0', n_envs=1,
-    #                    env_kwargs={"policy_name": "DQNAgent", "sumoCfg": sumoCfg})
+
     env = gym.make('LeftLaneENV-v0', policy_name="DQNAgent", sumoCfg=sumoCfg)
     model = DQN("MlpPolicy", env, verbose=1)
 
