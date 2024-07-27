@@ -212,7 +212,7 @@ def allow_min_pass(policy_name, control_min_start):
             else:
                 traci.vehicle.setVehicleClass(vehID, "passenger")
 
-def handle_step(t, policy_name,av_rate):
+def handle_step(t, policy_name,av_rate, log_rate = LOG_RATE):
     global BUSES_VOLUNTEERS
     if policy_name == "Nothing" and exp_name.startswith("Left") and t < 1:
         for lane in traci.lane.getIDList():
@@ -333,7 +333,7 @@ def handle_step(t, policy_name,av_rate):
     if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
         START_ARRIVING = True
 
-    if LOG_RATE and t % LOG_RATE == 0:
+    if log_rate and t % log_rate == 0:
         if t == 0:
             init_wandb_logger(policy_name,av_rate,delete_older=DELETE_OLDER)
 

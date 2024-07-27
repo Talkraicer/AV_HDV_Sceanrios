@@ -27,7 +27,7 @@ def action_wrapper(state, gym_policy_name, policy_name):
     t_start = state[-2]
 
     for i in range(ACT_RATE):
-        handle_step(t_start, policy_name, "av"+str(av_rate))
+        handle_step(t_start, policy_name, "av"+str(av_rate),log_rate=0)
         t_start += 1
         traci.simulationStep(t_start)
 
