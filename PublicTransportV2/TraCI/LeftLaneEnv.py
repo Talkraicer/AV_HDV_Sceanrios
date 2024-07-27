@@ -47,7 +47,7 @@ def action_wrapper(state, gym_policy_name, policy_name):
     return reward, done, new_features
 
 
-ACTIONS = [lambda state, policy_name: action_wrapper(state, policy_name, f"StaticNumPassFL_{i}") for i in range(1, 6)]
+ACTIONS = [lambda state, policy_name: action_wrapper(state, policy_name, f"StaticNumPassFL_{i}") for i in range(1, 7)]
 
 ACTION_SPACE = gym.spaces.Discrete(len(ACTIONS))
 
