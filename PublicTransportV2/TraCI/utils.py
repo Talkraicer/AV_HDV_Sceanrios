@@ -29,7 +29,7 @@ BUSES_VOLUNTEERS = dict()
 # visualization effects
 LOG_RATE = 0 # Switch to zero for no logging
 START_ARRIVING = False
-DELETE_OLDER = True
+DELETE_OLDER = False
 
 # Control Var Min Start
 CONTROL_MIN_START = 1
@@ -178,6 +178,28 @@ def log_features(output_file,t, log_rate):
                    "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
         return log_msg
 
+def init_wandb_logger(policy_name,av_rate,delete_older=False):
+    run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
+    proj_name = exp_name + "_" + str(av_rate)
+
+    if delete_older:
+        # Retrieve the run ID (you can also manually set this if you know the ID)
+        api = wandb.Api()
+        username = api.default_entity
+        runs = api.runs(f"{username}/{proj_name}")
+
+        # Delete the run if it exists
+        deleted = False
+        for run in runs:
+            if run.name == policy_name:
+                run = api.run(f"{username}/{proj_name}/{run.id}")
+                run.delete()
+                deleted = True
+                break
+        if not deleted:
+            print(f"Run {policy_name} not found")
+    wandb.init(project=proj_name, name=policy_name)
+
 def allow_min_pass(policy_name, control_min_start):
     vehIDs = traci.vehicle.getIDList()
     for vehID in vehIDs:
@@ -313,26 +335,7 @@ def handle_step(t, policy_name,av_rate):
 
     if LOG_RATE and t % LOG_RATE == 0:
         if t == 0:
-            run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
-            proj_name = exp_name+"_" + str(av_rate)
-
-            if DELETE_OLDER:
-                # Retrieve the run ID (you can also manually set this if you know the ID)
-                api = wandb.Api()
-                username = api.default_entity
-                runs = api.runs(f"{username}/{proj_name}")
-
-                # Delete the run if it exists
-                deleted = False
-                for run in runs:
-                    if run.name == policy_name:
-                        run = api.run(f"{username}/{proj_name}/{run.id}")
-                        run.delete()
-                        deleted = True
-                        break
-                if not deleted:
-                    print(f"Run {policy_name} not found")
-            wandb.init(project=proj_name, name=policy_name)
+            init_wandb_logger(policy_name,av_rate,delete_older=DELETE_OLDER)
 
 
         log_msg = log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t,LOG_RATE)

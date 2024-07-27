@@ -1,17 +1,13 @@
 from multiprocessing import Pool
-
 import gymnasium as gym
 import numpy as np
-import sys
-
 from tqdm import tqdm
-
-from utils import handle_step, log_features, exp_name
+import wandb
+from utils import handle_step, log_features, exp_name, init_wandb_logger
 from simulation_run import init_simulation, NUM_PROCESSES
 import traci
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
-from stable_baselines3.common.env_util import make_vec_env
 
 ACT_RATE = 100
 TrainTimeSteps = 100000
@@ -48,7 +44,7 @@ def action_wrapper(state, gym_policy_name, policy_name):
 
     done = traci.simulation.getMinExpectedNumber() <= 0
 
-    return reward, done
+    return reward, done, new_features
 
 
 ACTIONS = [lambda state, policy_name: action_wrapper(state, policy_name, f"StaticNumPassFL_{i}") for i in range(1, 6)]
@@ -61,13 +57,16 @@ def make_observation_space():
 
 
 class LeftLaneENV(gym.Env):
-    def __init__(self, policy_name, sumoCfg):
+    def __init__(self, policy_name, sumoCfg, log_wandb=True):
         self.observation_space = make_observation_space()
         self.action_space = ACTION_SPACE
         self.state = None
-        self.av_rate = None
+        self.av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1][2:]
         self.policy_name = policy_name
         self.sumoCfg = sumoCfg
+        self.log_wandb = log_wandb
+        if log_wandb:
+            init_wandb_logger(self.policy_name,"av"+str(self.av_rate),delete_older=True)
         self.log = ""
         self.act_rate = ACT_RATE
 
@@ -78,14 +77,18 @@ class LeftLaneENV(gym.Env):
         # check if a traci instance is already running
 
         _, _, self.av_rate = init_simulation((self.policy_name, self.sumoCfg))
-        self.av_rate = self.av_rate[2:]
+        self.av_rate = float(self.av_rate[2:])
         self.state = [0] * len(OBSERVATIONS)
-        self.state[-1] = float(self.av_rate)
+        self.state[-1] = self.av_rate
         return self.observation(), {}
 
     def step(self, action):
-        reward, done = ACTIONS[action](self.state, self.policy_name)
+        reward, done, log_msg = ACTIONS[action](self.state, self.policy_name)
         self.log += f"Time: {self.state[-2] - self.act_rate} Action: {action + 1}, Reward: {reward}\n"
+        if self.log_wandb:
+            log_msg["MinNumPass"] = action + 1
+            log_msg["Reward"] = reward
+            wandb.log(log_msg)
         if done:
             traci.close()
         return self.observation(), reward, done, False, {}
