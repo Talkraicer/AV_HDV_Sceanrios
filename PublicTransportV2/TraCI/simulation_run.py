@@ -52,14 +52,17 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
-
-def simulate(arg):
+def init_simulation(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
     exp_output_name = "results_reps/" + policy_name + ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + ".xml"
     av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1]
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
+    return policy_name, sumoCfg, av_rate
+
+def simulate(arg):
+    policy_name, sumoCfg, av_rate = init_simulation(arg)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         handle_step(step, policy_name,av_rate)

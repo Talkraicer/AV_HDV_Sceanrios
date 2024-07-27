@@ -27,7 +27,7 @@ STOP_FROM = 1000
 BUSES_VOLUNTEERS = dict()
 
 # visualization effects
-LOG_RATE = 100 # Switch to zero for no logging
+LOG_RATE = 0 # Switch to zero for no logging
 START_ARRIVING = False
 DELETE_OLDER = True
 
@@ -141,15 +141,15 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
-def log_features(output_file,t):
+def log_features(output_file,t, log_rate):
     # calc all vehicles speed in the road
     vehIDs = traci.vehicle.getIDList()
     mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
-    mean_speed_in_end_PTL = traci.lane.getLastStepMeanSpeed("E7_2")
+    mean_speed_in_end_PTL = traci.lane.getLastStepMeanSpeed("E7_3")
     num_vehs_in_PTL = sum(
         [traci.lane.getLastStepVehicleNumber(l) for l in traci.lane.getIDList() if len(traci.lane.getAllowed(l)) > 0])
     num_total_vehs = len(vehIDs)
-    num_hdv_in_end_PTL = traci.lane.getLastStepVehicleNumber("E7_1") + traci.lane.getLastStepVehicleNumber("E7_0")
+    num_hdv_in_end_PTL = sum([traci.lane.getLastStepMeanSpeed(f"E7_{i}") for i in range(3)])
 
     # calc arrived passengers mean total delay
     output_file = f"{results_reps_folder}/{output_file}"
@@ -162,7 +162,7 @@ def log_features(output_file,t):
         total_delay = calc_stats_metric(df, "totalDelay", diff=False)
         mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
 
-        df_timestamp = df[df["arrivalTime"] > t-LOG_RATE]
+        df_timestamp = df[df["arrivalTime"] > t-log_rate]
         total_delay_timestamp = calc_stats_metric(df_timestamp, "totalDelay", diff=False)
         mean_pass_delay_timestamp = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
 
@@ -178,14 +178,14 @@ def log_features(output_file,t):
                    "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
         return log_msg
 
-def allow_min_pass(policy_name):
+def allow_min_pass(policy_name, control_min_start):
     vehIDs = traci.vehicle.getIDList()
     for vehID in vehIDs:
         typeID = traci.vehicle.getTypeID(vehID)
-        if typeID.startswith("AV") and int(typeID.split("_")[1][0]) >= CONTROL_MIN_START:
+        if typeID.startswith("AV") and int(typeID.split("_")[1][0]) >= control_min_start:
             if policy_name.startswith("Control") or policy_name.startswith("StaticNumPassFL"):
                 loc = traci.vehicle.getPosition(vehID)[0]
-                if loc < 500:
+                if loc < 300:
                     traci.vehicle.setVehicleClass(vehID, "passenger")
             else:
                 traci.vehicle.setVehicleClass(vehID, "passenger")
@@ -305,7 +305,12 @@ def handle_step(t, policy_name,av_rate):
     if policy_name.startswith("StaticNumPass"):
         min_num_pass = int(policy_name.split("_")[1][0])
         CONTROL_MIN_START = min_num_pass
-        allow_min_pass(policy_name)
+        allow_min_pass(policy_name,CONTROL_MIN_START)
+
+    global START_ARRIVING
+    if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
+        START_ARRIVING = True
+
     if LOG_RATE and t % LOG_RATE == 0:
         if t == 0:
             run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
@@ -329,10 +334,8 @@ def handle_step(t, policy_name,av_rate):
                     print(f"Run {policy_name} not found")
             wandb.init(project=proj_name, name=policy_name)
 
-        global START_ARRIVING
-        if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
-            START_ARRIVING = True
-        log_msg = log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t)
+
+        log_msg = log_features(policy_name+exp_name+"_"+str(av_rate)+".xml",t,LOG_RATE)
         
         if policy_name.startswith("Control") and log_msg:
             control_var = policy_name.split()[1]
@@ -346,7 +349,7 @@ def handle_step(t, policy_name,av_rate):
             log_msg["MinPassNum"] = CONTROL_MIN_START
             wandb.log(log_msg)
     if policy_name.startswith("Control"):
-        allow_min_pass(policy_name)
+        allow_min_pass(policy_name,CONTROL_MIN_START)
 
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
