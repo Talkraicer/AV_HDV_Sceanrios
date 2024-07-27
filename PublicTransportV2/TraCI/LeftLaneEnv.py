@@ -80,7 +80,7 @@ class LeftLaneENV(gym.Env):
         _, _, self.av_rate = init_simulation((self.policy_name, self.sumoCfg))
         self.av_rate = self.av_rate[2:]
         self.state = [0] * len(OBSERVATIONS)
-        self.state[-1] = self.av_rate
+        self.state[-1] = float(self.av_rate)
         return self.observation(), {}
 
     def step(self, action):
