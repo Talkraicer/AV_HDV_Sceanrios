@@ -173,5 +173,6 @@ if __name__ == '__main__':
     feat_types = ["LOG_FEATURES", "E_FEATURES"]
     act_rates = [1,100,300]
     cfgs = [(sumoCfg, feat_type, act_rate) for sumoCfg in sumoCfgs for feat_type in feat_types for act_rate in act_rates]
+    print("num cfgs", len(cfgs))
     with Pool(min(NUM_PROCESSES, len(cfgs))) as pool:
         tqdm(pool.map(train_agent, cfgs), total=len(sumoCfgs))
