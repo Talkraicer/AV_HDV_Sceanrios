@@ -48,7 +48,7 @@ def set_rou_file(av_prob):
                 vTypeDist.append(elem)
             for k,v in PROB_PASS_HD.items():
                 prob = round(hd_prob * v,5)
-                elem = ET.Element('vType', id=f'HD_{k}', color='red', probability=str(prob), vClass='private')
+                elem = ET.Element('vType', id=f'HD_{k}', color='red', probability=str(prob), vClass='passenger')
                 elem.tail = '\n\t\t'
                 vTypeDist.append(elem)
         elif vTypeDist.attrib['id'] == 'busDist':

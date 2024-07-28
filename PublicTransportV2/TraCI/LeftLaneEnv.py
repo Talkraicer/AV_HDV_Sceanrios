@@ -10,57 +10,68 @@ from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
 
 ACT_RATE = 300
-TrainTimeSteps = 100000
-# DECISION VARיIABLE
+TrainTimeSteps = 10000
+NUM_EDGES = 8
+
+# DECISION VARIABLE
 MIN_NUM_PASS = 1
 
 # List of relevant studied features
-OBSERVATIONS = ["num_total_vehs", "num_hdv_in_end_PTL", "num_vehs_in_PTL",
-                "mean_speed_in_end_PTL", "mean_speed"
-    , "time_step", "av_rate"]  # last row is for dummy observation
-NUM_DUMMY_OBS = 3
+OBSERVATIONS = []
+
+def set_observations(obs_type):
+    global OBSERVATIONS
+    if obs_type == "LOG_FEATURES":
+        OBSERVATIONS = ["num_total_vehs", "num_hdv_in_end_PTL", "num_vehs_in_PTL",
+                "mean_speed_in_end_PTL", "mean_speed"]
+
+    if obs_type == "E_FEATURES":
+        for i in range(NUM_EDGES):
+            OBSERVATIONS.append(f"num_vehs_edge_{i}_no_PTL")
+            OBSERVATIONS.append(f"mean_speed_edge_{i}_no_PTL")
+            OBSERVATIONS.append(f"num_vehs_edge_{i}_in_PTL")
+            OBSERVATIONS.append(f"mean_speed_edge_{i}_in_PTL")
 
 
-def action_wrapper(state, gym_policy_name, policy_name):
+    if obs_type == "LOG_FEATURES":
+        return gym.spaces.Box(low=0, high=100000, shape=(len(OBSERVATIONS),))
+
+
+def action_wrapper(env, policy_name):
     # run the step
-    av_rate = state[-1]
-    t_start = state[-2]
 
     for i in range(ACT_RATE):
-        handle_step(t_start, policy_name, "av"+str(av_rate),log_rate=0)
-        t_start += 1
-        traci.simulationStep(t_start)
+        handle_step(env.timestep, policy_name, "av"+str(env.av_rate),log_rate=0)
+        env.timestep += 1
+        traci.simulationStep(env.timestep)
 
     # get the new state
-    state[-2] += ACT_RATE
-    t_end = state[-2]
-    new_features = log_features(gym_policy_name + exp_name + "_av" + str(av_rate) + ".xml", t_end, ACT_RATE)
-    if new_features:
-        for i in range(len(OBSERVATIONS) - NUM_DUMMY_OBS):
-            state[i] = new_features[OBSERVATIONS[i]]
-        reward = 1 / new_features["mean_pass_delay_timestamp"]
-    else:
-        reward = 0
+    if env.obs_type == "LOG_FEATURES":
+        new_features = log_features(env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml", env.timestep, ACT_RATE)
+        if new_features:
+            for i in range(len(OBSERVATIONS)):
+                env.state[i] = new_features[OBSERVATIONS[i]]
+            reward = 1 / new_features["mean_pass_delay_timestamp"]
+        else:
+            reward = 0
 
     done = traci.simulation.getMinExpectedNumber() <= 0
 
     return reward, done, new_features
 
 
-ACTIONS = [lambda state, policy_name: action_wrapper(state, policy_name, f"StaticNumPassFL_{i}") for i in range(1, 7)]
+ACTIONS = [lambda env: action_wrapper(env,f"StaticNumPassFL_{i}") for i in range(1, 7)]
 
 ACTION_SPACE = gym.spaces.Discrete(len(ACTIONS))
 
 
-def make_observation_space():
-    return gym.spaces.Box(low=0, high=100000, shape=(len(OBSERVATIONS),))
-
 
 class LeftLaneENV(gym.Env):
-    def __init__(self, policy_name, sumoCfg, log_wandb=True):
-        self.observation_space = make_observation_space()
+    def __init__(self, policy_name, sumoCfg, log_wandb=True, features_type="LOG_FEATURES"):
+        self.observation_space = set_observations(features_type)
         self.action_space = ACTION_SPACE
         self.state = None
+        self.timestep = 0
         self.av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1][2:]
         self.policy_name = policy_name
         self.sumoCfg = sumoCfg
@@ -75,20 +86,19 @@ class LeftLaneENV(gym.Env):
 
     def reset(self, seed=None, options=None, ):
         # check if a traci instance is already running
-
+        self.timestep = 0
         _, _, self.av_rate = init_simulation((self.policy_name, self.sumoCfg))
         self.av_rate = float(self.av_rate[2:])
         self.state = [0] * len(OBSERVATIONS)
-        self.state[-1] = self.av_rate
 
-        for i in range (20):
-            ACTIONS[5](self.state, self.policy_name)
+        for i in range(20):
+            ACTIONS[5](self)
 
         return self.observation(), {}
 
     def step(self, action):
-        reward, done, log_msg = ACTIONS[action](self.state, self.policy_name)
-        self.log += f"Time: {self.state[-2] - self.act_rate} Action: {action + 1}, Reward: {reward}\n"
+        reward, done, log_msg = ACTIONS[action](self)
+        self.log += f"Time: {self.timestep - self.act_rate} Action: {action + 1}, Reward: {reward}\n"
         if self.log_wandb:
             log_msg["MinNumPass"] = action + 1
             log_msg["Reward"] = reward

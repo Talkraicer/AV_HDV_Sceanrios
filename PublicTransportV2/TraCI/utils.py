@@ -208,9 +208,9 @@ def allow_min_pass(policy_name, control_min_start):
             if policy_name.startswith("Control") or policy_name.startswith("StaticNumPassFL"):
                 loc = traci.vehicle.getPosition(vehID)[0]
                 if loc < 300:
-                    traci.vehicle.setVehicleClass(vehID, "passenger")
+                    traci.vehicle.setVehicleClass(vehID, "private")
             else:
-                traci.vehicle.setVehicleClass(vehID, "passenger")
+                traci.vehicle.setVehicleClass(vehID, "private")
 
 def handle_step(t, policy_name,av_rate, log_rate = LOG_RATE):
     global BUSES_VOLUNTEERS
