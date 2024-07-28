@@ -182,7 +182,11 @@ def init_wandb_logger(policy_name,av_rate,delete_older=False):
     run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
     proj_name = exp_name + "_" + str(av_rate)
 
-    if delete_older:
+    api = wandb.Api()
+    username = api.default_entity
+
+    projects = api.projects(username)
+    if delete_older and proj_name in [proj.name for proj in projects]:
         # Retrieve the run ID (you can also manually set this if you know the ID)
         api = wandb.Api()
         username = api.default_entity
