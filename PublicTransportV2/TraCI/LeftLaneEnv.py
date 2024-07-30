@@ -6,7 +6,7 @@ import wandb
 from utils import handle_step, log_features, exp_name, init_wandb_logger, output_file_to_df
 from simulation_run import init_simulation, NUM_PROCESSES
 import traci
-from stable_baselines3 import DQN, PPO, A2C, TD3
+from stable_baselines3 import DQN, PPO, A2C
 from stable_baselines3.common.evaluation import evaluate_policy
 
 it_len = 10000
@@ -206,8 +206,6 @@ def train_agent(cfg):
         model = PPO("MlpPolicy", env, verbose=1)
     elif agent_type == "A2C":
         model = A2C("MlpPolicy", env, verbose=1)
-    elif agent_type == "TD3":
-        model = TD3("MlpPolicy", env, verbose=1)
 
     for i in range(num_it):
         model.learn(total_timesteps=it_len)
@@ -221,7 +219,7 @@ def train_agent(cfg):
 
 if __name__ == '__main__':
     sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8]]
-    agent_types = ["DQN", "PPO", "A2C", "TD3"]
+    agent_types = ["DQN", "PPO", "A2C"]
     feat_types = ["E_FEATURES_TU","LOG_FEATURES", "E_FEATURES"]
     act_rates = [100, 300]
     cfgs = [(sumoCfg, feat_type, act_rate, agent_type) for sumoCfg in sumoCfgs for feat_type in feat_types
