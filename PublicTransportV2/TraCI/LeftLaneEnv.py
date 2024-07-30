@@ -224,8 +224,8 @@ if __name__ == '__main__':
     agent_types = ["DQN", "PPO", "A2C", "TD3"]
     feat_types = ["E_FEATURES_TU","LOG_FEATURES", "E_FEATURES"]
     act_rates = [100, 300]
-    cfgs = [(sumoCfg, feat_type, act_rate) for sumoCfg in sumoCfgs for feat_type in feat_types for act_rate in act_rates]
-    cfgs_agents = [(cfg, agent) for cfg in cfgs for agent in agent_types]
-    print("num cfgs", len(cfgs_agents))
-    with Pool(min(NUM_PROCESSES, len(cfgs_agents))) as pool:
-        tqdm(pool.map(train_agent, cfgs_agents), total=len(sumoCfgs))
+    cfgs = [(sumoCfg, feat_type, act_rate, agent_type) for sumoCfg in sumoCfgs for feat_type in feat_types
+            for act_rate in act_rates for agent_type in agent_types]
+    print("num cfgs", len(cfgs))
+    with Pool(min(NUM_PROCESSES, len(cfgs))) as pool:
+        tqdm(pool.map(train_agent, cfgs), total=len(sumoCfgs))
