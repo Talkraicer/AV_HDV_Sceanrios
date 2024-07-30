@@ -44,11 +44,16 @@ def set_observations(obs_type):
 
 
 def calculate_reward(env):
-    output_file = env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml"
+    output_file = "results_reps/" +env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml"
     with open(output_file, "a+") as f:
         f.write("</tripinfos>")
     df = output_file_to_df(output_file)
     df_timestep = df[df["arrivalTime"] >= env.timestep - env.act_rate]
+    # remove the <tripinfo> tag
+    with open(output_file, "r") as f:
+        lines = f.readlines()
+    with open(output_file, "w") as f:
+        f.writelines(lines[:-1])
     if df_timestep.empty:
         return 0
     total_delay = df_timestep.apply(lambda x: x["totalDelay"] * x["numPass"], axis=1).sum()
