@@ -3,10 +3,10 @@ import gymnasium as gym
 import numpy as np
 from tqdm import tqdm
 import wandb
-from utils import handle_step, log_features, exp_name, init_wandb_logger
+from utils import handle_step, log_features, exp_name, init_wandb_logger, output_file_to_df
 from simulation_run import init_simulation, NUM_PROCESSES
 import traci
-from stable_baselines3 import DQN
+from stable_baselines3 import DQN, PPO, A2C, TD3
 from stable_baselines3.common.evaluation import evaluate_policy
 
 it_len = 10000
@@ -22,71 +22,116 @@ OBSERVATIONS = []
 
 def set_observations(obs_type):
     global OBSERVATIONS
+    high_limit = 0
     if obs_type == "LOG_FEATURES":
         OBSERVATIONS = ["num_total_vehs", "num_hdv_in_end_PTL", "num_vehs_in_PTL",
                         "mean_speed_in_end_PTL", "mean_speed"]
+        high_limit = 100000
 
-    if obs_type == "E_FEATURES":
+    elif obs_type in ["E_FEATURES", "E_FEATURES_TU"]:
         for i in range(NUM_EDGES):
             OBSERVATIONS.append(f"num_vehs_edge_{i}_no_PTL")
             OBSERVATIONS.append(f"mean_speed_edge_{i}_no_PTL")
+            OBSERVATIONS.append(f"std_speed_edge_{i}_no_PTL")
             if 1 <= i < NUM_EDGES - 1:
                 OBSERVATIONS.append(f"num_vehs_edge_{i}_in_PTL")
                 OBSERVATIONS.append(f"mean_speed_edge_{i}_in_PTL")
+                OBSERVATIONS.append(f"std_speed_edge_{i}_in_PTL")
+        high_limit = 200
 
-    if obs_type == "E_FEATURES":
-        return gym.spaces.Box(low=0, high=200, shape=(len(OBSERVATIONS),))
 
-    if obs_type == "LOG_FEATURES":
-        return gym.spaces.Box(low=0, high=100000, shape=(len(OBSERVATIONS),))
+    return gym.spaces.Box(low=0, high=high_limit, shape=(len(OBSERVATIONS),))
+
+
+def calculate_reward(env):
+    output_file = env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml"
+    with open(output_file, "a+") as f:
+        f.write("</tripinfos>")
+    df = output_file_to_df(output_file)
+    df_timestep = df[df["arrivalTime"] >= env.timestep - env.act_rate]
+    if df_timestep.empty:
+        return 0
+    total_delay = df_timestep.apply(lambda x: x["totalDelay"] * x["numPass"], axis=1).sum()
+    return -total_delay
+
+def calc_E_features(env):
+    for e_idx in range(NUM_EDGES):
+        edge = "E" + str(e_idx)
+        if 1 <= e_idx < NUM_EDGES - 1:
+            num_lanes = traci.edge.getLaneNumber(edge)
+            PTL_idx = num_lanes - 1
+            PTL_speeds = [traci.vehicle.getSpeed(vehID) for vehID in
+                        traci.lane.getLastStepVehicleIDs(f"{edge}_{PTL_idx}")]
+            env.state[OBSERVATIONS.index(f"num_vehs_edge_{e_idx}_in_PTL")] = \
+                traci.lane.getLastStepVehicleNumber(f"{edge}_{PTL_idx}")
+            env.state[OBSERVATIONS.index(f"mean_speed_edge_{e_idx}_in_PTL")] = \
+                traci.lane.getLastStepMeanSpeed(f"{edge}_{PTL_idx}")
+            env.state[OBSERVATIONS.index(f"std_speed_edge_{e_idx}_in_PTL")] = \
+                np.std(PTL_speeds)
+
+        edge_vehIDs = traci.edge.getLastStepVehicleIDs(f"E{e_idx}")
+        edge_speeds = [traci.vehicle.getSpeed(vehID) for vehID in edge_vehIDs]
+        num_vehs_no_PTL = len(edge_vehIDs)
+        mean_speed_no_PTL = np.mean(edge_speeds)
+        std_speed_no_PTL = np.std(edge_speeds)
+        env.state[OBSERVATIONS.index(f"num_vehs_edge_{e_idx}_no_PTL")] = num_vehs_no_PTL
+        env.state[OBSERVATIONS.index(f"mean_speed_edge_{e_idx}_no_PTL")] = mean_speed_no_PTL
+        env.state[OBSERVATIONS.index(f"std_speed_edge_{e_idx}_no_PTL")] = std_speed_no_PTL
+def calc_E_features_TU():
+    speeds = {}
+    for e_idx in range(NUM_EDGES):
+        edge = "E" + str(e_idx)
+        if 1 <= e_idx < NUM_EDGES - 1:
+            num_lanes = traci.edge.getLaneNumber(edge)
+            PTL_idx = num_lanes - 1
+            PTL_speeds = [traci.vehicle.getSpeed(vehID) for vehID in
+                          traci.lane.getLastStepVehicleIDs(f"{edge}_{PTL_idx}")]
+            speeds[f"edge_{e_idx}_in_PTL"] = PTL_speeds
+
+        edge_vehIDs = traci.edge.getLastStepVehicleIDs(f"E{e_idx}")
+        edge_speeds = [traci.vehicle.getSpeed(vehID) for vehID in edge_vehIDs]
+        speeds[f"edge_{e_idx}_no_PTL"] = edge_speeds
+    return speeds
 
 
 def action_wrapper(env, policy_name):
     # run the step
-
     for i in range(env.act_rate):
         handle_step(env.timestep, policy_name, "av" + str(env.av_rate), log_rate=0)
-        env.timestep += 1
         traci.simulationStep(env.timestep)
+        env.timestep += 1
+        if env.features_type == "E_FEATURES_TU":
+            e_features = calc_E_features_TU()
+            if i == 0:
+                tot_speeds = e_features
+            else:
+                for key in tot_speeds.keys():
+                    tot_speeds[key] += e_features[key]
 
-    # get the new state
     new_features = log_features(env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml", env.timestep,
                                 env.act_rate)
-    if new_features:
-        if env.features_type == "LOG_FEATURES":
+    if env.features_type == "LOG_FEATURES":
+        if new_features:
+            # get the new state
             for i in range(len(OBSERVATIONS)):
                 env.state[i] = new_features[OBSERVATIONS[i]]
-        reward = 1 / new_features["mean_pass_delay"]
-    else:
-        reward = 0
 
-    if env.features_type == "E_FEATURES":
-        for e_idx in range(NUM_EDGES):
-            edge = "E" + str(e_idx)
-            if 1 <= e_idx < NUM_EDGES - 1:
-                num_lanes = traci.edge.getLaneNumber(edge)
-                PTL_idx = num_lanes - 1
-                env.state[OBSERVATIONS.index(f"num_vehs_edge_{e_idx}_in_PTL")] = \
-                    traci.lane.getLastStepVehicleNumber(f"{edge}_{PTL_idx}")
-                env.state[OBSERVATIONS.index(f"mean_speed_edge_{e_idx}_in_PTL")] = \
-                    traci.lane.getLastStepMeanSpeed(f"{edge}_{PTL_idx}")
+    elif env.features_type == "E_FEATURES":
+        calc_E_features(env)
 
-                num_vehs_no_PTL = [traci.lane.getLastStepVehicleNumber(f"{edge}_{i}") for i in range(PTL_idx)]
-                mean_speed_no_PTL = [traci.lane.getLastStepMeanSpeed(f"{edge}_{i}") for i in range(PTL_idx)]
-                num_vehs_no_PTL = sum(num_vehs_no_PTL)
-                mean_speed_no_PTL = sum(mean_speed_no_PTL) / (num_lanes - 1)
-                env.state[OBSERVATIONS.index(f"num_vehs_edge_{e_idx}_no_PTL")] = num_vehs_no_PTL
-                env.state[OBSERVATIONS.index(f"mean_speed_edge_{e_idx}_no_PTL")] = mean_speed_no_PTL
-
-            else:
-                env.state[OBSERVATIONS.index(f"num_vehs_edge_{e_idx}_no_PTL")] = \
-                    traci.edge.getLastStepVehicleNumber(edge)
-                env.state[OBSERVATIONS.index(f"mean_speed_edge_{e_idx}_no_PTL")] = \
-                    traci.edge.getLastStepMeanSpeed(edge)
+    elif env.features_type == "E_FEATURES_TU":
+        for obs in OBSERVATIONS:
+            location = "_".join(obs.split("_")[2:])
+            if obs.startswith("num"):
+                env.state[OBSERVATIONS.index(obs)] = len(tot_speeds[location])
+            elif obs.startswith("mean"):
+                env.state[OBSERVATIONS.index(obs)] = np.mean(tot_speeds[location])
+            elif obs.startswith("std"):
+                env.state[OBSERVATIONS.index(obs)] = np.std(tot_speeds[location])
 
     done = traci.simulation.getMinExpectedNumber() <= 0
 
-    return reward, done, new_features
+    return calculate_reward(env), done, new_features
 
 
 ACTIONS = [lambda env: action_wrapper(env, f"StaticNumPassFL_{i}") for i in range(1, 7)]
@@ -95,7 +140,7 @@ ACTION_SPACE = gym.spaces.Discrete(len(ACTIONS))
 
 
 class LeftLaneENV(gym.Env):
-    def __init__(self, policy_name, sumoCfg, log_wandb=True, features_type="LOG_FEATURES", act_rate = 1):
+    def __init__(self, policy_name, sumoCfg, log_wandb=True, features_type="LOG_FEATURES", act_rate=1):
         self.observation_space = set_observations(features_type)
         self.features_type = features_type
         self.actions = ACTIONS
@@ -108,8 +153,8 @@ class LeftLaneENV(gym.Env):
         self.log_wandb = log_wandb
         self.act_rate = act_rate
         if log_wandb:
-            proj_tail = "_ACT_RATE_"+str(self.act_rate)
-            init_wandb_logger(self.policy_name, "av" + str(self.av_rate)+proj_tail, delete_older=True)
+            proj_tail = "_ACT_RATE_" + str(self.act_rate)
+            init_wandb_logger(self.policy_name, "av" + str(self.av_rate) + proj_tail, delete_older=True)
         self.log = ""
 
     def observation(self):
@@ -136,16 +181,17 @@ class LeftLaneENV(gym.Env):
             wandb.log(log_msg)
         if done:
             traci.close()
-        return self.observation(), reward, done, False, {}
+        obs = self.observation()
+        return obs, reward, done, False, {}
 
     def render(self, mode=None):
         print(self.log)
         self.log = ''
 
 
-def train_agent(cfg, policy_name="DQN"):
-    sumoCfg, feat_type, act_rate = cfg
-    policy_name += "_"+feat_type+"_ACT_RATE_"+str(act_rate)
+def train_agent(cfg):
+    sumoCfg, feat_type, act_rate,agent_type = cfg
+    policy_name = agent_type + "_" + feat_type + "_ACT_RATE_" + str(act_rate)
     # Register the environment with Gym
     gym.envs.registration.register(
         id='LeftLaneENV-v0',
@@ -153,26 +199,33 @@ def train_agent(cfg, policy_name="DQN"):
     )
 
     env = gym.make('LeftLaneENV-v0', policy_name=policy_name, sumoCfg=sumoCfg, features_type=feat_type,
-                   act_rate = act_rate)
-    model = DQN("MlpPolicy", env, verbose=1)
+                   act_rate=act_rate)
+    if agent_type == "DQN":
+        model = DQN("MlpPolicy", env, verbose=1)
+    elif agent_type == "PPO":
+        model = PPO("MlpPolicy", env, verbose=1)
+    elif agent_type == "A2C":
+        model = A2C("MlpPolicy", env, verbose=1)
+    elif agent_type == "TD3":
+        model = TD3("MlpPolicy", env, verbose=1)
 
     for i in range(num_it):
         model.learn(total_timesteps=it_len)
 
-        mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
-        print(f"it {i} Mean reward: {mean_reward} +/- {std_reward}")
         experiment_name = ".".join(sumoCfg.split("/")[-1].split(".")[:-1])
-        agent_name = experiment_name +"_"+ policy_name
-        model.save(agent_name+"_"+str(i))
+        agent_name = experiment_name + "_" + policy_name
+        model.save(agent_name + "_" + str(i))
 
     env.close()
 
 
 if __name__ == '__main__':
     sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8]]
-    feat_types = ["LOG_FEATURES", "E_FEATURES"]
-    act_rates = [1,100,300]
+    agent_types = ["DQN", "PPO", "A2C", "TD3"]
+    feat_types = ["E_FEATURES_TU","LOG_FEATURES", "E_FEATURES"]
+    act_rates = [100, 300]
     cfgs = [(sumoCfg, feat_type, act_rate) for sumoCfg in sumoCfgs for feat_type in feat_types for act_rate in act_rates]
-    print("num cfgs", len(cfgs))
-    with Pool(min(NUM_PROCESSES, len(cfgs))) as pool:
-        tqdm(pool.map(train_agent, cfgs), total=len(sumoCfgs))
+    cfgs_agents = [(cfg, agent) for cfg in cfgs for agent in agent_types]
+    print("num cfgs", len(cfgs_agents))
+    with Pool(min(NUM_PROCESSES, len(cfgs_agents))) as pool:
+        tqdm(pool.map(train_agent, cfgs_agents), total=len(sumoCfgs))
