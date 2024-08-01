@@ -263,12 +263,12 @@ if __name__ == '__main__':
 
     sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8]]
     agent_types = ["DQN_CNN", "PPO_CNN", "A2C_CNN","DQN", "PPO", "A2C", ]
-    feat_types = ["E_FEATURES_TU","LOG_FEATURES", "E_FEATURES"]
+    feat_types = ["E_FEATURES_TU","LOG_FEATURES"]
     ACTION_SPACE_TAGS = ["alter"]
     act_rates = [100, 300]
     cfgs = [(sumoCfg, feat_type, act_rate, agent_type, action_space_tag) for sumoCfg in sumoCfgs for feat_type in feat_types
             for act_rate in act_rates for agent_type in agent_types for action_space_tag in ACTION_SPACE_TAGS]
     cfgs_clean = [cfg for cfg in cfgs if not(cfg[1] == "LOG_FEATURES" and cfg[3].endswith("CNN"))]
     print("num cfgs", len(cfgs_clean))
-    with Pool(min(NUM_PROCESSES, len(cfgs_clean))) as pool:
+    with Pool(len(cfgs_clean)) as pool:
         tqdm(pool.map(train_agent, cfgs_clean), total=len(sumoCfgs))
