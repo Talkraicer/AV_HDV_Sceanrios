@@ -174,7 +174,7 @@ class LeftLaneENV(gym.Env):
         if self.obs_type == "vec":
             return np.array([self.state[i] for i in range(len(OBSERVATIONS))])
         elif self.obs_type == "img":
-            obs = np.zeros((1,NUM_E_FEATURES, NUM_EDGES))
+            obs = np.zeros((1,NUM_E_FEATURES, NUM_EDGES), dtype=np.float32)
             for i in range(NUM_EDGES):
                 if 1 <= i < NUM_EDGES - 1:
                     obs[0][0][i] = self.state[OBSERVATIONS.index(f"num_vehs_edge_{i}_in_PTL")]
