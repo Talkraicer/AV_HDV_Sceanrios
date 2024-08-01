@@ -172,7 +172,7 @@ class LeftLaneENV(gym.Env):
 
     def observation(self):
         if self.obs_type == "vec":
-            return np.array([self.state[i] for i in range(len(OBSERVATIONS))])
+            return np.array([self.state[i] for i in range(len(OBSERVATIONS))]).astype(np.float32)
         elif self.obs_type == "img":
             obs = np.zeros((1,NUM_E_FEATURES, NUM_EDGES), dtype=np.float32)
             for i in range(NUM_EDGES):
@@ -183,7 +183,7 @@ class LeftLaneENV(gym.Env):
                 obs[0][3][i] = self.state[OBSERVATIONS.index(f"num_vehs_edge_{i}_no_PTL")]
                 obs[0][4][i] = self.state[OBSERVATIONS.index(f"mean_speed_edge_{i}_no_PTL")]
                 obs[0][5][i] = self.state[OBSERVATIONS.index(f"std_speed_edge_{i}_no_PTL")]
-            return obs
+            return obs.astype(np.float32)
 
     def reset(self, seed=None, options=None, ):
         # check if a traci instance is already running
