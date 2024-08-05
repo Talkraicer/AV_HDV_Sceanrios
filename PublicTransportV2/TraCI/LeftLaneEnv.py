@@ -128,7 +128,7 @@ def action_wrapper(env, policy_name):
             for i in range(len(OBSERVATIONS)):
                 env.state[i] = new_features[OBSERVATIONS[i]]
     elif env.features_type == "MS_EPTL" and new_features:
-        env.state[OBSERVATIONS.index("mean_speed_in_end_PTL")] = new_features["mean_speed_in_end_PTL"]
+        env.state[OBSERVATIONS.index("mean_speed_in_end_PTL")] = new_features["mean_speed_in_end_PTL"]/(MAX_SPEED*1.5)
 
     elif env.features_type == "E_FEATURES":
         calc_E_features(env)
