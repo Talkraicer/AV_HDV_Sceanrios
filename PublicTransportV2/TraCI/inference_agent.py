@@ -43,6 +43,6 @@ def infer(agent_path):
         obs, reward, done, _ , _ = env.step(action)
 
 if __name__ == '__main__':
-    paths = [f"agents/{path}" for path in os.listdir("agents")]
+    paths = [f"agents/{path}" for path in os.listdir("agents") if path != "logged_agents"]
     with Pool() as p:
         p.map(infer, paths)
