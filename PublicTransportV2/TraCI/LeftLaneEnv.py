@@ -13,7 +13,7 @@ it_len = 10000
 num_it = 100
 NUM_EDGES = 8
 NUM_E_FEATURES = 6
-
+MAX_SPEED = 25
 # DECISION VARIABLE
 MIN_NUM_PASS = 1
 
@@ -39,6 +39,10 @@ def set_observations(features_type, obs_type):
                 OBSERVATIONS.append(f"mean_speed_edge_{i}_in_PTL")
                 OBSERVATIONS.append(f"std_speed_edge_{i}_in_PTL")
         high_limit = 200
+
+    elif features_type == "MS_EPTL":
+        OBSERVATIONS = ["mean_speed_in_end_PTL"]
+        high_limit = 1
 
     if obs_type == "vec":
         return gym.spaces.Box(low=0, high=high_limit, shape=(len(OBSERVATIONS),), dtype=np.float32)
@@ -123,6 +127,8 @@ def action_wrapper(env, policy_name):
             # get the new state
             for i in range(len(OBSERVATIONS)):
                 env.state[i] = new_features[OBSERVATIONS[i]]
+    elif env.features_type == "MS_EPTL" and new_features:
+        env.state[OBSERVATIONS.index("mean_speed_in_end_PTL")] = new_features["mean_speed_in_end_PTL"]
 
     elif env.features_type == "E_FEATURES":
         calc_E_features(env)
@@ -262,9 +268,11 @@ def train_agent(cfg):
 if __name__ == '__main__':
 
     sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8]]
-    agent_types = ["DQN_CNN", "PPO_CNN", "A2C_CNN","DQN", "PPO", "A2C", ]
-    feat_types = ["E_FEATURES_TU","LOG_FEATURES"]
-    ACTION_SPACE_TAGS = ["alter"]
+    # agent_types = ["DQN_CNN", "PPO_CNN", "A2C_CNN","DQN", "PPO", "A2C", ]
+    agent_types = ["DQN", "PPO", "A2C", ]
+    # feat_types = ["E_FEATURES_TU","LOG_FEATURES","E_FEATURES"]
+    feat_types = ["MS_EPTL"]
+    ACTION_SPACE_TAGS = ["alter", "direct"]
     act_rates = [100, 300]
     cfgs = [(sumoCfg, feat_type, act_rate, agent_type, action_space_tag) for sumoCfg in sumoCfgs for feat_type in feat_types
             for act_rate in act_rates for agent_type in agent_types for action_space_tag in ACTION_SPACE_TAGS]
