@@ -262,7 +262,7 @@ def train_agent(cfg):
     )
 
     env = gym.make('LeftLaneENV-v0', policy_name=policy_name, sumoCfg=sumoCfg, features_type=feat_type,
-                   act_rate=act_rate, action_space_tag=action_space_tag, log_wandb = False)
+                   act_rate=act_rate, action_space_tag=action_space_tag)
     if agent_type == "DQN":
         model = DQN("MlpPolicy", env, verbose=1, learning_starts=1, target_update_interval=(3600*13)//act_rate)
     elif agent_type == "DQN_CNN":
