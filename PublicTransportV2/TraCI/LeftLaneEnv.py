@@ -11,6 +11,9 @@ from stable_baselines3 import DQN, PPO, A2C
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.callbacks import BaseCallback
 
+import warnings
+warnings.filterwarnings("ignore", message="API change now handles step as floating point seconds connection.check().simulationStep(step)")
+
 NUM_EDGES = 8
 NUM_E_FEATURES = 6
 MAX_SPEED = 25
