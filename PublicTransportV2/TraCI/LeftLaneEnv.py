@@ -297,5 +297,5 @@ if __name__ == '__main__':
             for act_rate in act_rates for agent_type in agent_types for action_space_tag in ACTION_SPACE_TAGS]
     cfgs_clean = [cfg for cfg in cfgs if not(cfg[1] == "LOG_FEATURES" and cfg[3].endswith("CNN"))]
     print("num cfgs", len(cfgs_clean))
-    with Pool(min(len(cfgs_clean))) as pool:
+    with Pool(len(cfgs_clean)) as pool:
         tqdm(pool.map(train_agent, cfgs_clean), total=len(sumoCfgs))
