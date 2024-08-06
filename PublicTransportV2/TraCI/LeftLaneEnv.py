@@ -205,7 +205,8 @@ class LeftLaneENV(gym.Env):
                          self.act_rate)
             mean_pass_delay = final_log["mean_pass_delay"]
             if mean_pass_delay < self.best_mean_pass_delay:
-                os.remove("agents/" + self.agent_name + "_" + str(round(self.best_mean_pass_delay,0)))
+                if self.agent_name + "_" + str(round(self.best_mean_pass_delay,0)) in os.listdir("agents"):
+                    os.remove("agents/" + self.agent_name + "_" + str(round(self.best_mean_pass_delay,0)))
                 self.best_mean_pass_delay = mean_pass_delay
                 self.model.save("agents/" + self.agent_name + "_" + str(round(mean_pass_delay,0)))
 
