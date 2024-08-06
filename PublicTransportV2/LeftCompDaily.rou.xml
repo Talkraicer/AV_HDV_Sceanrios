@@ -12,6 +12,5 @@
 	<vTypeDistribution id="busDist">
 	</vTypeDistribution>
 
-	<flow id="busFlow" type="busDist" begin="0.00" departLane="2" fromJunction="J0" toJunction="J9" end="10800" departSpeed="random" vehsPerHour="120" personNumber="2" />
 
 </routes>

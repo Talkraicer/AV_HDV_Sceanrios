@@ -9,11 +9,12 @@ from simulation_run import init_simulation, NUM_PROCESSES
 import traci
 from stable_baselines3 import DQN, PPO, A2C
 from stable_baselines3.common.env_checker import check_env
-it_len = 10000
-num_it = 100
+from stable_baselines3.common.callbacks import BaseCallback
+
 NUM_EDGES = 8
 NUM_E_FEATURES = 6
 MAX_SPEED = 25
+num_it = 10000
 # DECISION VARIABLE
 MIN_NUM_PASS = 1
 
@@ -176,6 +177,10 @@ class LeftLaneENV(gym.Env):
             init_wandb_logger(self.policy_name, "av" + str(self.av_rate) + proj_tail+ "_" + action_space_tag, delete_older=True)
         self.log = ""
 
+        self.model = None
+        self.best_mean_pass_delay = 99999999
+        self.agent_name = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + "_" + self.policy_name
+
     def observation(self):
         if self.obs_type == "vec":
             return np.array([self.state[i] for i in range(len(OBSERVATIONS))]).astype(np.float32)
@@ -192,6 +197,15 @@ class LeftLaneENV(gym.Env):
             return obs.astype(np.float32)
 
     def reset(self, seed=None, options=None, ):
+        if self.model:
+            final_log = log_features(self.policy_name + exp_name + "_av" + str(self.av_rate) + ".xml", self.timestep,
+                         self.act_rate)
+            mean_pass_delay = final_log["mean_pass_delay"]
+            if mean_pass_delay < self.best_mean_pass_delay:
+                os.remove("agents/" + self.agent_name + "_" + str(round(self.best_mean_pass_delay,0)))
+                self.best_mean_pass_delay = mean_pass_delay
+                self.model.save("agents/" + self.agent_name + "_" + str(round(mean_pass_delay,0)))
+
         # check if a traci instance is already running
         try:
             traci.close()
@@ -228,6 +242,15 @@ class LeftLaneENV(gym.Env):
         print(self.log)
         self.log = ''
 
+class SaveOnResetCallback(BaseCallback):
+    def __init__(self, env, verbose=1):
+        super(SaveOnResetCallback, self).__init__(verbose)
+        self.env = env.env.env
+
+    def _on_step(self) -> bool:
+        self.env.model = self.model
+        return True
+
 
 def train_agent(cfg):
     sumoCfg, feat_type, act_rate,agent_type, action_space_tag = cfg
@@ -239,10 +262,9 @@ def train_agent(cfg):
     )
 
     env = gym.make('LeftLaneENV-v0', policy_name=policy_name, sumoCfg=sumoCfg, features_type=feat_type,
-                   act_rate=act_rate, action_space_tag=action_space_tag)
-    check_env(env)
+                   act_rate=act_rate, action_space_tag=action_space_tag, log_wandb = False)
     if agent_type == "DQN":
-        model = DQN("MlpPolicy", env, verbose=1)
+        model = DQN("MlpPolicy", env, verbose=1, learning_starts=1, target_update_interval=(3600*13)//act_rate)
     elif agent_type == "DQN_CNN":
         model = DQN("CnnPolicy", env, verbose=1)
     elif agent_type == "PPO":
@@ -254,22 +276,19 @@ def train_agent(cfg):
     elif agent_type == "A2C_CNN":
         model = A2C("CnnPolicy", env, verbose=1)
 
-    for i in range(num_it):
-        model.learn(total_timesteps=it_len)
-
-        experiment_name = ".".join(sumoCfg.split("/")[-1].split(".")[:-1])
-        agent_name = experiment_name + "_" + policy_name
-        os.makedirs("agents", exist_ok=True)
-        model.save("agents/"+agent_name + "_" + str(i))
+    os.makedirs("agents", exist_ok=True)
+    save_callback = SaveOnResetCallback(env)
+    model.learn(total_timesteps=num_it, callback=save_callback)
 
     env.close()
 
 
 if __name__ == '__main__':
 
-    sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8]]
+    sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8, 0.5]]
+    # sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.5]]
     # agent_types = ["DQN_CNN", "PPO_CNN", "A2C_CNN","DQN", "PPO", "A2C", ]
-    agent_types = ["DQN", "PPO", "A2C", ]
+    agent_types = ["DQN"]
     # feat_types = ["E_FEATURES_TU","LOG_FEATURES","E_FEATURES"]
     feat_types = ["MS_EPTL"]
     ACTION_SPACE_TAGS = ["alter", "direct"]
@@ -278,5 +297,5 @@ if __name__ == '__main__':
             for act_rate in act_rates for agent_type in agent_types for action_space_tag in ACTION_SPACE_TAGS]
     cfgs_clean = [cfg for cfg in cfgs if not(cfg[1] == "LOG_FEATURES" and cfg[3].endswith("CNN"))]
     print("num cfgs", len(cfgs_clean))
-    with Pool(len(cfgs_clean)) as pool:
+    with Pool(min(len(cfgs_clean))) as pool:
         tqdm(pool.map(train_agent, cfgs_clean), total=len(sumoCfgs))
