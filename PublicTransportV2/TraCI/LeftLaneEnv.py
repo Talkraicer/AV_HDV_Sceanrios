@@ -12,7 +12,7 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.callbacks import BaseCallback
 
 import warnings
-warnings.filterwarnings("ignore", message="API change now handles step as floating point seconds connection.check().simulationStep(step)")
+warnings.filterwarnings("ignore")
 
 NUM_EDGES = 8
 NUM_E_FEATURES = 6
