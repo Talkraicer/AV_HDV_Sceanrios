@@ -20,9 +20,9 @@ def infer(agent_path):
     else:
         raise ValueError("Invalid agent path")
     av_rate_str = agent_path_cln.split("_")[1]
-    feat_type = "_".join(agent_path_cln.split("_")[3:6])
-    act_rate = agent_path_cln.split("_")[8]
-    act_type = agent_path_cln.split("_")[9]
+    feat_type = "_".join(agent_path_cln.split("_")[3:5])
+    act_rate = agent_path_cln.split("_")[7]
+    act_type = agent_path_cln.split("_")[8]
     sumo_cfg = f"../cfg_files_{exp_name}/{exp_name}_{av_rate_str}.sumocfg"
 
     gym.envs.registration.register(
