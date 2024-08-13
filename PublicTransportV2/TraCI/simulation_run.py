@@ -6,7 +6,6 @@ import pandas as pd
 from tqdm import tqdm
 from multiprocessing import Pool
 
-from results_utils import parse_all_output_files
 from utils import *
 import traci
 import optuna
