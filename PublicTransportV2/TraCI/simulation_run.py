@@ -14,9 +14,9 @@ GUI = False
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = "LeftCompDaily"
+EXP_NAME_TAG = "LeftCompDemo"
 
-POLICIES = ["Control mean_speed_in_end_PTL","Nothing","StaticNumPassFL"]
+POLICIES = ["Plus","Control mean_speed_in_end_PTL","Nothing","StaticNumPassFL"]
 
 CONTROL_SPEED_RANGES = [(10,20),(12,20),(14,20),(16,22),(8,20),(8,18),(8,15), (10,18)]
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                 for enter_clear in EnterClearRange:
                     policy_name = f"{policy}_{enter_clear}"
                     args.append((policy_name, sumoCfg))
-            elif policy.startswith("StaticNumPass"):
+            elif policy.startswith("StaticNumPass") or policy.startswith("Plus"):
                 for min_num_pass in MIN_NUM_PASS:
                     policy_name = f"{policy}_{min_num_pass}"
                     args.append((policy_name, sumoCfg))
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     parallel_simulation(args)
     policies = []
     for policy in POLICIES:
-        if policy.startswith("StaticNumPass"):
+        if policy.startswith("StaticNumPass") or policy.startswith("Plus"):
             for min_num_pass in MIN_NUM_PASS:
                 policies.append(f"{policy}_{min_num_pass}")
         elif policy.startswith("Control"):
@@ -127,10 +127,10 @@ if __name__ == "__main__":
     # policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
     #                 for enter_clear in EnterClearRange]
     # policy_names = ["Nothing"]
-    parse_all_output_files(AV_rates, 1, policies)
-    if "Nothing" in policies:
-        policies.remove("Nothing")
-    parse_all_pairwise(policies, AV_rates)
+    # parse_all_output_files(AV_rates, 1, policies)
+    # if "Nothing" in policies:
+    #     policies.remove("Nothing")
+    # parse_all_pairwise(policies, AV_rates)
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
     #                 for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     # policy_names += [f"{policy}_{feature_dist}_{max_avs}_{max_buses}" for policy in POLICIES if policy.startswith("FastLane")]
