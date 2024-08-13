@@ -5,8 +5,11 @@ import pandas as pd
 
 from tqdm import tqdm
 from multiprocessing import Pool
+
+from PublicTransportV2.TraCI.results_utils import parse_all_output_files
 from utils import *
 import traci
+import optuna
 
 GUI = False
 
@@ -14,11 +17,11 @@ GUI = False
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = "LeftCompDemo"
+EXP_NAME_TAG = "LeftCompDaily"
 
-POLICIES = ["Plus","Control mean_speed_in_end_PTL","Nothing","StaticNumPassFL"]
+POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
 
-CONTROL_SPEED_RANGES = [(10,20),(12,20),(14,20),(16,22),(8,20),(8,18),(8,15), (10,18)]
+CONTROL_SPEED_RANGES = [(10, 20), (12, 20), (14, 20), (16, 22), (8, 20), (8, 18), (8, 15), (10, 18)]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]
@@ -38,7 +41,6 @@ Max_Buses = ["0", "1", "2"]
 if GUI:
     NUM_PROCESSES = 1
 
-
 if 'SUMO_HOME' in os.environ:
     sumo_path = os.environ['SUMO_HOME']
     sys.path.append(os.path.join(sumo_path, 'tools'))
@@ -52,6 +54,7 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
+
 def init_simulation(arg):
     policy_name, sumoCfg = arg
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
@@ -61,11 +64,15 @@ def init_simulation(arg):
     traci.start(sumoCmd)
     return policy_name, sumoCfg, av_rate
 
-def simulate(arg):
+
+def simulate(arg, log_wandb=True):
     policy_name, sumoCfg, av_rate = init_simulation(arg)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        handle_step(step, policy_name,av_rate)
+        if log_wandb:
+            handle_step(step, policy_name, av_rate)
+        else:
+            handle_step(step, policy_name, av_rate, log_rate=0)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -76,14 +83,31 @@ def parallel_simulation(args):
         results = list(tqdm(pool.imap(simulate, args), total=len(args)))
 
 
-if __name__ == "__main__":
-    sumoCfgPaths = []
-    for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
-        if sumoCfg.endswith(".sumocfg"):
-            sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
-            sumoCfgPaths.append(sumoCfgPath)
-    if GUI:
-        sumoCfgPaths = [sumoCfgPaths[3]]
+def optuna_simulation(sumoCfgPaths):
+    for sumoCfg in sumoCfgPaths:
+        study = optuna.create_study(direction='minimize')
+
+        def optuna_objective(trial):
+            min_speed = trial.suggest_float('min_speed', 8, 16)
+            max_speed = trial.suggest_float('max_speed', min_speed + 2, 22)
+            policy_name = f"Control mean_speed_in_end_PTL {min_speed} {max_speed}"
+            simulate((policy_name, sumoCfg), log_wandb=False)
+            av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1]
+            output_file = "results_reps/" + policy_name + exp_name + "_" + str(av_rate) + ".xml"
+            df = output_file_to_df(output_file)
+            total_delay = calc_stats_metric(df, "totalDelay", diff=False)
+            mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
+            return mean_pass_delay
+
+        study.optimize(optuna_objective, n_trials=1000, n_jobs=1, show_progress_bar=True)
+        with open("optuna_results.txt", "a+") as f:
+            f.write(f"SumoCfg: {sumoCfg}\n")
+            f.write(f"Best value: {study.best_value}\n")
+            f.write(f"Best params: {study.best_params}\n")
+            f.write("\n")
+
+
+def simulate_policies(sumoCfgPaths):
     args = []
     for policy in POLICIES:
         policy_name = policy
@@ -114,6 +138,9 @@ if __name__ == "__main__":
             else:
                 args.append((policy_name, sumoCfg))
     parallel_simulation(args)
+
+
+def parse_results():
     policies = []
     for policy in POLICIES:
         if policy.startswith("StaticNumPass") or policy.startswith("Plus"):
@@ -124,17 +151,30 @@ if __name__ == "__main__":
                 policies.append(f"{policy} {min_speed} {max_speed}")
         else:
             policies.append(policy)
-    # policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
-    #                 for enter_clear in EnterClearRange]
-    # policy_names = ["Nothing"]
-    # parse_all_output_files(AV_rates, 1, policies)
-    # if "Nothing" in policies:
-    #     policies.remove("Nothing")
-    # parse_all_pairwise(policies, AV_rates)
-    # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
-    #                 for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
-    # policy_names += [f"{policy}_{feature_dist}_{max_avs}_{max_buses}" for policy in POLICIES if policy.startswith("FastLane")]
-    # policy_names += [policy for policy in POLICIES if not policy.startswith("DisallowBack") and not policy.startswith("FastLane")]
-    # create_all_results_tables(AV_rates,policy_names)
-    # parse_all_output_files(AV_rates, 1, policy_names)
-    # parse_all_pairwise(policy_names, AV_rates)
+        policy_names = [f"{policy}_{enter_clear}" for policy in POLICIES if policy.startswith("EnterClear")
+                        for enter_clear in EnterClearRange]
+        policy_names = ["Nothing"]
+        parse_all_output_files(AV_rates, 1, policies)
+        if "Nothing" in policies:
+            policies.remove("Nothing")
+        # parse_all_pairwise(policies, AV_rates)
+        # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in POLICIES if policy.startswith("DisallowBack")
+        #                 for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
+        # policy_names += [f"{policy}_{feature_dist}_{max_avs}_{max_buses}" for policy in POLICIES if policy.startswith("FastLane")]
+        # policy_names += [policy for policy in POLICIES if not policy.startswith("DisallowBack") and not policy.startswith("FastLane")]
+        # create_all_results_tables(AV_rates,policy_names)
+        # parse_all_output_files(AV_rates, 1, policy_names)
+        # parse_all_pairwise(policy_names, AV_rates)
+
+
+if __name__ == "__main__":
+    sumoCfgPaths = []
+    for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
+        if sumoCfg.endswith(".sumocfg"):
+            sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
+            sumoCfgPaths.append(sumoCfgPath)
+
+    if GUI:
+        sumoCfgPaths = [sumoCfgPaths[3]]
+    # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
+    simulate_policies(sumoCfgPaths)

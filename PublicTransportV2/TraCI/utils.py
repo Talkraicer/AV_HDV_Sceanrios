@@ -1,4 +1,4 @@
-exp_name = "LeftCompDemo"
+exp_name = "LeftCompDaily"
 
 import os
 import traci
