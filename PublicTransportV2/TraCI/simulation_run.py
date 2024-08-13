@@ -83,29 +83,28 @@ def parallel_simulation(args):
         results = list(tqdm(pool.imap(simulate, args), total=len(args)))
 
 
-def optuna_simulation(sumoCfgPaths):
-    for sumoCfg in sumoCfgPaths:
-        study = optuna.create_study(direction='minimize')
+def optuna_simulation(sumoCfgPath):
+    study = optuna.create_study(direction='minimize')
 
-        def optuna_objective(trial):
-            min_speed = trial.suggest_float('min_speed', 8, 16)
-            max_speed = trial.suggest_float('max_speed', min_speed + 2, 22)
-            policy_name = f"Control mean_speed_in_end_PTL {min_speed} {max_speed}"
-            simulate((policy_name, sumoCfg), log_wandb=False)
-            av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1]
-            output_file = "results_reps/" + policy_name + exp_name + "_" + str(av_rate) + ".xml"
-            df = output_file_to_df(output_file)
-            total_delay = calc_stats_metric(df, "totalDelay", diff=False)
-            mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
-            return mean_pass_delay
+    def optuna_objective(trial):
+        min_speed = trial.suggest_float('min_speed', 8, 16)
+        max_speed = trial.suggest_float('max_speed', min_speed + 2, 22)
+        policy_name = f"Control mean_speed_in_end_PTL {min_speed} {max_speed}"
+        simulate((policy_name, sumoCfgPath), log_wandb=False)
+        av_rate = ".".join(sumoCfgPath.split("/")[-1].split(".")[:-1]).split("_")[-1]
+        output_file = "results_reps/" + policy_name + exp_name + "_" + str(av_rate) + ".xml"
+        df = output_file_to_df(output_file)
+        total_delay = calc_stats_metric(df, "totalDelay", diff=False)
+        mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
+        return mean_pass_delay
 
-        with parallel_backend('multiprocessing'):
-            study.optimize(optuna_objective, n_trials=1000, n_jobs=-1, show_progress_bar=True)
-        with open("optuna_results.txt", "a+") as f:
-            f.write(f"SumoCfg: {sumoCfg}\n")
-            f.write(f"Best value: {study.best_value}\n")
-            f.write(f"Best params: {study.best_params}\n")
-            f.write("\n")
+    with parallel_backend('multiprocessing'):
+        study.optimize(optuna_objective, n_trials=100, n_jobs=1, show_progress_bar=True)
+    with open("optuna_results.txt", "a+") as f:
+        f.write(f"SumoCfg: {sumoCfg}\n")
+        f.write(f"Best value: {study.best_value}\n")
+        f.write(f"Best params: {study.best_params}\n")
+        f.write("\n")
 
 
 def simulate_policies(sumoCfgPaths):
@@ -178,5 +177,6 @@ if __name__ == "__main__":
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[3]]
     # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
-    optuna_simulation(sumoCfgPaths)
+    with Pool(len(sumoCfgPaths)) as p:
+        p.map(optuna_simulation, sumoCfgPaths)
     # simulate_policies(sumoCfgPaths)
