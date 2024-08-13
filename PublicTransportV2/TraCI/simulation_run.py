@@ -99,7 +99,7 @@ def optuna_simulation(sumoCfgPaths):
             mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
             return mean_pass_delay
 
-        study.optimize(optuna_objective, n_trials=1000, n_jobs=1, show_progress_bar=True)
+        study.optimize(optuna_objective, n_trials=1000, n_jobs=-1, show_progress_bar=True)
         with open("optuna_results.txt", "a+") as f:
             f.write(f"SumoCfg: {sumoCfg}\n")
             f.write(f"Best value: {study.best_value}\n")
