@@ -176,4 +176,5 @@ if __name__ == "__main__":
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[3]]
     # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
-    simulate_policies(sumoCfgPaths)
+    optuna_simulation(sumoCfgPaths)
+    # simulate_policies(sumoCfgPaths)
