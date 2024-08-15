@@ -10,6 +10,8 @@ from joblib import parallel_backend
 from utils import *
 import traci
 import optuna
+import warnings
+warnings.filterwarnings("ignore")
 
 GUI = False
 
@@ -17,7 +19,7 @@ GUI = False
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = "LeftCompDaily"
+EXP_NAME_TAG = "LeftCompScenarios"
 
 POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
 
@@ -177,6 +179,6 @@ if __name__ == "__main__":
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[3]]
     # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
-    with Pool(len(sumoCfgPaths)) as p:
-        p.map(optuna_simulation, sumoCfgPaths)
-    # simulate_policies(sumoCfgPaths)
+    # with Pool(len(sumoCfgPaths)) as p:
+        # p.map(optuna_simulation, sumoCfgPaths)
+    simulate_policies(sumoCfgPaths)

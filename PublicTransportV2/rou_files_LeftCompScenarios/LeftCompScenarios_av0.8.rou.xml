@@ -1,0 +1,170 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+	<vTypeDistribution id="vehicleDist">
+		<vType id="AV_1" color="blue" probability="0.504" vClass="evehicle" />
+		<vType id="AV_2" color="blue" probability="0.224" vClass="evehicle" />
+		<vType id="AV_3" color="blue" probability="0.048" vClass="evehicle" />
+		<vType id="AV_4" color="blue" probability="0.016" vClass="evehicle" />
+		<vType id="AV_5" color="blue" probability="0.008" vClass="evehicle" />
+		<vType id="HD_1" color="red" probability="0.126" vClass="passenger" />
+		<vType id="HD_2" color="red" probability="0.056" vClass="passenger" />
+		<vType id="HD_3" color="red" probability="0.012" vClass="passenger" />
+		<vType id="HD_4" color="red" probability="0.004" vClass="passenger" />
+		<vType id="HD_5" color="red" probability="0.002" vClass="passenger" />
+		</vTypeDistribution>
+	
+	<vType id="TemporalHD" color="magenta" />
+	<vType id="AllowedTemporalHD" color="orange" />
+
+
+
+
+	<vTypeDistribution id="busDist">
+		<vType id="Bus_25" probability="0.05" vClass="bus" />
+		<vType id="Bus_26" probability="0.05" vClass="bus" />
+		<vType id="Bus_27" probability="0.05" vClass="bus" />
+		<vType id="Bus_28" probability="0.05" vClass="bus" />
+		<vType id="Bus_29" probability="0.05" vClass="bus" />
+		<vType id="Bus_30" probability="0.05" vClass="bus" />
+		<vType id="Bus_31" probability="0.05" vClass="bus" />
+		<vType id="Bus_32" probability="0.05" vClass="bus" />
+		<vType id="Bus_33" probability="0.05" vClass="bus" />
+		<vType id="Bus_34" probability="0.05" vClass="bus" />
+		<vType id="Bus_35" probability="0.05" vClass="bus" />
+		<vType id="Bus_36" probability="0.05" vClass="bus" />
+		<vType id="Bus_37" probability="0.05" vClass="bus" />
+		<vType id="Bus_38" probability="0.05" vClass="bus" />
+		<vType id="Bus_39" probability="0.05" vClass="bus" />
+		<vType id="Bus_40" probability="0.05" vClass="bus" />
+		<vType id="Bus_41" probability="0.05" vClass="bus" />
+		<vType id="Bus_42" probability="0.05" vClass="bus" />
+		<vType id="Bus_43" probability="0.05" vClass="bus" />
+		<vType id="Bus_44" probability="0.05" vClass="bus" />
+		</vTypeDistribution>
+<flow id="MajorFlow6" type="vehicleDist" begin="0" departLane="random" fromJunction="J0" toJunction="J9" end="1800" vehsPerHour="3200" departSpeed="max" />
+	<flow id="MajorFlow6_J3" type="vehicleDist" begin="0" departLane="random" fromJunction="J0" toJunction="J3" end="1800" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow6_J5" type="vehicleDist" begin="0" departLane="random" fromJunction="J0" toJunction="J5" end="1800" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow6_J7" type="vehicleDist" begin="0" departLane="random" fromJunction="J0" toJunction="J7" end="1800" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow6_J2" type="vehicleDist" begin="0" departLane="0" fromJunction="J2" toJunction="J9" end="1800" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow6_J4" type="vehicleDist" begin="0" departLane="0" fromJunction="J4" toJunction="J9" end="1800" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow6_J6" type="vehicleDist" begin="0" departLane="0" fromJunction="J6" toJunction="J9" end="1800" vehsPerHour="400" departSpeed="max" />
+	<flow id="busFlow6" type="busDist" begin="0" departLane="random" fromJunction="J0" toJunction="J9" end="1800" vehsPerHour="30" departSpeed="max" />
+	<flow id="MajorFlow7" type="vehicleDist" begin="1800" departLane="random" fromJunction="J0" toJunction="J9" end="3600" vehsPerHour="5600" departSpeed="max" />
+	<flow id="MajorFlow7_J3" type="vehicleDist" begin="1800" departLane="random" fromJunction="J0" toJunction="J3" end="3600" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow7_J5" type="vehicleDist" begin="1800" departLane="random" fromJunction="J0" toJunction="J5" end="3600" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow7_J7" type="vehicleDist" begin="1800" departLane="random" fromJunction="J0" toJunction="J7" end="3600" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow7_J2" type="vehicleDist" begin="1800" departLane="0" fromJunction="J2" toJunction="J9" end="3600" vehsPerHour="700" departSpeed="max" />
+	<flow id="MajorFlow7_J4" type="vehicleDist" begin="1800" departLane="0" fromJunction="J4" toJunction="J9" end="3600" vehsPerHour="700" departSpeed="max" />
+	<flow id="MajorFlow7_J6" type="vehicleDist" begin="1800" departLane="0" fromJunction="J6" toJunction="J9" end="3600" vehsPerHour="700" departSpeed="max" />
+	<flow id="busFlow7" type="busDist" begin="1800" departLane="random" fromJunction="J0" toJunction="J9" end="3600" vehsPerHour="60" departSpeed="max" />
+	<flow id="MajorFlow8" type="vehicleDist" begin="3600" departLane="random" fromJunction="J0" toJunction="J9" end="5400" vehsPerHour="5600" departSpeed="max" />
+	<flow id="MajorFlow8_J3" type="vehicleDist" begin="3600" departLane="random" fromJunction="J0" toJunction="J3" end="5400" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow8_J5" type="vehicleDist" begin="3600" departLane="random" fromJunction="J0" toJunction="J5" end="5400" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow8_J7" type="vehicleDist" begin="3600" departLane="random" fromJunction="J0" toJunction="J7" end="5400" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow8_J2" type="vehicleDist" begin="3600" departLane="0" fromJunction="J2" toJunction="J9" end="5400" vehsPerHour="700" departSpeed="max" />
+	<flow id="MajorFlow8_J4" type="vehicleDist" begin="3600" departLane="0" fromJunction="J4" toJunction="J9" end="5400" vehsPerHour="700" departSpeed="max" />
+	<flow id="MajorFlow8_J6" type="vehicleDist" begin="3600" departLane="0" fromJunction="J6" toJunction="J9" end="5400" vehsPerHour="700" departSpeed="max" />
+	<flow id="busFlow8" type="busDist" begin="3600" departLane="random" fromJunction="J0" toJunction="J9" end="5400" vehsPerHour="60" departSpeed="max" />
+	<flow id="MajorFlow9" type="vehicleDist" begin="5400" departLane="random" fromJunction="J0" toJunction="J9" end="7200" vehsPerHour="3200" departSpeed="max" />
+	<flow id="MajorFlow9_J3" type="vehicleDist" begin="5400" departLane="random" fromJunction="J0" toJunction="J3" end="7200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow9_J5" type="vehicleDist" begin="5400" departLane="random" fromJunction="J0" toJunction="J5" end="7200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow9_J7" type="vehicleDist" begin="5400" departLane="random" fromJunction="J0" toJunction="J7" end="7200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow9_J2" type="vehicleDist" begin="5400" departLane="0" fromJunction="J2" toJunction="J9" end="7200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow9_J4" type="vehicleDist" begin="5400" departLane="0" fromJunction="J4" toJunction="J9" end="7200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow9_J6" type="vehicleDist" begin="5400" departLane="0" fromJunction="J6" toJunction="J9" end="7200" vehsPerHour="400" departSpeed="max" />
+	<flow id="busFlow9" type="busDist" begin="5400" departLane="random" fromJunction="J0" toJunction="J9" end="7200" vehsPerHour="30" departSpeed="max" />
+	<flow id="MajorFlow12" type="vehicleDist" begin="10800" departLane="random" fromJunction="J0" toJunction="J9" end="12600" vehsPerHour="7200" departSpeed="max" />
+	<flow id="MajorFlow12_J3" type="vehicleDist" begin="10800" departLane="random" fromJunction="J0" toJunction="J3" end="12600" vehsPerHour="900" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow12_J5" type="vehicleDist" begin="10800" departLane="random" fromJunction="J0" toJunction="J5" end="12600" vehsPerHour="900" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow12_J7" type="vehicleDist" begin="10800" departLane="random" fromJunction="J0" toJunction="J7" end="12600" vehsPerHour="900" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow12_J2" type="vehicleDist" begin="10800" departLane="0" fromJunction="J2" toJunction="J9" end="12600" vehsPerHour="900" departSpeed="max" />
+	<flow id="MajorFlow12_J4" type="vehicleDist" begin="10800" departLane="0" fromJunction="J4" toJunction="J9" end="12600" vehsPerHour="900" departSpeed="max" />
+	<flow id="MajorFlow12_J6" type="vehicleDist" begin="10800" departLane="0" fromJunction="J6" toJunction="J9" end="12600" vehsPerHour="900" departSpeed="max" />
+	<flow id="busFlow12" type="busDist" begin="10800" departLane="random" fromJunction="J0" toJunction="J9" end="12600" vehsPerHour="40" departSpeed="max" />
+	<flow id="MajorFlow15" type="vehicleDist" begin="16200" departLane="random" fromJunction="J0" toJunction="J9" end="18000" vehsPerHour="4640" departSpeed="max" />
+	<flow id="MajorFlow15_J3" type="vehicleDist" begin="16200" departLane="random" fromJunction="J0" toJunction="J3" end="18000" vehsPerHour="580" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow15_J5" type="vehicleDist" begin="16200" departLane="random" fromJunction="J0" toJunction="J5" end="18000" vehsPerHour="580" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow15_J7" type="vehicleDist" begin="16200" departLane="random" fromJunction="J0" toJunction="J7" end="18000" vehsPerHour="580" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow15_J2" type="vehicleDist" begin="16200" departLane="0" fromJunction="J2" toJunction="J9" end="18000" vehsPerHour="580" departSpeed="max" />
+	<flow id="MajorFlow15_J4" type="vehicleDist" begin="16200" departLane="0" fromJunction="J4" toJunction="J9" end="18000" vehsPerHour="580" departSpeed="max" />
+	<flow id="MajorFlow15_J6" type="vehicleDist" begin="16200" departLane="0" fromJunction="J6" toJunction="J9" end="18000" vehsPerHour="580" departSpeed="max" />
+	<flow id="busFlow15" type="busDist" begin="16200" departLane="random" fromJunction="J0" toJunction="J9" end="18000" vehsPerHour="40" departSpeed="max" />
+	<flow id="MajorFlow16" type="vehicleDist" begin="18000" departLane="random" fromJunction="J0" toJunction="J9" end="19800" vehsPerHour="4640" departSpeed="max" />
+	<flow id="MajorFlow16_J3" type="vehicleDist" begin="18000" departLane="random" fromJunction="J0" toJunction="J3" end="19800" vehsPerHour="580" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow16_J5" type="vehicleDist" begin="18000" departLane="random" fromJunction="J0" toJunction="J5" end="19800" vehsPerHour="580" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow16_J7" type="vehicleDist" begin="18000" departLane="random" fromJunction="J0" toJunction="J7" end="19800" vehsPerHour="580" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow16_J2" type="vehicleDist" begin="18000" departLane="0" fromJunction="J2" toJunction="J9" end="19800" vehsPerHour="580" departSpeed="max" />
+	<flow id="MajorFlow16_J4" type="vehicleDist" begin="18000" departLane="0" fromJunction="J4" toJunction="J9" end="19800" vehsPerHour="580" departSpeed="max" />
+	<flow id="MajorFlow16_J6" type="vehicleDist" begin="18000" departLane="0" fromJunction="J6" toJunction="J9" end="19800" vehsPerHour="580" departSpeed="max" />
+	<flow id="busFlow16" type="busDist" begin="18000" departLane="random" fromJunction="J0" toJunction="J9" end="19800" vehsPerHour="40" departSpeed="max" />
+	<flow id="MajorFlow19" type="vehicleDist" begin="23400" departLane="random" fromJunction="J0" toJunction="J9" end="25200" vehsPerHour="3200" departSpeed="max" />
+	<flow id="MajorFlow19_J3" type="vehicleDist" begin="23400" departLane="random" fromJunction="J0" toJunction="J3" end="25200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow19_J5" type="vehicleDist" begin="23400" departLane="random" fromJunction="J0" toJunction="J5" end="25200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow19_J7" type="vehicleDist" begin="23400" departLane="random" fromJunction="J0" toJunction="J7" end="25200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow19_J2" type="vehicleDist" begin="23400" departLane="0" fromJunction="J2" toJunction="J9" end="25200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow19_J4" type="vehicleDist" begin="23400" departLane="0" fromJunction="J4" toJunction="J9" end="25200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow19_J6" type="vehicleDist" begin="23400" departLane="0" fromJunction="J6" toJunction="J9" end="25200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow20" type="vehicleDist" begin="25200" departLane="random" fromJunction="J0" toJunction="J9" end="27000" vehsPerHour="3200" departSpeed="max" />
+	<flow id="MajorFlow20_J3" type="vehicleDist" begin="25200" departLane="random" fromJunction="J0" toJunction="J3" end="27000" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow20_J5" type="vehicleDist" begin="25200" departLane="random" fromJunction="J0" toJunction="J5" end="27000" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow20_J7" type="vehicleDist" begin="25200" departLane="random" fromJunction="J0" toJunction="J7" end="27000" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow20_J2" type="vehicleDist" begin="25200" departLane="0" fromJunction="J2" toJunction="J9" end="27000" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow20_J4" type="vehicleDist" begin="25200" departLane="0" fromJunction="J4" toJunction="J9" end="27000" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow20_J6" type="vehicleDist" begin="25200" departLane="0" fromJunction="J6" toJunction="J9" end="27000" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow23" type="vehicleDist" begin="30600" departLane="random" fromJunction="J0" toJunction="J9" end="32400" vehsPerHour="3200" departSpeed="max" />
+	<flow id="MajorFlow23_J3" type="vehicleDist" begin="30600" departLane="random" fromJunction="J0" toJunction="J3" end="32400" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow23_J5" type="vehicleDist" begin="30600" departLane="random" fromJunction="J0" toJunction="J5" end="32400" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow23_J7" type="vehicleDist" begin="30600" departLane="random" fromJunction="J0" toJunction="J7" end="32400" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow23_J2" type="vehicleDist" begin="30600" departLane="0" fromJunction="J2" toJunction="J9" end="32400" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow23_J4" type="vehicleDist" begin="30600" departLane="0" fromJunction="J4" toJunction="J9" end="32400" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow23_J6" type="vehicleDist" begin="30600" departLane="0" fromJunction="J6" toJunction="J9" end="32400" vehsPerHour="400" departSpeed="max" />
+	<flow id="busFlow23" type="busDist" begin="30600" departLane="random" fromJunction="J0" toJunction="J9" end="32400" vehsPerHour="30" departSpeed="max" />
+	<flow id="MajorFlow24" type="vehicleDist" begin="32400" departLane="random" fromJunction="J0" toJunction="J9" end="34200" vehsPerHour="4000" departSpeed="max" />
+	<flow id="MajorFlow24_J3" type="vehicleDist" begin="32400" departLane="random" fromJunction="J0" toJunction="J3" end="34200" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow24_J5" type="vehicleDist" begin="32400" departLane="random" fromJunction="J0" toJunction="J5" end="34200" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow24_J7" type="vehicleDist" begin="32400" departLane="random" fromJunction="J0" toJunction="J7" end="34200" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow24_J2" type="vehicleDist" begin="32400" departLane="0" fromJunction="J2" toJunction="J9" end="34200" vehsPerHour="500" departSpeed="max" />
+	<flow id="MajorFlow24_J4" type="vehicleDist" begin="32400" departLane="0" fromJunction="J4" toJunction="J9" end="34200" vehsPerHour="500" departSpeed="max" />
+	<flow id="MajorFlow24_J6" type="vehicleDist" begin="32400" departLane="0" fromJunction="J6" toJunction="J9" end="34200" vehsPerHour="500" departSpeed="max" />
+	<flow id="busFlow24" type="busDist" begin="32400" departLane="random" fromJunction="J0" toJunction="J9" end="34200" vehsPerHour="40" departSpeed="max" />
+	<flow id="MajorFlow25" type="vehicleDist" begin="34200" departLane="random" fromJunction="J0" toJunction="J9" end="36000" vehsPerHour="4800" departSpeed="max" />
+	<flow id="MajorFlow25_J3" type="vehicleDist" begin="34200" departLane="random" fromJunction="J0" toJunction="J3" end="36000" vehsPerHour="600" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow25_J5" type="vehicleDist" begin="34200" departLane="random" fromJunction="J0" toJunction="J5" end="36000" vehsPerHour="600" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow25_J7" type="vehicleDist" begin="34200" departLane="random" fromJunction="J0" toJunction="J7" end="36000" vehsPerHour="600" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow25_J2" type="vehicleDist" begin="34200" departLane="0" fromJunction="J2" toJunction="J9" end="36000" vehsPerHour="600" departSpeed="max" />
+	<flow id="MajorFlow25_J4" type="vehicleDist" begin="34200" departLane="0" fromJunction="J4" toJunction="J9" end="36000" vehsPerHour="600" departSpeed="max" />
+	<flow id="MajorFlow25_J6" type="vehicleDist" begin="34200" departLane="0" fromJunction="J6" toJunction="J9" end="36000" vehsPerHour="600" departSpeed="max" />
+	<flow id="busFlow25" type="busDist" begin="34200" departLane="random" fromJunction="J0" toJunction="J9" end="36000" vehsPerHour="50" departSpeed="max" />
+	<flow id="MajorFlow26" type="vehicleDist" begin="36000" departLane="random" fromJunction="J0" toJunction="J9" end="37800" vehsPerHour="5600" departSpeed="max" />
+	<flow id="MajorFlow26_J3" type="vehicleDist" begin="36000" departLane="random" fromJunction="J0" toJunction="J3" end="37800" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow26_J5" type="vehicleDist" begin="36000" departLane="random" fromJunction="J0" toJunction="J5" end="37800" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow26_J7" type="vehicleDist" begin="36000" departLane="random" fromJunction="J0" toJunction="J7" end="37800" vehsPerHour="700" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow26_J2" type="vehicleDist" begin="36000" departLane="0" fromJunction="J2" toJunction="J9" end="37800" vehsPerHour="700" departSpeed="max" />
+	<flow id="MajorFlow26_J4" type="vehicleDist" begin="36000" departLane="0" fromJunction="J4" toJunction="J9" end="37800" vehsPerHour="700" departSpeed="max" />
+	<flow id="MajorFlow26_J6" type="vehicleDist" begin="36000" departLane="0" fromJunction="J6" toJunction="J9" end="37800" vehsPerHour="700" departSpeed="max" />
+	<flow id="busFlow26" type="busDist" begin="36000" departLane="random" fromJunction="J0" toJunction="J9" end="37800" vehsPerHour="60" departSpeed="max" />
+	<flow id="MajorFlow27" type="vehicleDist" begin="37800" departLane="random" fromJunction="J0" toJunction="J9" end="39600" vehsPerHour="4800" departSpeed="max" />
+	<flow id="MajorFlow27_J3" type="vehicleDist" begin="37800" departLane="random" fromJunction="J0" toJunction="J3" end="39600" vehsPerHour="600" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow27_J5" type="vehicleDist" begin="37800" departLane="random" fromJunction="J0" toJunction="J5" end="39600" vehsPerHour="600" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow27_J7" type="vehicleDist" begin="37800" departLane="random" fromJunction="J0" toJunction="J7" end="39600" vehsPerHour="600" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow27_J2" type="vehicleDist" begin="37800" departLane="0" fromJunction="J2" toJunction="J9" end="39600" vehsPerHour="600" departSpeed="max" />
+	<flow id="MajorFlow27_J4" type="vehicleDist" begin="37800" departLane="0" fromJunction="J4" toJunction="J9" end="39600" vehsPerHour="600" departSpeed="max" />
+	<flow id="MajorFlow27_J6" type="vehicleDist" begin="37800" departLane="0" fromJunction="J6" toJunction="J9" end="39600" vehsPerHour="600" departSpeed="max" />
+	<flow id="busFlow27" type="busDist" begin="37800" departLane="random" fromJunction="J0" toJunction="J9" end="39600" vehsPerHour="50" departSpeed="max" />
+	<flow id="MajorFlow28" type="vehicleDist" begin="39600" departLane="random" fromJunction="J0" toJunction="J9" end="41400" vehsPerHour="4000" departSpeed="max" />
+	<flow id="MajorFlow28_J3" type="vehicleDist" begin="39600" departLane="random" fromJunction="J0" toJunction="J3" end="41400" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow28_J5" type="vehicleDist" begin="39600" departLane="random" fromJunction="J0" toJunction="J5" end="41400" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow28_J7" type="vehicleDist" begin="39600" departLane="random" fromJunction="J0" toJunction="J7" end="41400" vehsPerHour="500" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow28_J2" type="vehicleDist" begin="39600" departLane="0" fromJunction="J2" toJunction="J9" end="41400" vehsPerHour="500" departSpeed="max" />
+	<flow id="MajorFlow28_J4" type="vehicleDist" begin="39600" departLane="0" fromJunction="J4" toJunction="J9" end="41400" vehsPerHour="500" departSpeed="max" />
+	<flow id="MajorFlow28_J6" type="vehicleDist" begin="39600" departLane="0" fromJunction="J6" toJunction="J9" end="41400" vehsPerHour="500" departSpeed="max" />
+	<flow id="busFlow28" type="busDist" begin="39600" departLane="random" fromJunction="J0" toJunction="J9" end="41400" vehsPerHour="40" departSpeed="max" />
+	<flow id="MajorFlow29" type="vehicleDist" begin="41400" departLane="random" fromJunction="J0" toJunction="J9" end="43200" vehsPerHour="3200" departSpeed="max" />
+	<flow id="MajorFlow29_J3" type="vehicleDist" begin="41400" departLane="random" fromJunction="J0" toJunction="J3" end="43200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow29_J5" type="vehicleDist" begin="41400" departLane="random" fromJunction="J0" toJunction="J5" end="43200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow29_J7" type="vehicleDist" begin="41400" departLane="random" fromJunction="J0" toJunction="J7" end="43200" vehsPerHour="400" departSpeed="max" arrivalLane="0" />
+	<flow id="MajorFlow29_J2" type="vehicleDist" begin="41400" departLane="0" fromJunction="J2" toJunction="J9" end="43200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow29_J4" type="vehicleDist" begin="41400" departLane="0" fromJunction="J4" toJunction="J9" end="43200" vehsPerHour="400" departSpeed="max" />
+	<flow id="MajorFlow29_J6" type="vehicleDist" begin="41400" departLane="0" fromJunction="J6" toJunction="J9" end="43200" vehsPerHour="400" departSpeed="max" />
+	<flow id="busFlow29" type="busDist" begin="41400" departLane="random" fromJunction="J0" toJunction="J9" end="43200" vehsPerHour="30" departSpeed="max" />
+	</routes>
