@@ -1,6 +1,8 @@
 import os
 import xml.etree.ElementTree as ET
 from multiprocessing import Pool
+
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from utils import exp_name
@@ -265,14 +267,43 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
             convert_flows_to_av_rates, args), total=len(args)))
 
 
+SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
+SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR"]
+def parse_scenarios(output_files):
+    policy_names = []
+    av_rates = []
+    for output_file in output_files:
+        file_name = output_file.split("/")[-1]
+        policy_name = file_name[:file_name.find(exp_name)]
+        av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
+        policy_names.append(policy_name)
+        av_rates.append(av_rate)
+    av_rates = list(set(av_rates))
+
+    df = pd.DataFrame(columns=pd.MultiIndex.from_product([SCENARIO_NAMES, av_rates]),
+                      index=policy_names)
+    for output_file in tqdm(output_files):
+        file_name = output_file.split("/")[-1]
+        policy_name = file_name[:file_name.find(exp_name)]
+        av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
+        df = output_file_to_df(output_file)
+        for scenario in SCENARIO_NAMES:
+            start_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)]
+            end_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)+1]
+            df_scenario = df[(df.depart >= start_time) & (df.depart < end_time)]
+            total_delay_timestamp = calc_stats_metric(df_scenario, "totalDelay", diff=False)
+            mean_pass_delay_scenario = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
+            df.loc[policy_name, (scenario, av_rate)] = mean_pass_delay_scenario
+    df.to_csv(f"{results_folder}/scenarios_{exp_name}.csv")
+
 if __name__ == '__main__':
     # Example usage
-    AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-
-    policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
-    # parse_all_output_files(AV_rates, 1, policies)
-    policies.remove("Nothing")
-    parse_all_pairwise(policies, AV_rates)
+    # AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    #
+    # policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
+    # # parse_all_output_files(AV_rates, 1, policies)
+    # policies.remove("Nothing")
+    # parse_all_pairwise(policies, AV_rates)
     # policies.remove("Nothing")
     # create_all_results_tables(AV_rates, policies)
     # STOP_FROM_RANGE = [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
@@ -280,3 +311,4 @@ if __name__ == '__main__':
     # policies = ["DisallowBack"]
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in policies for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     # create_all_results_tables(AV_rates, policy_names)
+    parse_scenarios(["results_reps/"+f for f in os.listdir("results_reps") if f.find(exp_name) != -1])
