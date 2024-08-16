@@ -278,7 +278,7 @@ def parse_scenarios(output_files):
         av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
         policy_names.append(policy_name)
         av_rates.append(av_rate)
-    av_rates = list(set(av_rates))
+    av_rates = sorted(list(set(av_rates)))
 
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([SCENARIO_NAMES, av_rates]),
                       index=policy_names)
