@@ -282,20 +282,28 @@ def parse_scenarios(output_files):
 
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([SCENARIO_NAMES, av_rates]),
                       index=policy_names)
-    for output_file in tqdm(output_files):
-        file_name = output_file.split("/")[-1]
-        policy_name = file_name[:file_name.find(exp_name)]
-        av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
-        df = output_file_to_df(output_file)
-        for scenario in SCENARIO_NAMES:
-            start_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)]
-            end_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)+1]
-            df_scenario = df[(df.depart >= start_time) & (df.depart < end_time)]
-            total_delay_timestamp = calc_stats_metric(df_scenario, "totalDelay", diff=False)
-            mean_pass_delay_scenario = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
-            df.loc[policy_name, (scenario, av_rate)] = mean_pass_delay_scenario
+    with Pool(NUM_PROCESSES) as pool:
+        results = list(tqdm(pool.imap(parse_scenarios_file, output_files), total=len(output_files)))
+    for result in results:
+        for policy, scenario, av_rate, mean_pass_delay_scenario in result:
+            df.loc[policy, (scenario, av_rate)] = mean_pass_delay_scenario
     df.to_csv(f"{results_folder}/scenarios_{exp_name}.csv")
     df.to_pickle(f"{results_folder}/scenarios_{exp_name}.pkl")
+
+def parse_scenarios_file(output_file):
+    file_results = []
+    file_name = output_file.split("/")[-1]
+    policy_name = file_name[:file_name.find(exp_name)]
+    av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
+    df_file = output_file_to_df(output_file)
+    for scenario in SCENARIO_NAMES:
+        start_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)]
+        end_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario) + 1]
+        df_scenario = df_file[(df_file.depart >= start_time) & (df_file.depart < end_time)]
+        total_delay_timestamp = calc_stats_metric(df_scenario, "totalDelay", diff=False)
+        mean_pass_delay_scenario = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
+        file_results.append((policy_name, scenario, av_rate, mean_pass_delay_scenario))
+    return file_results
 
 if __name__ == '__main__':
     # Example usage
