@@ -295,6 +295,7 @@ def parse_scenarios(output_files):
             mean_pass_delay_scenario = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
             df.loc[policy_name, (scenario, av_rate)] = mean_pass_delay_scenario
     df.to_csv(f"{results_folder}/scenarios_{exp_name}.csv")
+    df.to_pickle(f"{results_folder}/scenarios_{exp_name}.pkl")
 
 if __name__ == '__main__':
     # Example usage
