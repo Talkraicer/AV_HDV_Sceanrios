@@ -21,8 +21,8 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftCompScenarios"
 
-POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
-
+# POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
+POLICIES = ["StaticNumPassFL"]
 CONTROL_SPEED_RANGES = [(10, 20), (12, 20), (14, 20), (16, 22), (8, 20), (8, 18), (8, 15), (10, 18)]
 
 # parameters for StaticNumPass
@@ -100,8 +100,7 @@ def optuna_simulation(sumoCfgPath):
         mean_pass_delay = total_delay.loc["avg_totalDelay", "Passenger"]
         return mean_pass_delay
 
-    with parallel_backend('multiprocessing'):
-        study.optimize(optuna_objective, n_trials=100, n_jobs=1, show_progress_bar=True)
+    study.optimize(optuna_objective, n_trials=100, n_jobs=1, show_progress_bar=True)
     with open("optuna_results.txt", "a+") as f:
         f.write(f"SumoCfg: {sumoCfg}\n")
         f.write(f"Best value: {study.best_value}\n")
