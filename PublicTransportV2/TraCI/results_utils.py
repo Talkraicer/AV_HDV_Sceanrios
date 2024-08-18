@@ -312,6 +312,7 @@ def parse_scenarios_file(output_file):
     try:
         df_file = output_file_to_df(output_file)
     except:
+        print(f"Error in file {output_file}")
         return None
     for scenario in SCENARIO_NAMES:
         start_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)]
