@@ -290,6 +290,8 @@ def parse_scenarios(output_files):
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(parse_scenarios_file, output_files), total=len(output_files)))
     for result in results:
+        if result is None:
+            continue
         for policy, scenario, av_rate, mean_pass_delay_scenario in result:
             df.loc[policy, (scenario, av_rate)] = mean_pass_delay_scenario
     # Apply the highlight function to the DataFrame
@@ -307,7 +309,10 @@ def parse_scenarios_file(output_file):
     file_name = output_file.split("/")[-1]
     policy_name = file_name[:file_name.find(exp_name)]
     av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
-    df_file = output_file_to_df(output_file)
+    try:
+        df_file = output_file_to_df(output_file)
+    except:
+        return None
     for scenario in SCENARIO_NAMES:
         start_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)]
         end_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario) + 1]
