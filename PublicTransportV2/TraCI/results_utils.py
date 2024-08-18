@@ -279,6 +279,7 @@ def parse_scenarios(output_files):
         policy_names.append(policy_name)
         av_rates.append(av_rate)
     av_rates = sorted(list(set(av_rates)))
+    policy_names = sorted(list(set(policy_names)))
 
     df = pd.DataFrame(columns=pd.MultiIndex.from_product([SCENARIO_NAMES, av_rates]),
                       index=policy_names)
