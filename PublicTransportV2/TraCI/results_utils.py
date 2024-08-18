@@ -272,7 +272,7 @@ def highlight_min(s):
     return ['background-color: yellow' if v else '' for v in is_min]
 
 SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
-SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR"]
+SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR", "TOTAL"]
 def parse_scenarios(output_files):
     policy_names = []
     av_rates = []
@@ -322,6 +322,9 @@ def parse_scenarios_file(output_file):
         total_delay_timestamp = calc_stats_metric(df_scenario, "totalDelay", diff=False)
         mean_pass_delay_scenario = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
         file_results.append((policy_name, scenario, av_rate, mean_pass_delay_scenario))
+    total_delay_timestamp = calc_stats_metric(df_file, "totalDelay", diff=False)
+    mean_pass_delay_total = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
+    file_results.append((policy_name, "TOTAL", av_rate, mean_pass_delay_total))
     return file_results
 
 def main():
