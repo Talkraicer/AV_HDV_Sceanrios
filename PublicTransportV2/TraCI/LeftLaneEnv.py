@@ -129,12 +129,10 @@ def action_wrapper(env, policy_name):
                     tot_speeds[key] += e_features[key]
 
     new_features = log_features(env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml", env.timestep,
-                                env.act_rate)
-    if env.features_type == "LOG_FEATURES":
-        if new_features:
-            # get the new state
-            for i in range(len(OBSERVATIONS)):
-                env.state[i] = new_features[OBSERVATIONS[i]]
+                                env.act_rate, start_arriving=True)
+    if env.features_type == "LOG_FEATURES" and new_features:
+        for i in range(len(OBSERVATIONS)):
+            env.state[i] = new_features[OBSERVATIONS[i]]
     elif env.features_type == "MS_EPTL" and new_features:
         env.state[OBSERVATIONS.index("mean_speed_in_end_PTL")] = new_features["mean_speed_in_end_PTL"]/(MAX_SPEED*1.5)
     elif env.features_type == "NUM_ALWD" and new_features:
@@ -307,5 +305,6 @@ if __name__ == '__main__':
             for act_rate in act_rates for agent_type in agent_types for action_space_tag in ACTION_SPACE_TAGS]
     cfgs_clean = [cfg for cfg in cfgs if not(cfg[1] == "LOG_FEATURES" and cfg[3].endswith("CNN"))]
     print("num cfgs", len(cfgs_clean))
-    with Pool(len(cfgs_clean)) as pool:
+    # with Pool(len(cfgs_clean)) as pool:
+    with Pool(1) as pool:
         tqdm(pool.map(train_agent, cfgs_clean), total=len(sumoCfgs))
