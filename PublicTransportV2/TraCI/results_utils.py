@@ -267,6 +267,10 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
             convert_flows_to_av_rates, args), total=len(args)))
 
 
+def highlight_min(s):
+    is_min = s == s.min()
+    return ['background-color: yellow' if v else '' for v in is_min]
+
 SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
 SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR"]
 def parse_scenarios(output_files):
@@ -288,8 +292,15 @@ def parse_scenarios(output_files):
     for result in results:
         for policy, scenario, av_rate, mean_pass_delay_scenario in result:
             df.loc[policy, (scenario, av_rate)] = mean_pass_delay_scenario
-    df.to_csv(f"{results_folder}/scenarios_{exp_name}.csv")
+    # Apply the highlight function to the DataFrame
+    styled_df = df.style.apply(highlight_min, subset=df.columns)
+    styled_df.to_excel(f"{results_folder}/scenarios_{exp_name}.xlsx")
     df.to_pickle(f"{results_folder}/scenarios_{exp_name}.pkl")
+
+    df_without_plus = df[df.index.str.find("Plus") == -1]
+    styled_df_without_plus = df_without_plus.style.apply(highlight_min, subset=df_without_plus.columns)
+    styled_df_without_plus.to_excel(f"{results_folder}/scenarios_{exp_name}_without_plus.xlsx")
+    df_without_plus.to_pickle(f"{results_folder}/scenarios_{exp_name}_without_plus.pkl")
 
 def parse_scenarios_file(output_file):
     file_results = []
@@ -306,6 +317,9 @@ def parse_scenarios_file(output_file):
         file_results.append((policy_name, scenario, av_rate, mean_pass_delay_scenario))
     return file_results
 
+def main():
+    parse_scenarios(["results_reps/"+f for f in os.listdir("results_reps") if f.find(exp_name) != -1])
+
 if __name__ == '__main__':
     # Example usage
     # AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -321,4 +335,4 @@ if __name__ == '__main__':
     # policies = ["DisallowBack"]
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in policies for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     # create_all_results_tables(AV_rates, policy_names)
-    parse_scenarios(["results_reps/"+f for f in os.listdir("results_reps") if f.find(exp_name) != -1])
+    main()
