@@ -18,6 +18,8 @@ def log_features(output_file,t, log_rate, start_arriving=False):
     num_total_vehs = len(vehIDs)
     num_hdv_in_end_PTL = sum([traci.lane.getLastStepMeanSpeed(f"E6_{i}") for i in range(3)])
 
+    num_allowed_vehs_PTL = sum([1 for vehID in vehIDs if traci.vehicle.getTypeID(vehID) in ["private","Bus"]])
+
     # calc arrived passengers mean total delay
     output_file = f"{results_reps_folder}/{output_file}"
     mean_pass_delay = 0
@@ -42,6 +44,7 @@ def log_features(output_file,t, log_rate, start_arriving=False):
         log_msg = {"num_vehs_in_PTL": num_vehs_in_PTL, "num_total_vehs": num_total_vehs,
                    "num_hdv_in_end_PTL": num_hdv_in_end_PTL, "mean_speed": mean_speed,
                    "mean_speed_in_end_PTL": mean_speed_in_end_PTL, "mean_pass_delay": mean_pass_delay,
+                   "num_allowed_vehs_PTL": num_allowed_vehs_PTL,
                    "mean_pass_delay_timestamp": mean_pass_delay_timestamp}
         return log_msg
 

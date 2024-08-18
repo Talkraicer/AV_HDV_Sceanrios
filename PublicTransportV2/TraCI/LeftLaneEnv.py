@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 NUM_EDGES = 8
 NUM_E_FEATURES = 6
 MAX_SPEED = 25
-num_it = 10000
+num_it = 100000
 # DECISION VARIABLE
 MIN_NUM_PASS = 1
 
@@ -30,7 +30,7 @@ def set_observations(features_type, obs_type):
     high_limit = 0
     if features_type == "LOG_FEATURES":
         OBSERVATIONS = ["num_total_vehs", "num_hdv_in_end_PTL", "num_vehs_in_PTL",
-                        "mean_speed_in_end_PTL", "mean_speed"]
+                        "mean_speed_in_end_PTL", "mean_speed", "num_allowed_vehs_PTL",]
         high_limit = 100000
 
     elif features_type in ["E_FEATURES", "E_FEATURES_TU"]:
@@ -47,6 +47,10 @@ def set_observations(features_type, obs_type):
     elif features_type == "MS_EPTL":
         OBSERVATIONS = ["mean_speed_in_end_PTL"]
         high_limit = 1
+
+    elif features_type == "NUM_ALWD":
+        OBSERVATIONS = ["num_allowed_vehs_PTL"]
+        high_limit = 1000
 
     if obs_type == "vec":
         return gym.spaces.Box(low=0, high=high_limit, shape=(len(OBSERVATIONS),), dtype=np.float32)
@@ -133,6 +137,8 @@ def action_wrapper(env, policy_name):
                 env.state[i] = new_features[OBSERVATIONS[i]]
     elif env.features_type == "MS_EPTL" and new_features:
         env.state[OBSERVATIONS.index("mean_speed_in_end_PTL")] = new_features["mean_speed_in_end_PTL"]/(MAX_SPEED*1.5)
+    elif env.features_type == "NUM_ALWD" and new_features:
+        env.state[OBSERVATIONS.index("num_allowed_vehs_PTL")] = new_features["num_allowed_vehs_PTL"]
 
     elif env.features_type == "E_FEATURES":
         calc_E_features(env)
@@ -289,12 +295,12 @@ def train_agent(cfg):
 
 if __name__ == '__main__':
 
-    sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8, 0.5]]
+    sumoCfgs = [f"../cfg_files_LeftCompScenarios/LeftCompScenarios_av{r}.sumocfg" for r in [0.2, 0.4, 0.6, 0.8]]
     # sumoCfgs = [f"../cfg_files_LeftCompDaily/LeftCompDaily_av{r}.sumocfg" for r in [0.5]]
     # agent_types = ["DQN_CNN", "PPO_CNN", "A2C_CNN","DQN", "PPO", "A2C", ]
     agent_types = ["DQN"]
     # feat_types = ["E_FEATURES_TU","LOG_FEATURES","E_FEATURES"]
-    feat_types = ["MS_EPTL"]
+    feat_types = ["MS_EPTL","NUM_ALWD"]
     ACTION_SPACE_TAGS = ["alter", "direct"]
     act_rates = [100, 300]
     cfgs = [(sumoCfg, feat_type, act_rate, agent_type, action_space_tag) for sumoCfg in sumoCfgs for feat_type in feat_types
