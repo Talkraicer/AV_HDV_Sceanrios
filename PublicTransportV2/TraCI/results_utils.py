@@ -316,6 +316,8 @@ def parse_scenarios_file(output_file):
         print(f"Error in file {output_file}")
         return None
     for scenario in SCENARIO_NAMES:
+        if scenario == "TOTAL":
+            continue
         start_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario)]
         end_time = SCENARIO_START_TIMES[SCENARIO_NAMES.index(scenario) + 1]
         df_scenario = df_file[(df_file.depart >= start_time) & (df_file.depart < end_time)]
