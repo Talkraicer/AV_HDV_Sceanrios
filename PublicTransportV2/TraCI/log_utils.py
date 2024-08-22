@@ -8,7 +8,7 @@ from results_utils import output_file_to_df, calc_stats_metric
 from utils import exp_name
 results_reps_folder = "results_reps"
 
-def log_features(output_file,t, log_rate, start_arriving=False):
+def log_features(output_file,t, log_rate):
     # calc all vehicles speed in the road
     vehIDs = traci.vehicle.getIDList()
     mean_speed = np.mean([traci.vehicle.getSpeed(vehID) for vehID in vehIDs])
@@ -22,6 +22,9 @@ def log_features(output_file,t, log_rate, start_arriving=False):
 
     # calc arrived passengers mean total delay
     output_file = f"{results_reps_folder}/{output_file}"
+    with open(output_file, "r") as f:
+        txt = f.read()
+    start_arriving = "<tripinfo " in txt
     mean_pass_delay = 0
     if start_arriving:
         # fix end of <tripinfo> tag

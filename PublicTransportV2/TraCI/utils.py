@@ -31,7 +31,6 @@ BUSES_VOLUNTEERS = dict()
 
 # visualization effects
 LOG_RATE = 100  # Switch to zero for no logging
-START_ARRIVING = False
 DELETE_OLDER = True
 
 # Control Var Min Start
@@ -283,15 +282,11 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
         CONTROL_MIN_START = min_num_pass
         allow_min_pass(policy_name, CONTROL_MIN_START)
 
-    global START_ARRIVING
-    if not START_ARRIVING and len(traci.simulation.getArrivedIDList()) > 0:
-        START_ARRIVING = True
-
     if log_rate and t % log_rate == 0:
         if t == 0:
             init_wandb_logger(policy_name, av_rate, delete_older=DELETE_OLDER)
 
-        log_msg = log_features(policy_name + exp_name + "_" + str(av_rate) + ".xml", t, LOG_RATE, START_ARRIVING)
+        log_msg = log_features(policy_name + exp_name + "_" + str(av_rate) + ".xml", t, LOG_RATE)
 
         if policy_name.startswith("Control") and log_msg:
             control_var = policy_name.split()[1]

@@ -36,7 +36,7 @@ def infer(agent_path):
     init_wandb_logger(policy_name=agent_path_cln, av_rate=av_rate_str, delete_older=True)
     left_env = env.env.env
     while not done:
-        log_msg = log_features(left_env.policy_name + exp_name + "_av" + str(left_env.av_rate) + ".xml", left_env.timestep, left_env.act_rate,start_arriving=True)
+        log_msg = log_features(left_env.policy_name + exp_name + "_av" + str(left_env.av_rate) + ".xml", left_env.timestep, left_env.act_rate)
         if log_msg:
             log_msg["MinNumPass"] = left_env.last_action
             wandb.log(log_msg)

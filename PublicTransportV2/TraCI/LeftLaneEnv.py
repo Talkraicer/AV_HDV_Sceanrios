@@ -129,7 +129,8 @@ def action_wrapper(env, policy_name):
                     tot_speeds[key] += e_features[key]
 
     new_features = log_features(env.policy_name + exp_name + "_av" + str(env.av_rate) + ".xml", env.timestep,
-                                env.act_rate, start_arriving=True)
+                                env.act_rate
+                                )
     if env.features_type == "LOG_FEATURES" and new_features:
         for i in range(len(OBSERVATIONS)):
             env.state[i] = new_features[OBSERVATIONS[i]]
@@ -206,7 +207,7 @@ class LeftLaneENV(gym.Env):
     def reset(self, seed=None, options=None, ):
         if self.model:
             final_log = log_features(self.policy_name + exp_name + "_av" + str(self.av_rate) + ".xml", self.timestep,
-                         self.act_rate, start_arriving=True)
+                         self.act_rate,)
             mean_pass_delay = final_log["mean_pass_delay"]
             if mean_pass_delay < self.best_mean_pass_delay:
                 if self.agent_name + "_" + str(round(self.best_mean_pass_delay,0)) in os.listdir("agents"):
