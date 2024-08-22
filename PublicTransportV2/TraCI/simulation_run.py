@@ -21,8 +21,8 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftCompScenarios"
 
-# POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
-POLICIES = ["Control mean_speed_in_end_PTL"]
+POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
+# POLICIES = ["Control mean_speed_in_end_PTL"]
 CONTROL_SPEED_RANGES = [(13,20),(16,21),(16,20),(15,22),(14,22)]
 
 # parameters for StaticNumPass
@@ -171,10 +171,11 @@ def parse_results():
 if __name__ == "__main__":
     sumoCfgPaths = []
     for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
-        if sumoCfg.endswith(".sumocfg"):
+        if sumoCfg.endswith(".sumocfg") and ("0.1" in sumoCfg or "0.3" in sumoCfg):
             sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
             sumoCfgPaths.append(sumoCfgPath)
 
+    print("Number of sumoCfg files: ", len(sumoCfgPaths))
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[3]]
     # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
