@@ -279,7 +279,8 @@ def parse_scenarios(output_files):
     for output_file in output_files:
         file_name = output_file.split("/")[-1]
         policy_name = file_name[:file_name.find(exp_name)]
-        av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
+        av_idx = file_name.find("av")
+        av_rate = file_name[av_idx:av_idx+5]
         policy_names.append(policy_name)
         av_rates.append(av_rate)
     av_rates = sorted(list(set(av_rates)))
