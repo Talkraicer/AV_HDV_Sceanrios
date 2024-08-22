@@ -310,7 +310,8 @@ def parse_scenarios_file(output_file):
     file_results = []
     file_name = output_file.split("/")[-1]
     policy_name = file_name[:file_name.find(exp_name)]
-    av_rate = file_name[file_name.find("av"):file_name.find(".xml")]
+    av_idx = file_name.find("av")
+    av_rate = file_name[av_idx:av_idx + 5]
     try:
         df_file = output_file_to_df(output_file)
     except:
