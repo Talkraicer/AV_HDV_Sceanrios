@@ -13,7 +13,7 @@ import optuna
 import warnings
 warnings.filterwarnings("ignore")
 
-GUI = True
+GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
