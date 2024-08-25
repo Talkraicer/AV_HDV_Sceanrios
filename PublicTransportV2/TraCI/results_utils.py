@@ -295,7 +295,7 @@ def parse_scenarios(output_files):
             continue
         for policy, scenario, av_rate, mean_pass_delay_scenario in result:
             df.loc[policy, (scenario, av_rate)] = mean_pass_delay_scenario
-    df.dropna(axis=0, how='any', inplace=True)
+    # df.dropna(axis=0, how='any', inplace=True)
     # Apply the highlight function to the DataFrame
     styled_df = df.style.apply(highlight_min, subset=df.columns)
     styled_df.to_excel(f"{results_folder}/scenarios_{exp_name}.xlsx")

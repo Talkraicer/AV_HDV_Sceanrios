@@ -1,7 +1,11 @@
 from xml.etree import ElementTree as ET
 import numpy as np
+import pandas as pd
 import scipy.stats as stats
 import copy
+
+from matplotlib import pyplot as plt
+
 
 def normalize_dict(d):
     total = sum(d.values())
@@ -23,6 +27,12 @@ VEH_AMOUNT = {6:6163, 7:6450,8:7053,9:6443,10:6287,11:5800,12:6266,13:5428,
 EXIT_PROP = 0.1
 BUS_AMOUNT = {6:62, 7:37,8:19,9:31,10:26,11:25,12:17,13:31,
               14:44,15:30,16:24,17:28,18:25,19:16}
+
+df = pd.DataFrame(VEH_AMOUNT.items(), columns = ['Hour', 'Vehicles'])
+df.plot(x = 'Hour', y = 'Vehicles', kind = 'bar')
+plt.suptitle('Vehicles demand per hour')
+plt.grid()
+plt.show()
 
 # TODO: Find bus occupancy distribution
 BUS_PASS_RANGE = range(25, 45)
