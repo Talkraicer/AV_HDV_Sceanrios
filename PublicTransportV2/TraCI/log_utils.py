@@ -52,7 +52,6 @@ def log_features(output_file,t, log_rate):
         return log_msg
 
 def init_wandb_logger(policy_name,av_rate,delete_older=False):
-    run_name = exp_name + "_" + policy_name + "_" + str(av_rate)
     proj_name = exp_name + "_" + str(av_rate)
 
     api = wandb.Api()

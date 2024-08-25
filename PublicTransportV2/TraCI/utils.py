@@ -14,7 +14,6 @@ from log_utils import log_features, init_wandb_logger
 
 NUM_PROCESSES = 70
 GUI = False
-sumoCfg = fr"../{exp_name}.sumocfg"
 results_folder = "results_csvs"
 results_reps_folder = "results_reps"
 METRICS = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]

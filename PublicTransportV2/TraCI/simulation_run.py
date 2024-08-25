@@ -11,6 +11,7 @@ from utils import *
 import traci
 import optuna
 import warnings
+
 warnings.filterwarnings("ignore")
 
 GUI = False
@@ -21,11 +22,11 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftCompDaily"
 
-POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
+POLICIES = ["Nothing", "StaticNumPassFL","Plus", "Control mean_speed_in_end_PTL",]
 # POLICIES = ["Control mean_speed_in_end_PTL"]
-CONTROL_SPEED_RANGES = [(13,20),(16,21),(16,20),(15,22),(14,22)]
-CONTROL_SPEED_RANGES += [(10,18),(10,20),(14,20),(16,22),(8,15),(8,20),(8,18)]
-CONTROL_SPEED_RANGES += [(12,20)]
+CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]
+CONTROL_SPEED_RANGES += [(10, 18), (10, 20), (14, 20), (16, 22), (8, 15), (8, 20), (8, 18)]
+CONTROL_SPEED_RANGES += [(12, 20)]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]
@@ -69,14 +70,11 @@ def init_simulation(arg):
     return policy_name, sumoCfg, av_rate
 
 
-def simulate(arg, log_wandb=True):
+def simulate(arg):
     policy_name, sumoCfg, av_rate = init_simulation(arg)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        if log_wandb:
-            handle_step(step, policy_name, av_rate)
-        else:
-            handle_step(step, policy_name, av_rate, log_rate=0)
+        handle_step(step, policy_name, av_rate)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -104,7 +102,7 @@ def optuna_simulation(sumoCfgPath):
 
     study.optimize(optuna_objective, n_trials=100, n_jobs=1, show_progress_bar=True)
     with open("optuna_results.txt", "a+") as f:
-        f.write(f"SumoCfg: {sumoCfg}\n")
+        f.write(f"SumoCfg: {sumoCfgPath}\n")
         f.write(f"Best value: {study.best_value}\n")
         f.write(f"Best params: {study.best_params}\n")
         f.write("\n")
@@ -170,7 +168,7 @@ def parse_results():
         # parse_all_pairwise(policy_names, AV_rates)
 
 
-if __name__ == "__main__":
+def main():
     sumoCfgPaths = []
     for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
         if sumoCfg.endswith(".sumocfg"):
@@ -183,5 +181,9 @@ if __name__ == "__main__":
         sumoCfgPaths = [sumoCfgPaths[3]]
     # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
     # with Pool(len(sumoCfgPaths)) as p:
-        # p.map(optuna_simulation, sumoCfgPaths)
+    # p.map(optuna_simulation, sumoCfgPaths)
     simulate_policies(sumoCfgPaths)
+
+
+if __name__ == "__main__":
+    main()
