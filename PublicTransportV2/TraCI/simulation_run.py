@@ -21,11 +21,11 @@ NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = "LeftCompScenarios"
 
-# POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
-POLICIES = ["Control mean_speed_in_end_PTL"]
-# CONTROL_SPEED_RANGES = [(13,20),(16,21),(16,20),(15,22),(14,22)]
-# CONTROL_SPEED_RANGES = [(10,18),(10,20),(14,20),(16,22),(8,15),(8,20),(8,18)]
-CONTROL_SPEED_RANGES = [(12,20)]
+POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
+# POLICIES = ["Control mean_speed_in_end_PTL"]
+CONTROL_SPEED_RANGES = [(13,20),(16,21),(16,20),(15,22),(14,22)]
+CONTROL_SPEED_RANGES += [(10,18),(10,20),(14,20),(16,22),(8,15),(8,20),(8,18)]
+CONTROL_SPEED_RANGES += [(12,20)]
 
 # parameters for StaticNumPass
 MIN_NUM_PASS = [1, 2, 3, 4, 5]
