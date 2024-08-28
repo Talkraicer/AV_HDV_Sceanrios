@@ -1,0 +1,14 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+	<vTypeDistribution id="vehicleDist">
+	</vTypeDistribution>
+	
+	<vType id="TemporalHD" color="magenta"/>
+	<vType id="AllowedTemporalHD" color="orange"/>
+
+
+
+
+	<vTypeDistribution id="busDist">
+	</vTypeDistribution>
+</routes>

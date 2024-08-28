@@ -46,4 +46,4 @@ def duplicate_experiment(input_exp_name, input_exp_short_name, output_exp_name):
     # os.system(f"python rou_files_{output_exp_name}/create_rou_files.py")
 
 if __name__ == '__main__':
-    duplicate_experiment("LeftCompDaily", "LeftCompDaily", "LeftCompScenarios")
+    duplicate_experiment("LeftCompScenarios", "LeftCompScenarios", "ClosedLeftCompScenarios")
