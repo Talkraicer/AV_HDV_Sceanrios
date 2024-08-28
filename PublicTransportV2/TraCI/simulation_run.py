@@ -18,11 +18,12 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 10
+NUM_PROCESSES = 1
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = exp_name
 
-POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
+# POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
+POLICIES = ["Control mean_speed_in_PTL"]
 # POLICIES = ["Control mean_speed_in_end_PTL"]
 CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]
 CONTROL_SPEED_RANGES += [(10, 18), (10, 20), (14, 20), (16, 22), (8, 15), (8, 20), (8, 18)]
@@ -176,7 +177,7 @@ def main():
     sumoCfgPaths = []
     for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
         if sumoCfg.endswith(".sumocfg"):
-            if "0.5" in sumoCfg:
+            if "0.5" not in sumoCfg:
                 sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
                 sumoCfgPaths.append(sumoCfgPath)
 
