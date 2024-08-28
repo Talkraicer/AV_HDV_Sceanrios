@@ -20,9 +20,9 @@ GUI = False
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = "LeftCompDaily"
+EXP_NAME_TAG = exp_name
 
-POLICIES = ["Nothing", "StaticNumPassFL","Plus", "Control mean_speed_in_end_PTL",]
+POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL"]
 # POLICIES = ["Control mean_speed_in_end_PTL"]
 CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]
 CONTROL_SPEED_RANGES += [(10, 18), (10, 20), (14, 20), (16, 22), (8, 15), (8, 20), (8, 18)]
@@ -70,14 +70,18 @@ def init_simulation(arg):
     return policy_name, sumoCfg, av_rate
 
 
-def simulate(arg):
+def simulate(arg, log_wandb=True):
     policy_name, sumoCfg, av_rate = init_simulation(arg)
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        handle_step(step, policy_name, av_rate)
+        if log_wandb:
+            handle_step(step, policy_name, av_rate)
+        else:
+            handle_step(step, policy_name, av_rate, log_rate=0)
         traci.simulationStep(step)
         step += 1
     traci.close()
+    wandb.finish()
 
 
 def parallel_simulation(args):
@@ -172,9 +176,9 @@ def main():
     sumoCfgPaths = []
     for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
         if sumoCfg.endswith(".sumocfg"):
-            # if ("0.1" in sumoCfg or "0.3" in sumoCfg):
-            sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
-            sumoCfgPaths.append(sumoCfgPath)
+            if "0.5" in sumoCfg:
+                sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
+                sumoCfgPaths.append(sumoCfgPath)
 
     print("Number of sumoCfg files: ", len(sumoCfgPaths))
     if GUI:
