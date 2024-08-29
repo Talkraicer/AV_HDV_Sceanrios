@@ -350,7 +350,7 @@ def unify_results_tables():
     large_df.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified.pkl")
     large_df.to_excel(f"{results_folder}/scenarios_{exp_names}_unified.xlsx")
 
-    large_df_without_plus = large_df[large_df["index"].str.find("Plus") == -1]
+    large_df_without_plus = large_df[large_df.index.str.find("Plus") == -1]
     large_df_without_plus= large_df_without_plus.style.apply(reset_style, subset=large_df_without_plus.columns)
     large_df_without_plus = large_df_without_plus.style.apply(highlight_min, subset=large_df_without_plus.columns)
 
