@@ -7,6 +7,8 @@ import pandas as pd
 from tqdm import tqdm
 from utils import exp_name
 
+exp_names = ["LeftCompScenarios", "ClosedLeftCompScenarios"]
+
 NUM_PROCESSES = 70
 results_folder = "results_csvs"
 results_reps_folder = "results_reps"
@@ -271,6 +273,9 @@ def highlight_min(s):
     is_min = s == s.min()
     return ['background-color: yellow' if v else '' for v in is_min]
 
+def reset_style(s):
+    return ['' for v in s]
+
 SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
 SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR", "TOTAL"]
 def parse_scenarios(output_files):
@@ -331,9 +336,29 @@ def parse_scenarios_file(output_file):
     file_results.append((policy_name, "TOTAL", av_rate, mean_pass_delay_total))
     return file_results
 
-def main():
-    parse_scenarios(["results_reps/"+f for f in os.listdir("results_reps") if f.find(exp_name) != -1])
+def unify_results_tables():
+    large_df = pd.DataFrame()
+    for experiment in exp_names:
+        exp_df = pd.read_pickle(f"{results_folder}/scenarios_{experiment}.pkl")
+        large_df = pd.concat([large_df, exp_df])
+    # reset style and index
+    large_df.reset_index(inplace=True)
+    large_df.style.apply(reset_style, subset=large_df.columns)
+    large_df.style.apply(highlight_min, subset=large_df.columns)
 
+    large_df.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified.pkl")
+    large_df.to_excel(f"{results_folder}/scenarios_{exp_names}_unified.xlsx")
+
+    large_df_without_plus = large_df[large_df["index"].str.find("Plus") == -1]
+    large_df_without_plus.style.apply(reset_style, subset=large_df_without_plus.columns)
+    large_df_without_plus.style.apply(highlight_min, subset=large_df_without_plus.columns)
+
+    large_df_without_plus.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.pkl")
+    large_df_without_plus.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.xlsx")
+
+def main():
+    # parse_scenarios(["results_reps/"+f for f in os.listdir("results_reps") if f.find(exp_name) != -1])
+    unify_results_tables()
 if __name__ == '__main__':
     # Example usage
     # AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
