@@ -347,16 +347,21 @@ def unify_results_tables():
     styled_large_df = large_df.style.apply(highlight_min, subset=large_df.columns)
 
     large_df.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified.pkl")
-    large_df.to_excel(f"{results_folder}/scenarios_{exp_names}_unified.xlsx")
+    styled_large_df.to_excel(f"{results_folder}/scenarios_{exp_names}_unified.xlsx")
 
     large_df_without_plus = large_df[large_df.index.str.find("Plus") == -1]
-    large_df_without_plus = large_df_without_plus.style.apply(highlight_min, subset=large_df_without_plus.columns)
+    styled_large_df_without_plus = large_df_without_plus.style.apply(highlight_min, subset=large_df_without_plus.columns)
 
     large_df_without_plus.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.pkl")
-    large_df_without_plus.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.xlsx")
+    styled_large_df_without_plus.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.xlsx")
 
 def main():
-    # parse_scenarios(["results_reps/"+f for f in os.listdir("results_reps") if f.find(exp_name) != -1])
+    results_files = []
+    for result in os.listdir(results_reps_folder):
+        idx_exp_name = result.find(exp_name)
+        if idx_exp_name != -1 and result[idx_exp_name-1].isdigit():
+            results_files.append(f"{results_reps_folder}/{result}")
+    parse_scenarios(results_files)
     unify_results_tables()
 if __name__ == '__main__':
     # Example usage
