@@ -37,7 +37,7 @@ CONTROL_MIN_START = 1
 
 # Clipping parameters:
 NUM_VEHS_PTL_MIN = 10
-NUM_VEHS_PTL_MAX = 50
+NUM_VEHS_PTL_MAX = 60
 
 
 
@@ -300,10 +300,10 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
             if "Clipped" in policy_name:
                 num_vehs_in_PTL = log_msg["num_vehs_in_PTL"]
                 if num_vehs_in_PTL < NUM_VEHS_PTL_MIN:
-                    CONTROL_MIN_START += 1
+                    CONTROL_MIN_START -= 1
                     changed = True
                 elif num_vehs_in_PTL > NUM_VEHS_PTL_MAX:
-                    CONTROL_MIN_START -= 1
+                    CONTROL_MIN_START += 1
                     changed = True
             if not changed:
                 if log_msg[control_var] < control_var_min:
