@@ -1,4 +1,4 @@
-exp_name = "ClosedLeftCompScenarios"
+exp_name = "LeftCompScenarios"
 
 import os
 import traci
