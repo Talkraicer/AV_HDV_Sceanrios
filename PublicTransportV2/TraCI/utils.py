@@ -35,6 +35,11 @@ DELETE_OLDER = True
 # Control Var Min Start
 CONTROL_MIN_START = 1
 
+# Clipping parameters:
+NUM_VEHS_PTL_MIN = 10
+NUM_VEHS_PTL_MAX = 50
+
+
 
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
@@ -291,10 +296,17 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
             control_var = policy_name.split()[1]
             control_var_min = int(policy_name.split()[2])
             control_var_max = int(policy_name.split()[3])
-            if log_msg[control_var] < control_var_min and CONTROL_MIN_START < 6:
-                CONTROL_MIN_START += 1
-            elif log_msg[control_var] > control_var_max and CONTROL_MIN_START > 1:
-                CONTROL_MIN_START -= 1
+            if "Clipped" in policy_name:
+                num_vehs_in_PTL = log_msg["num_vehs_in_PTL"]
+                if num_vehs_in_PTL < NUM_VEHS_PTL_MIN:
+                    CONTROL_MIN_START += 1
+                elif num_vehs_in_PTL > NUM_VEHS_PTL_MAX:
+                    CONTROL_MIN_START -= 1
+            else:
+                if log_msg[control_var] < control_var_min and CONTROL_MIN_START < 6:
+                    CONTROL_MIN_START += 1
+                elif log_msg[control_var] > control_var_max and CONTROL_MIN_START > 1:
+                    CONTROL_MIN_START -= 1
         if log_msg:
             log_msg["MinPassNum"] = CONTROL_MIN_START
             wandb.log(log_msg)
