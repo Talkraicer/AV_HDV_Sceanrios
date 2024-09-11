@@ -276,6 +276,24 @@ def highlight_min(s):
 def reset_style(s):
     return ['' for v in s]
 
+
+def filter_strongly_dominated_rows(df):
+    # Create a mask to mark the rows that are dominated
+    dominated_mask = [False] * len(df)
+
+    # Compare each row with every other row
+    for i, row_X in df.iterrows():
+        for j, row_Y in df.iterrows():
+            if i != j:
+                # Check if row_Y dominates row_X
+                if all(row_Y <= row_X) and any(row_Y < row_X):
+                    dominated_mask[i] = True
+                    break  # No need to check further once a row is found to dominate
+
+    # Return the DataFrame without dominated rows
+    return df[~pd.Series(dominated_mask)].reset_index(drop=True)
+
+
 SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
 SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR", "TOTAL"]
 def parse_scenarios(output_files):
@@ -306,10 +324,10 @@ def parse_scenarios(output_files):
     styled_df.to_excel(f"{results_folder}/scenarios_{exp_name}.xlsx")
     df.to_pickle(f"{results_folder}/scenarios_{exp_name}.pkl")
 
-    df_without_plus = df[df.index.str.find("Plus") == -1]
-    styled_df_without_plus = df_without_plus.style.apply(highlight_min, subset=df_without_plus.columns)
-    styled_df_without_plus.to_excel(f"{results_folder}/scenarios_{exp_name}_without_plus.xlsx")
-    df_without_plus.to_pickle(f"{results_folder}/scenarios_{exp_name}_without_plus.pkl")
+    df_clean = filter_strongly_dominated_rows(df)
+    styled_df_clean = df_clean.style.apply(highlight_min, subset=df_clean.columns)
+    styled_df_clean.to_excel(f"{results_folder}/scenarios_{exp_name}_clean.xlsx")
+    df_clean.to_pickle(f"{results_folder}/scenarios_{exp_name}_clean.pkl")
 
 def parse_scenarios_file(output_file):
     file_results = []
@@ -349,11 +367,10 @@ def unify_results_tables():
     large_df.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified.pkl")
     styled_large_df.to_excel(f"{results_folder}/scenarios_{exp_names}_unified.xlsx")
 
-    large_df_without_plus = large_df[large_df.index.str.find("Plus") == -1]
-    styled_large_df_without_plus = large_df_without_plus.style.apply(highlight_min, subset=large_df_without_plus.columns)
-
-    large_df_without_plus.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.pkl")
-    styled_large_df_without_plus.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_without_plus.xlsx")
+    large_df_clean = filter_strongly_dominated_rows(large_df)
+    styled_large_df_clean = large_df_clean.style.apply(highlight_min, subset=large_df_clean.columns)
+    large_df_clean.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified_clean.pkl")
+    styled_large_df_clean.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_clean.xlsx")
 
 def main():
     results_files = []
