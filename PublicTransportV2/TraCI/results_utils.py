@@ -359,7 +359,7 @@ def main():
     results_files = []
     for result in os.listdir(results_reps_folder):
         idx_exp_name = result.find(exp_name)
-        if idx_exp_name != -1 and result[idx_exp_name-1].isdigit():
+        if (idx_exp_name != -1 and result[idx_exp_name-1].isdigit()) or result.find("Nothing" + exp_name) != -1:
             results_files.append(f"{results_reps_folder}/{result}")
     parse_scenarios(results_files)
     unify_results_tables()
