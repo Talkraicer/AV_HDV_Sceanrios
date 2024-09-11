@@ -279,19 +279,19 @@ def reset_style(s):
 
 def filter_strongly_dominated_rows(df):
     # Create a mask to mark the rows that are dominated
-    dominated_mask = [False] * len(df)
+    dominated_mask = {index: False for index in df.index}
 
     # Compare each row with every other row
-    for k,(i, row_X) in enumerate(df.iterrows()):
+    for i, row_X in df.iterrows():
         for j, row_Y in df.iterrows():
             if i != j:
                 # Check if row_Y dominates row_X
                 if all(row_Y <= row_X) and any(row_Y < row_X):
-                    dominated_mask[k] = True
+                    dominated_mask[i] = True
                     break  # No need to check further once a row is found to dominate
 
     # Return the DataFrame without dominated rows
-    return df[~pd.Series(dominated_mask)].reset_index(drop=True)
+    return df[~pd.Series(dominated_mask)]
 
 
 SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
