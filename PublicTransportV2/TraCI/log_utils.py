@@ -17,7 +17,7 @@ def log_features(output_file,t, log_rate):
     num_vehs_in_PTL = sum(
         [traci.lane.getLastStepVehicleNumber(l) for l in traci.lane.getIDList() if len(traci.lane.getAllowed(l)) > 0])
     num_total_vehs = len(vehIDs)
-    num_hdv_in_end_PTL = sum([traci.lane.getLastStepMeanSpeed(f"E6_{i}") for i in range(3)])
+    num_hdv_in_end_PTL = sum([traci.lane.getLastStepVehicleNumber(f"E6_{i}") for i in range(3)])
 
     num_allowed_vehs_PTL = sum([1 for vehID in vehIDs if traci.vehicle.getVehicleClass(vehID) in ["private","bus"]])
 
