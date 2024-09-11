@@ -282,12 +282,12 @@ def filter_strongly_dominated_rows(df):
     dominated_mask = [False] * len(df)
 
     # Compare each row with every other row
-    for i, row_X in df.iterrows():
+    for k,(i, row_X) in enumerate(df.iterrows()):
         for j, row_Y in df.iterrows():
             if i != j:
                 # Check if row_Y dominates row_X
                 if all(row_Y <= row_X) and any(row_Y < row_X):
-                    dominated_mask[i] = True
+                    dominated_mask[k] = True
                     break  # No need to check further once a row is found to dominate
 
     # Return the DataFrame without dominated rows
