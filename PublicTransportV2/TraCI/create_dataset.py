@@ -29,7 +29,7 @@ if __name__ == "__main__":
     runs = []
     for proj_name in proj_names:
         runs.extend(api.runs(f"{username}/{proj_name}"))
-    with Pool(10) as pool:
+    with Pool() as pool:
         results = list(tqdm(pool.imap(handle_run, runs), total=len(runs)))
     X_train, y_train = zip(*results)
     X_train = np.concatenate(X_train)
