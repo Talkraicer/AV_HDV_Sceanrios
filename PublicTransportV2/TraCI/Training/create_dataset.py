@@ -4,21 +4,22 @@ from tqdm import tqdm
 
 import wandb
 import numpy as np
-features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","MinNumPass"]
+features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","MinNumPass","mean_pass_delay_timestamp"]
 
 def handle_run(run):
     df_history = run.history()
     try:
         if "MinPassNum" in df_history.columns:
             df_history["MinNumPass"] = df_history["MinPassNum"]
-        X_train = df_history[features]
+        df = df_history[features]
     except:
         return None, None, False
-    X_train = X_train.dropna(subset=["MinNumPass"])
+    df = df.astype(float).dropna(subset=["MinNumPass","mean_pass_delay_timestamp"])
     values_to_fill = {"mean_speed_in_end_PTL": 25, "mean_speed_in_PTL": 25, "num_total_vehs": 0, "num_vehs_in_PTL": 0}
-    X_train = X_train.fillna(value=values_to_fill)
-    y_train = df_history["mean_pass_delay_timestamp"]
-    X_train = X_train.to_numpy()[:-1]
+    df = df.fillna(value=values_to_fill)
+    X_train = df[features[:-1]]
+    y_train = df["mean_pass_delay_timestamp"]
+    X_train = X_train.to_numpy()[:-1,:]
     y_train = y_train.to_numpy()[1:]
     return X_train, y_train, True
 
