@@ -8,9 +8,12 @@ features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_ve
 
 def handle_run(run):
     df_history = run.history()
-    if "MinPassNum" in df_history.columns:
-        df_history["MinNumPass"] = df_history["MinPassNum"]
-    X_train = df_history[features]
+    try:
+        if "MinPassNum" in df_history.columns:
+            df_history["MinNumPass"] = df_history["MinPassNum"]
+        X_train = df_history[features]
+    except:
+        return None, None
     X_train = X_train.dropna(subset=["MinNumPass"])
     values_to_fill = {"mean_speed_in_end_PTL": 25, "mean_speed_in_PTL": 25, "num_total_vehs": 0, "num_vehs_in_PTL": 0}
     X_train = X_train.fillna(value=values_to_fill)
