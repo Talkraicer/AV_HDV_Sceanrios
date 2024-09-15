@@ -34,10 +34,10 @@ if __name__ == "__main__":
         runs.extend(api.runs(f"{username}/{proj_name}"))
     results = []
     for run in tqdm(runs):
-        results.append(handle_run(run))
-    X_train, y_train = zip(*results)
-    X_train = np.concatenate(X_train)
-    y_train = np.concatenate(y_train)
+        X,y = handle_run(run)
+        if X:
+            X_train = np.concatenate(X_train)
+            y_train = np.concatenate(y_train)
 
     np.save("X_train.npy", X_train)
     np.save("y_train.npy", y_train)
