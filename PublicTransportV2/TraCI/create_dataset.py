@@ -11,9 +11,9 @@ def handle_run(run):
     if "MinPassNum" in df_history.columns:
         df_history["MinNumPass"] = df_history["MinPassNum"]
     X_train = df_history[features]
-    X_train.dropna(subset=["MinNumPass"], inplace=True)
+    X_train = X_train.dropna(subset=["MinNumPass"])
     values_to_fill = {"mean_speed_in_end_PTL": 25, "mean_speed_in_PTL": 25, "num_total_vehs": 0, "num_vehs_in_PTL": 0}
-    X_train.fillna(value=values_to_fill, inplace=True)
+    X_train = X_train.fillna(value=values_to_fill)
     y_train = df_history["mean_pass_delay_timestamp"]
     X_train = X_train.to_numpy()[:-1]
     y_train = y_train.to_numpy()[1:]
@@ -29,8 +29,9 @@ if __name__ == "__main__":
     runs = []
     for proj_name in proj_names:
         runs.extend(api.runs(f"{username}/{proj_name}"))
-    with Pool() as pool:
-        results = list(tqdm(pool.imap(handle_run, runs), total=len(runs)))
+    results = []
+    for run in tqdm(runs):
+        results.append(handle_run(run))
     X_train, y_train = zip(*results)
     X_train = np.concatenate(X_train)
     y_train = np.concatenate(y_train)
