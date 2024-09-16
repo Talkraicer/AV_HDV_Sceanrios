@@ -326,7 +326,10 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
             if LOADED_MODELS == {}:
                 load_models_and_features(model)
             optimal_delay = np.inf
-            X = [log_msg[feature] for feature in USED_FEATURES]
+            X = pd.DataFrame(log_msg)[USED_FEATURES].astype(float)
+            values_to_fill = {"mean_speed_in_end_PTL": 25, "mean_speed_in_PTL": 25, "num_total_vehs": 0,
+                              "num_vehs_in_PTL": 0}
+            X = X.fillna(value=values_to_fill).to_numpy().reshape(1, -1)
             for min_pass, model in LOADED_MODELS.items():
                 # load the model
                 delay = model.predict([X])
