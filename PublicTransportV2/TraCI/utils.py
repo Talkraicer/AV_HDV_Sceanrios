@@ -11,7 +11,7 @@ import wandb
 import time
 from results_utils import output_file_to_df, calc_stats_metric
 from log_utils import log_features, init_wandb_logger
-
+import pickle
 NUM_PROCESSES = 70
 GUI = False
 results_folder = "results_csvs"
@@ -40,7 +40,9 @@ NUM_VEHS_PTL_MIN = 10
 NUM_VEHS_PTL_MAX = 60
 
 
-
+# Trained models
+LOADED_MODELS = dict()
+USED_FEATURES = []
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -160,6 +162,12 @@ def allow_min_pass(policy_name, control_min_start):
             else:
                 traci.vehicle.setVehicleClass(vehID, "private")
 
+def load_models_and_features(model_name):
+    global LOADED_MODELS,USED_FEATURES
+    possible_min_pass = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+    LOADED_MODELS = {min_pass: pickle.load(open(f"Training/{model_name}/model_{min_pass}.pkl", "rb")) for min_pass in possible_min_pass}
+    with open(f"Training/{model_name}/features.txt", "r") as f:
+        USED_FEATURES = f.read().split(",")
 
 def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
     global BUSES_VOLUNTEERS
@@ -286,6 +294,7 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
         CONTROL_MIN_START = min_num_pass
         allow_min_pass(policy_name, CONTROL_MIN_START)
 
+
     if log_rate and t % log_rate == 0:
         if t == 0:
             init_wandb_logger(policy_name, av_rate, delete_older=DELETE_OLDER)
@@ -312,8 +321,20 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
                     CONTROL_MIN_START -= 1
             CONTROL_MIN_START = max(1, CONTROL_MIN_START)
             CONTROL_MIN_START = min(6, CONTROL_MIN_START)
+        if policy_name.startswith("Trained") and log_msg:
+            model = policy_name.split("_")[1]
+            if LOADED_MODELS == {}:
+                load_models_and_features(model)
+            optimal_delay = np.inf
+            X = [log_msg[feature] for feature in USED_FEATURES]
+            for min_pass, model in LOADED_MODELS.items():
+                # load the model
+                delay = model.predict([X])
+                if delay < optimal_delay:
+                    optimal_delay = delay
+                    CONTROL_MIN_START = min_pass
         if log_msg:
             log_msg["MinPassNum"] = CONTROL_MIN_START
             wandb.log(log_msg)
-    if policy_name.startswith("Control"):
+    if policy_name.startswith("Control") or policy_name.startswith("Trained"):
         allow_min_pass(policy_name, CONTROL_MIN_START)

@@ -18,12 +18,13 @@ GUI = False
 
 # SIM parameters
 SIM_DURATION = 86400
-NUM_PROCESSES = 70
+NUM_PROCESSES = 1
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 EXP_NAME_TAG = exp_name
 
-POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL","Control mean_speed_in_PTL"]
-POLICIES += ["ControlClipped mean_speed_in_PTL","ControlClipped mean_speed_in_end_PTL"]
+# POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL","Control mean_speed_in_PTL"]
+# POLICIES += ["ControlClipped mean_speed_in_PTL","ControlClipped mean_speed_in_end_PTL"]
+POLICIES = ["Trained_LR", "Trained_Trees"]
 # POLICIES = ["Plus"]
 # POLICIES = ["Nothing"]
 CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]

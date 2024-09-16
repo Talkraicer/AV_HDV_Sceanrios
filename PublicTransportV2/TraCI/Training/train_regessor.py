@@ -9,6 +9,7 @@ from sklearn.tree import DecisionTreeRegressor,plot_tree
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import os
+import pickle
 features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","MinNumPass"]
 target = "mean_pass_delay_timestamp"
 
@@ -19,7 +20,6 @@ def main():
 
     # split to different datasets according to MinNumPass
     values = np.unique(X[:,-1])
-    datasets = []
     for value in values:
         print(f"MinNumPass = {value}")
         mask = X[:,-1] == value
@@ -43,7 +43,10 @@ def main():
         print(f"Test sample: {test_sample}")
         print(f"Prediction: {model.predict([test_sample])}")
         # save the model
-        np.save("Trees/model_" + str(value) + ".npy", model)
+        pickle.dump(model, open("Trees/model_" + str(value) + ".pkl", "wb"))
+        # save the used features
+        with open("Trees/used_features.txt", "w") as f:
+            f.write(",".join(features[:-1]))
 
         os.makedirs("LR", exist_ok=True)
         scaler = StandardScaler()
@@ -56,7 +59,10 @@ def main():
         mse = mean_squared_error(y_test, y_pred)
         print(f"MSE LinearRegression: {mse}")
         # save the model
-        np.save("LR/model_" + str(value) + ".npy", model)
+        pickle.dump(model, open("LR/model_" + str(value) + ".pkl", "wb"))
+        # save the used features
+        with open("LR/used_features.txt", "w") as f:
+            f.write(",".join(features[:-1]))
 
 if __name__ == '__main__':
     main()
