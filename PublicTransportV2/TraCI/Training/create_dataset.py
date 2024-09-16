@@ -12,6 +12,8 @@ features = ["mean_speed_in_end_PTL", "mean_speed_in_PTL", "num_total_vehs", "num
 
 def handle_run(run,project_name):
     df_history = run.history()
+    if run.name == "Nothing":
+        df_history["MinPassNum"] = 6
     try:
         if "MinPassNum" in df_history.columns:
             df_history["MinNumPass"] = df_history["MinPassNum"]
