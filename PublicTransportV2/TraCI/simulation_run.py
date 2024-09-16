@@ -24,7 +24,7 @@ EXP_NAME_TAG = exp_name
 
 # POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL","Control mean_speed_in_PTL"]
 # POLICIES += ["ControlClipped mean_speed_in_PTL","ControlClipped mean_speed_in_end_PTL"]
-POLICIES = ["Trained_LR", "Trained_Trees"]
+POLICIES = ["Trained_LRSimFeat", "Trained_TreesSimFeat"]
 # POLICIES = ["Plus"]
 # POLICIES = ["Nothing"]
 CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]
