@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import os
 import pickle
-features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","MinNumPass"]
 av_rates = [0.1,0.2,0.3,0.4,0.6,0.8]
+features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","closed","av_rate"] + ["MinNumPass"]
 experiments = ["LeftCompDaily","LeftCompScenarios","ClosedLeftCompScenarios"]
 target = "mean_pass_delay_timestamp"
 
@@ -19,7 +19,9 @@ target = "mean_pass_delay_timestamp"
 def main():
     # load the dataset
     dataset = pd.read_pickle("dataset.pkl")
-    dataset = dataset[dataset["project_name"].isin([f"{exp_name}_av{av_rate}" for exp_name in experiments for av_rate in av_rates])]
+
+    dataset["av_rate"] = dataset["project_name"].apply(lambda x: float(x.split("_")[-1][2:]))
+    dataset["closed"] = dataset["project_name"].apply(lambda x: int("Closed" in x))
 
     X = dataset[features].to_numpy()
     Y = dataset[target].to_numpy()
@@ -35,26 +37,28 @@ def main():
         Y_dataset = Y[mask]
         X_train, X_test, y_train, y_test = train_test_split(X_dataset, Y_dataset, test_size=0.2)
 
-        os.makedirs("Trees", exist_ok=True)
-        model = DecisionTreeRegressor(max_depth=4)
+        trees_exp_name= "TreesSimFeat"
+        os.makedirs(trees_exp_name, exist_ok=True)
+        model = DecisionTreeRegressor(max_depth=5)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         fig = plt.figure(figsize=(25,20))
         plot_tree(model, feature_names=features[:-1], filled=True)
-        plt.savefig(f"Trees/tree_{value}.png")
+        plt.savefig(f"{trees_exp_name}/tree_{value}.png")
         plt.show()
         print(f"MSE DecisionTree: {mse}")
         test_sample = X_test[0]
         print(f"Test sample: {test_sample}")
         print(f"Prediction: {model.predict([test_sample])}")
         # save the model
-        pickle.dump(model, open("Trees/model_" + str(value) + ".pkl", "wb"))
+        pickle.dump(model, open(f"{trees_exp_name}/model_" + str(value) + ".pkl", "wb"))
         # save the used features
-        with open("Trees/used_features.txt", "w") as f:
+        with open(f"{trees_exp_name}/used_features.txt", "w") as f:
             f.write(",".join(features[:-1]))
 
-        os.makedirs("LR", exist_ok=True)
+        LR_exp_name = "LRSimFeat"
+        os.makedirs(LR_exp_name, exist_ok=True)
         scaler = StandardScaler()
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
@@ -65,9 +69,9 @@ def main():
         mse = mean_squared_error(y_test, y_pred)
         print(f"MSE LinearRegression: {mse}")
         # save the model
-        pickle.dump(model, open("LR/model_" + str(value) + ".pkl", "wb"))
+        pickle.dump(model, open(f"{LR_exp_name}/model_" + str(value) + ".pkl", "wb"))
         # save the used features
-        with open("LR/used_features.txt", "w") as f:
+        with open(f"{LR_exp_name}/used_features.txt", "w") as f:
             f.write(",".join(features[:-1]))
 
 if __name__ == '__main__':
