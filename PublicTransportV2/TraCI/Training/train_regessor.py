@@ -11,12 +11,18 @@ import matplotlib.pyplot as plt
 import os
 import pickle
 features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","MinNumPass"]
+av_rates = [0.1,0.2,0.3,0.4,0.6,0.8]
+experiments = ["LeftCompDaily","LeftCompScenarios","ClosedLeftCompScenarios"]
 target = "mean_pass_delay_timestamp"
 
 
 def main():
-    X = np.load("X_train.npy", allow_pickle=True).astype(float)
-    Y = np.load("y_train.npy", allow_pickle=True).astype(float)
+    # load the dataset
+    dataset = pd.read_pickle("dataset.pkl")
+    dataset = dataset[dataset["project_name"].isin([f"{exp_name}_av{av_rate}" for exp_name in experiments for av_rate in av_rates])]
+
+    X = dataset[features].to_numpy()
+    Y = dataset[target].to_numpy()
 
     # split to different datasets according to MinNumPass
     values = np.unique(X[:,-1])
