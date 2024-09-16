@@ -327,7 +327,7 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
                 load_models_and_features(model)
             optimal_delay = np.inf
             X = pd.DataFrame(log_msg,index=[0])
-            X["av_rate"] = av_rate
+            X["av_rate"] = av_rate[2:]
             X["closed"] = int("Closed" in exp_name)
             X = X[USED_FEATURES].astype(float)
             values_to_fill = {"mean_speed_in_end_PTL": 25, "mean_speed_in_PTL": 25, "num_total_vehs": 0,
