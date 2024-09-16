@@ -166,7 +166,7 @@ def load_models_and_features(model_name):
     global LOADED_MODELS,USED_FEATURES
     possible_min_pass = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
     LOADED_MODELS = {min_pass: pickle.load(open(f"Training/{model_name}/model_{min_pass}.pkl", "rb")) for min_pass in possible_min_pass}
-    with open(f"Training/{model_name}/features.txt", "r") as f:
+    with open(f"Training/{model_name}/used_features.txt", "r") as f:
         USED_FEATURES = f.read().split(",")
 
 def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
