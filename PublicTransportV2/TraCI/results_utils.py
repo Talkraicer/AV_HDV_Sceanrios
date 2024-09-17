@@ -375,10 +375,10 @@ def unify_results_tables():
 def main():
     results_files = []
     for result in os.listdir(results_reps_folder):
-        idx_exp_name = result.find(exp_name)
         if exp_name == "LeftCompScenarios" and result.find("Closed") != -1:
             continue
-        results_files.append(f"{results_reps_folder}/{result}")
+        if result.find(exp_name) != -1:
+            results_files.append(f"{results_reps_folder}/{result}")
     parse_scenarios(results_files)
     unify_results_tables()
 if __name__ == '__main__':
