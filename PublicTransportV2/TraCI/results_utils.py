@@ -329,7 +329,7 @@ def parse_scenarios(output_files):
     styled_df_clean.to_excel(f"{results_folder}/scenarios_{exp_name}_clean.xlsx")
     df_clean.to_pickle(f"{results_folder}/scenarios_{exp_name}_clean.pkl")
 
-    df_without_plus_rl = df[df.index.str.find("Plus") == -1 and df.index.str.find("ACT_RATE") == -1]
+    df_without_plus_rl = df[df.index.str.find("Plus") == -1 & df.index.str.find("ACT_RATE") == -1]
     styled_df_without_plus_rl = df_without_plus_rl.style.apply(highlight_min, subset=df_without_plus_rl.columns)
     styled_df_without_plus_rl.to_excel(f"{results_folder}/scenarios_{exp_name}_without_plus_rl.xlsx")
     df_without_plus_rl.to_pickle(f"{results_folder}/scenarios_{exp_name}_without_plus_rl.pkl")
