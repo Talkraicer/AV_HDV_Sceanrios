@@ -12,7 +12,7 @@ import xgboost as xg
 import matplotlib.pyplot as plt
 import os
 import pickle
-
+from multiprocessing import Pool
 from tqdm import tqdm
 
 av_rates = [0.1,0.2,0.3,0.4,0.6,0.8]
@@ -20,126 +20,122 @@ features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_ve
 experiments = ["LeftCompDaily","LeftCompScenarios","ClosedLeftCompScenarios"]
 target = "mean_pass_delay_timestamp"
 
+def train_models(value):
+    print(f"MinNumPass = {value}")
+    mask = X[:, -1] == value
 
-def main():
-    # load the dataset
-    dataset = pd.read_csv("dataset.csv")
+    X_dataset = X[mask]
+    X_dataset = X_dataset[:, :-1]
+    Y_dataset = Y[mask]
+    X_train, X_test, y_train, y_test = train_test_split(X_dataset, Y_dataset, test_size=0.2)
 
-    dataset["av_rate"] = dataset["project_name"].apply(lambda x: float(x.split("_")[-1][2:]))
-    dataset["closed"] = dataset["project_name"].apply(lambda x: int("Closed" in x))
+    trees_exp_name = "TreesSimFeat"
+    os.makedirs(trees_exp_name, exist_ok=True)
+    model = DecisionTreeRegressor(max_depth=5)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    fig = plt.figure(figsize=(25, 20))
+    plot_tree(model, feature_names=features[:-1], filled=True)
+    plt.savefig(f"{trees_exp_name}/tree_{value}.png")
+    plt.show()
+    print(f"MSE DecisionTree: {mse}")
+    test_sample = X_test[0]
+    print(f"Test sample: {test_sample}")
+    print(f"Prediction: {model.predict([test_sample])}")
+    # save the model
+    pickle.dump(model, open(f"{trees_exp_name}/model_" + str(value) + ".pkl", "wb"))
+    # save the used features
+    with open(f"{trees_exp_name}/used_features.txt", "w") as f:
+        f.write(",".join(features[:-1]))
 
-    X = dataset[features].to_numpy()
-    Y = dataset[target].to_numpy()
+    LR_exp_name = "LRSimFeat"
+    os.makedirs(LR_exp_name, exist_ok=True)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-    # split to different datasets according to MinNumPass
-    values = np.unique(X[:,-1])
-    for value in tqdm(values):
-        print(f"MinNumPass = {value}")
-        mask = X[:,-1] == value
+    model = LinearRegression()
+    model.fit(X_train_scaled, y_train)
+    y_pred = model.predict(X_test_scaled)
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"MSE LinearRegression: {mse}")
+    # save the model
+    pickle.dump(model, open(f"{LR_exp_name}/model_" + str(value) + ".pkl", "wb"))
+    # save the used features
+    with open(f"{LR_exp_name}/used_features.txt", "w") as f:
+        f.write(",".join(features[:-1]))
 
-        X_dataset = X[mask]
-        X_dataset = X_dataset[:,:-1]
-        Y_dataset = Y[mask]
-        X_train, X_test, y_train, y_test = train_test_split(X_dataset, Y_dataset, test_size=0.2)
+    trees_exp_name = "TreesSimFeatUnbounded"
+    model = DecisionTreeRegressor()
+    os.makedirs(trees_exp_name, exist_ok=True)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    fig = plt.figure(figsize=(25, 20))
+    plot_tree(model, feature_names=features[:-1], filled=True)
+    plt.savefig(f"{trees_exp_name}/tree_{value}.png")
+    plt.show()
+    print(f"MSE DecisionTree: {mse}")
+    test_sample = X_test[0]
+    print(f"Test sample: {test_sample}")
+    print(f"Prediction: {model.predict([test_sample])}")
+    # save the model
+    pickle.dump(model, open(f"{trees_exp_name}/model_" + str(value) + ".pkl", "wb"))
+    # save the used features
+    with open(f"{trees_exp_name}/used_features.txt", "w") as f:
+        f.write(",".join(features[:-1]))
 
-        trees_exp_name= "TreesSimFeat"
-        os.makedirs(trees_exp_name, exist_ok=True)
-        model = DecisionTreeRegressor(max_depth=5)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        fig = plt.figure(figsize=(25,20))
-        plot_tree(model, feature_names=features[:-1], filled=True)
-        plt.savefig(f"{trees_exp_name}/tree_{value}.png")
-        plt.show()
-        print(f"MSE DecisionTree: {mse}")
-        test_sample = X_test[0]
-        print(f"Test sample: {test_sample}")
-        print(f"Prediction: {model.predict([test_sample])}")
-        # save the model
-        pickle.dump(model, open(f"{trees_exp_name}/model_" + str(value) + ".pkl", "wb"))
-        # save the used features
-        with open(f"{trees_exp_name}/used_features.txt", "w") as f:
-            f.write(",".join(features[:-1]))
+    RF_exp_name = "RFSimFeat"
+    os.makedirs(RF_exp_name, exist_ok=True)
+    model = RandomForestRegressor(n_estimators=100)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"MSE RandomForest: {mse}")
+    # save the model
+    pickle.dump(model, open(f"{RF_exp_name}/model_" + str(value) + ".pkl", "wb"))
+    # save the used features
+    with open(f"{RF_exp_name}/used_features.txt", "w") as f:
+        f.write(",".join(features[:-1]))
 
-        LR_exp_name = "LRSimFeat"
-        os.makedirs(LR_exp_name, exist_ok=True)
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
+    MLPRegressor_exp_name = "MLPRegressorSimFeat"
+    os.makedirs(MLPRegressor_exp_name, exist_ok=True)
+    model = MLPRegressor(hidden_layer_sizes=(100, 100), max_iter=1000)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"MSE MLPRegressor: {mse}")
+    # save the model
+    pickle.dump(model, open(f"{MLPRegressor_exp_name}/model_" + str(value) + ".pkl", "wb"))
+    # save the used features
+    with open(f"{MLPRegressor_exp_name}/used_features.txt", "w") as f:
+        f.write(",".join(features[:-1]))
 
-        model = LinearRegression()
-        model.fit(X_train_scaled, y_train)
-        y_pred = model.predict(X_test_scaled)
-        mse = mean_squared_error(y_test, y_pred)
-        print(f"MSE LinearRegression: {mse}")
-        # save the model
-        pickle.dump(model, open(f"{LR_exp_name}/model_" + str(value) + ".pkl", "wb"))
-        # save the used features
-        with open(f"{LR_exp_name}/used_features.txt", "w") as f:
-            f.write(",".join(features[:-1]))
-        trees_exp_name= "TreesSimFeatUnbounded"
-        model = DecisionTreeRegressor()
-        os.makedirs(trees_exp_name, exist_ok=True)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        fig = plt.figure(figsize=(25,20))
-        plot_tree(model, feature_names=features[:-1], filled=True)
-        plt.savefig(f"{trees_exp_name}/tree_{value}.png")
-        plt.show()
-        print(f"MSE DecisionTree: {mse}")
-        test_sample = X_test[0]
-        print(f"Test sample: {test_sample}")
-        print(f"Prediction: {model.predict([test_sample])}")
-        # save the model
-        pickle.dump(model, open(f"{trees_exp_name}/model_" + str(value) + ".pkl", "wb"))
-        # save the used features
-        with open(f"{trees_exp_name}/used_features.txt", "w") as f:
-            f.write(",".join(features[:-1]))
-
-        RF_exp_name = "RFSimFeat"
-        os.makedirs(RF_exp_name, exist_ok=True)
-        model = RandomForestRegressor(n_estimators=100)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        print(f"MSE RandomForest: {mse}")
-        # save the model
-        pickle.dump(model, open(f"{RF_exp_name}/model_" + str(value) + ".pkl", "wb"))
-        # save the used features
-        with open(f"{RF_exp_name}/used_features.txt", "w") as f:
-            f.write(",".join(features[:-1]))
-
-        MLPRegressor_exp_name = "MLPRegressorSimFeat"
-        os.makedirs(MLPRegressor_exp_name, exist_ok=True)
-        model = MLPRegressor(hidden_layer_sizes=(100,100), max_iter=1000)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        print(f"MSE MLPRegressor: {mse}")
-        # save the model
-        pickle.dump(model, open(f"{MLPRegressor_exp_name}/model_" + str(value) + ".pkl", "wb"))
-        # save the used features
-        with open(f"{MLPRegressor_exp_name}/used_features.txt", "w") as f:
-            f.write(",".join(features[:-1]))
-
-        xg_exp_name = "XGBoostSimFeat"
-        os.makedirs(xg_exp_name, exist_ok=True)
-        model = xg.XGBRegressor()
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        print(f"MSE XGBoost: {mse}")
-        # save the model
-        pickle.dump(model, open(f"{xg_exp_name}/model_" + str(value) + ".pkl", "wb"))
-        # save the used features
-        with open(f"{xg_exp_name}/used_features.txt", "w") as f:
-            f.write(",".join(features[:-1]))
+    xg_exp_name = "XGBoostSimFeat"
+    os.makedirs(xg_exp_name, exist_ok=True)
+    model = xg.XGBRegressor()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"MSE XGBoost: {mse}")
+    # save the model
+    pickle.dump(model, open(f"{xg_exp_name}/model_" + str(value) + ".pkl", "wb"))
+    # save the used features
+    with open(f"{xg_exp_name}/used_features.txt", "w") as f:
+        f.write(",".join(features[:-1]))
 
 
 
+dataset = pd.read_csv("dataset.csv")
 
+dataset["av_rate"] = dataset["project_name"].apply(lambda x: float(x.split("_")[-1][2:]))
+dataset["closed"] = dataset["project_name"].apply(lambda x: int("Closed" in x))
 
-if __name__ == '__main__':
-    main()
+X = dataset[features].to_numpy()
+Y = dataset[target].to_numpy()
+
+# split to different datasets according to MinNumPass
+values = np.unique(X[:,-1])
+with Pool(6) as pool:
+    pool.map(train_models,values)
