@@ -19,6 +19,7 @@ av_rates = [0.1,0.2,0.3,0.4,0.6,0.8]
 features = ["mean_speed_in_end_PTL","mean_speed_in_PTL","num_total_vehs","num_vehs_in_PTL","closed","av_rate"] + ["MinNumPass"]
 experiments = ["LeftCompDaily","LeftCompScenarios","ClosedLeftCompScenarios"]
 target = "mean_pass_delay_timestamp"
+dataset_extension = "WP"
 
 def train_models(value):
     print(f"MinNumPass = {value}")
@@ -29,7 +30,7 @@ def train_models(value):
     Y_dataset = Y[mask]
     X_train, X_test, y_train, y_test = train_test_split(X_dataset, Y_dataset, test_size=0.2)
 
-    trees_exp_name = "TreesSimFeat"
+    trees_exp_name = "TreesSimFeat" + dataset_extension
     os.makedirs(trees_exp_name, exist_ok=True)
     model = DecisionTreeRegressor(max_depth=5)
     model.fit(X_train, y_train)
@@ -49,7 +50,7 @@ def train_models(value):
     with open(f"{trees_exp_name}/used_features.txt", "w") as f:
         f.write(",".join(features[:-1]))
 
-    LR_exp_name = "LRSimFeat"
+    LR_exp_name = "LRSimFeat" + dataset_extension
     os.makedirs(LR_exp_name, exist_ok=True)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
@@ -66,7 +67,7 @@ def train_models(value):
     with open(f"{LR_exp_name}/used_features.txt", "w") as f:
         f.write(",".join(features[:-1]))
 
-    trees_exp_name = "TreesSimFeatUnbounded"
+    trees_exp_name = "TreesSimFeatUnbounded" + dataset_extension
     model = DecisionTreeRegressor()
     os.makedirs(trees_exp_name, exist_ok=True)
     model.fit(X_train, y_train)
@@ -86,7 +87,7 @@ def train_models(value):
     with open(f"{trees_exp_name}/used_features.txt", "w") as f:
         f.write(",".join(features[:-1]))
 
-    RF_exp_name = "RFSimFeat"
+    RF_exp_name = "RFSimFeat" + dataset_extension
     os.makedirs(RF_exp_name, exist_ok=True)
     model = RandomForestRegressor(n_estimators=100)
     model.fit(X_train, y_train)
@@ -99,7 +100,7 @@ def train_models(value):
     with open(f"{RF_exp_name}/used_features.txt", "w") as f:
         f.write(",".join(features[:-1]))
 
-    MLPRegressor_exp_name = "MLPRegressorSimFeat"
+    MLPRegressor_exp_name = "MLPRegressorSimFeat" + dataset_extension
     os.makedirs(MLPRegressor_exp_name, exist_ok=True)
     model = MLPRegressor(hidden_layer_sizes=(100, 100), max_iter=1000)
     model.fit(X_train, y_train)
@@ -112,7 +113,7 @@ def train_models(value):
     with open(f"{MLPRegressor_exp_name}/used_features.txt", "w") as f:
         f.write(",".join(features[:-1]))
 
-    xg_exp_name = "XGBoostSimFeat"
+    xg_exp_name = "XGBoostSimFeat" + dataset_extension
     os.makedirs(xg_exp_name, exist_ok=True)
     model = xg.XGBRegressor()
     model.fit(X_train, y_train)
@@ -127,7 +128,7 @@ def train_models(value):
 
 
 
-dataset = pd.read_csv("dataset.csv", index_col = 0)
+dataset = pd.read_csv(f"dataset{dataset_extension}.csv", index_col = 0)
 
 dataset["av_rate"] = dataset["project_name"].apply(lambda x: float(x.split("_")[-1][2:]))
 dataset["closed"] = dataset["project_name"].apply(lambda x: int("Closed" in x))
