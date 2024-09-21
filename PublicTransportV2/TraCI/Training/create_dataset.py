@@ -12,6 +12,8 @@ features = ["mean_speed_in_end_PTL", "mean_speed_in_PTL", "num_total_vehs", "num
 
 def handle_run(run,project_name):
     df_history = run.history()
+    if "Plus" in run.name:
+        return None, False
     if run.name == "Nothing":
         df_history["MinPassNum"] = 6
     try:
@@ -41,7 +43,7 @@ if __name__ == "__main__":
             df, success = handle_run(run,proj_name)
             if success:
                 dataset = pd.concat([dataset, df])
-    dataset.to_pickle("dataset.pkl")
-    dataset.to_csv("dataset.csv")
+    dataset.to_pickle("datasetWP.pkl")
+    dataset.to_csv("datasetWP.csv")
 
 

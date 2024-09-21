@@ -127,7 +127,7 @@ def train_models(value):
 
 
 
-dataset = pd.read_csv("dataset.csv")
+dataset = pd.read_csv("dataset.csv", index_col = 0)
 
 dataset["av_rate"] = dataset["project_name"].apply(lambda x: float(x.split("_")[-1][2:]))
 dataset["closed"] = dataset["project_name"].apply(lambda x: int("Closed" in x))
