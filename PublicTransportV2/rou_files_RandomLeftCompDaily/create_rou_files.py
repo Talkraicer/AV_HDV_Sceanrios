@@ -8,7 +8,7 @@ def normalize_dict(d):
     total = sum(d.values())
     return {k: v / total for k, v in d.items()}
 
-exp_name = "RandomLeftCompScenarios"
+exp_name = "RandomLeftCompDaily"
 PROB_PASS_HD = {1: 0.63, 2: 0.28, 3: 0.06, 4: 0.02, 5: 0.01}
 FACTOR_AV = 1
 PROB_PASS_AV = copy.deepcopy(PROB_PASS_HD)
@@ -19,34 +19,18 @@ print("Expected number of passengers in AVs: ", sum([k*v for k,v in PROB_PASS_AV
 print("Expected number of passengers in HDs: ", sum([k*v for k,v in PROB_PASS_HD.items()]))
 
 
-VEH_AMOUNT = {
-              6: 4000,7:7000,8:7000,9:4000, # RUSH HOURS
-              10:0,11:0, # BREAK
-              12:9000, # PEAK
-              13:0,14:0, # BREAK
-              15:5800,16:5800, #MID DAY
-              17:0,18:0, # BREAK
-              19:4000,20:4000, # WEEKEND
-              21:0,22:0,# BREAK
-              23:4000, 24: 5000, 25:6000, 26:7000, 27:6000, 28: 5000, 29:4000 # Moderate Peak
-              }
+
+VEH_AMOUNT = {6:6163, 7:6450,8:7053,9:6443,10:6287,11:5800,12:6266,13:5428,
+              14:5661,15:4644,16:4937,17:5668,18:5184,19:5126}
+EXIT_PROP = 0.1
+BUS_AMOUNT = {6:62, 7:37,8:19,9:31,10:26,11:25,12:17,13:31,
+              14:44,15:30,16:24,17:28,18:25,19:16}
+
 df = pd.DataFrame(VEH_AMOUNT.items(), columns = ['Hour', 'Vehicles'])
 df.plot(x = 'Hour', y = 'Vehicles', kind = 'bar')
 plt.suptitle('Vehicles demand per hour')
 plt.grid()
 plt.show()
-EXIT_PROP = 0.1
-BUS_AMOUNT = {
-              6: 30,7:60,8:60,9:30, # RUSH HOURS
-              10:0,11:0, # BREAK
-              12:40, # PEAK
-              13:0,14:0, # BREAK
-              15:40,16:40, #MID DAY
-              17:0,18:0, # BREAK
-              19:0,20:0, # WEEKEND
-              21:0,22:0,# BREAK
-              23:30,24: 40, 25:50, 26:60, 27:50, 28: 40, 29:30 # Moderate Peak
-              }
 
 
 # TODO: Find bus occupancy distribution
@@ -136,4 +120,4 @@ def set_rou_file(av_prob, HOUR_LEN = 3600):
 
 if __name__ == '__main__':
     for av_prob in [0.1,0.2,0.3,0.4,0.6,0.8]:
-        set_rou_file(av_prob, HOUR_LEN = 1800)
+        set_rou_file(av_prob, HOUR_LEN = 3600)

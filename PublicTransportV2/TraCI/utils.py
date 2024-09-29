@@ -1,4 +1,4 @@
-exp_name = "RandomLeftCompScenarios"
+exp_name = "RandomLeftCompDaily"
 
 import os
 import traci
