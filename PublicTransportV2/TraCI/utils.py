@@ -1,4 +1,4 @@
-exp_name = "LeftCompScenarios"
+exp_name = "RandomLeftCompScenarios"
 
 import os
 import traci
@@ -9,7 +9,6 @@ from tqdm import tqdm
 from multiprocessing import Pool
 import wandb
 import time
-from results_utils import output_file_to_df, calc_stats_metric
 from log_utils import log_features, init_wandb_logger
 import pickle
 NUM_PROCESSES = 70
@@ -150,16 +149,17 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
-def allow_min_pass(policy_name, control_min_start):
+def allow_min_pass(policy_name, control_min_start, EndToEnd = False):
     vehIDs = traci.vehicle.getIDList()
     for vehID in vehIDs:
         typeID = traci.vehicle.getTypeID(vehID)
         if typeID.startswith("AV") and int(typeID.split("_")[1][0]) >= control_min_start:
-            if policy_name.startswith("Control") or policy_name.startswith("StaticNumPassFL"):
-                loc = traci.vehicle.getPosition(vehID)[0]
-                if loc < 300:
-                    traci.vehicle.setVehicleClass(vehID, "private")
-            else:
+            if EndToEnd:
+                route = traci.vehicle.getRoute(vehID)
+                if route[-1] != "E7" or route[0] != "E":
+                    continue
+            loc = traci.vehicle.getPosition(vehID)[0]
+            if loc < 300:
                 traci.vehicle.setVehicleClass(vehID, "private")
 
 def load_models_and_features(model_name):
@@ -169,9 +169,9 @@ def load_models_and_features(model_name):
     with open(f"Training/{model_name}/used_features.txt", "r") as f:
         USED_FEATURES = f.read().split(",")
 
-def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
-    global BUSES_VOLUNTEERS
-    if policy_name == "Nothing" and exp_name.startswith("Left") and t < 1:
+def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE, seed=None):
+    # global BUSES_VOLUNTEERS
+    if policy_name == "Nothing" and t < 1:
         for lane in traci.lane.getIDList():
             if "bus" in traci.lane.getAllowed(lane):
                 traci.lane.setAllowed(lane, "bus")
@@ -183,123 +183,129 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
             typeID = traci.vehicle.getTypeID(vehID)
             if int(typeID.split("_")[1][0]) >= control_min_start:
                 traci.vehicle.setVehicleClass(vehID, "private")
-    if policy_name.startswith("DisallowBack"):
-        stop_from = int(policy_name.split("_")[1])
-        stop_to = int(policy_name.split("_")[2])
-        vehIDs = traci.vehicle.getIDList()
-        stopping_buses = get_stopping_buses_ids()
-        for vehID in vehIDs:
-            laneID = traci.vehicle.getLaneID(vehID)
-            typeID = traci.vehicle.getTypeID(vehID)
-            if typeID.startswith("AV"):
-                if check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
-                    if laneID.endswith("0") and laneID.find(".S") == -1:
-                        switch_to_allowedTemporalHD(vehID)
-                    elif not laneID.endswith("0") and not laneID.endswith("S_1"):
-                        switch_to_temporalHD(vehID)
-            elif typeID.find("TemporalHD") != -1:
-                if not check_disallow_back(vehID, stopping_buses, stop_from, 0) \
-                        or laneID.endswith("S_1"):
-                    switch_to_AV(vehID)
-                elif typeID.find("AllowedTemporalHD") != -1 and not laneID.endswith("0") and not laneID.endswith("S_1"):
-                    switch_to_temporalHD(vehID)
 
-    if policy_name == "Volunteer_Stopper":
-        vehIDs = traci.vehicle.getIDList()
-        stopping_buses = get_stopping_buses_ids()
-
-        # assign volunteers to new stopping buses
-        for bus in stopping_buses:
-            if bus not in BUSES_VOLUNTEERS.keys():
-                assign_volunteer(bus)
-
-        # release volunteers if the bus is not stopping anymore
-        to_del = []
-        for bus in BUSES_VOLUNTEERS.keys():
-            if bus not in stopping_buses:
-                release_volunteer(BUSES_VOLUNTEERS[bus])
-                to_del.append(bus)
-        for bus_del in to_del:
-            BUSES_VOLUNTEERS.pop(bus_del)
-
-        # check if the AVs need to switch to TemporalHD
-        for vehID in vehIDs:
-            laneID = traci.vehicle.getLaneID(vehID)
-            typeID = traci.vehicle.getTypeID(vehID)
-            was_THD = False
-            if typeID.find("TemporalHD") != -1:
-                switch_to_AV(vehID)
-                was_THD = True
-            if typeID.startswith("AV") or was_THD:
-                for stopped_bus in BUSES_VOLUNTEERS:
-                    if BUSES_VOLUNTEERS[stopped_bus]:
-                        if vehicles_distance(vehID, BUSES_VOLUNTEERS[stopped_bus]) > 0 and \
-                                vehicles_distance(vehID, stopped_bus) < 0 and \
-                                not laneID.endswith("0") and \
-                                not laneID.find(".S") != -1:
-                            switch_to_temporalHD(vehID)
-                            break
-                    elif (0 < vehicles_distance(stopped_bus, vehID) < BUS_STOPPING_TIME * MAX_ALLOWED_SPEED and
-                          not laneID.endswith("0") and not laneID.find(".S") != -1
-                          and vehID not in BUSES_VOLUNTEERS.values()):
-                        switch_to_temporalHD(vehID)
-                        break
-    if policy_name.startswith("FastLane"):
-        dist_features = int(policy_name.split("_")[1])
-        num_avs_max = int(policy_name.split("_")[2])
-        num_buses_max = int(policy_name.split("_")[3])
-        num_avs, num_buses = count_avs_buses(dist_features)
-        insert_vehicles = num_avs <= num_avs_max and num_buses <= num_buses_max
-
-        for vehID in traci.vehicle.getIDList():
-            pos = traci.vehicle.getPosition(vehID)[0]
-            vType = traci.vehicle.getTypeID(vehID)
-            laneID = traci.vehicle.getLaneID(vehID)
-            if vType.startswith("AV") and pos < 7800:
-                if 100 < pos and not laneID.endswith("0"):
-                    switch_to_temporalHD(vehID)
-                else:
-                    if insert_vehicles:
-                        if not laneID.endswith("0"):
-                            traci.vehicle.changeLane(vehID, 0, 1)
-                        elif pos > 0:
-                            switch_to_allowedTemporalHD(vehID)
-                    else:
-                        switch_to_temporalHD(vehID)
-            if vType.find("TemporalHD") != -1 and pos > 7800:
-                switch_to_AV(vehID)
-
-    if policy_name.startswith("EnterClear"):
-        dist = int(policy_name.split("_")[1])
-        vehIDs = traci.vehicle.getIDList()
-        for vehID in vehIDs:
-            laneID = traci.vehicle.getLaneID(vehID)
-            typeID = traci.vehicle.getTypeID(vehID)
-            pos = traci.vehicle.getPosition(vehID)[0]
-            if typeID.startswith("Bus") and pos < -450:
-                for vehID2 in vehIDs:
-                    typeID2 = traci.vehicle.getTypeID(vehID2)
-                    pos2 = traci.vehicle.getPosition(vehID2)[0]
-                    if typeID2.startswith("AV") and pos < pos2 < pos + dist:
-                        switch_to_temporalHD(vehID2)
-                break
-        for vehID in vehIDs:
-            typeID = traci.vehicle.getTypeID(vehID)
-            if typeID.find("TemporalHD") != -1 and traci.vehicle.getPosition(vehID)[0] > 1500:
-                switch_to_AV(vehID)
+    # if policy_name.startswith("DisallowBack"):
+    #     stop_from = int(policy_name.split("_")[1])
+    #     stop_to = int(policy_name.split("_")[2])
+    #     vehIDs = traci.vehicle.getIDList()
+    #     stopping_buses = get_stopping_buses_ids()
+    #     for vehID in vehIDs:
+    #         laneID = traci.vehicle.getLaneID(vehID)
+    #         typeID = traci.vehicle.getTypeID(vehID)
+    #         if typeID.startswith("AV"):
+    #             if check_disallow_back(vehID, stopping_buses, stop_from, stop_to):
+    #                 if laneID.endswith("0") and laneID.find(".S") == -1:
+    #                     switch_to_allowedTemporalHD(vehID)
+    #                 elif not laneID.endswith("0") and not laneID.endswith("S_1"):
+    #                     switch_to_temporalHD(vehID)
+    #         elif typeID.find("TemporalHD") != -1:
+    #             if not check_disallow_back(vehID, stopping_buses, stop_from, 0) \
+    #                     or laneID.endswith("S_1"):
+    #                 switch_to_AV(vehID)
+    #             elif typeID.find("AllowedTemporalHD") != -1 and not laneID.endswith("0") and not laneID.endswith("S_1"):
+    #                 switch_to_temporalHD(vehID)
+    #
+    # if policy_name == "Volunteer_Stopper":
+    #     vehIDs = traci.vehicle.getIDList()
+    #     stopping_buses = get_stopping_buses_ids()
+    #
+    #     # assign volunteers to new stopping buses
+    #     for bus in stopping_buses:
+    #         if bus not in BUSES_VOLUNTEERS.keys():
+    #             assign_volunteer(bus)
+    #
+    #     # release volunteers if the bus is not stopping anymore
+    #     to_del = []
+    #     for bus in BUSES_VOLUNTEERS.keys():
+    #         if bus not in stopping_buses:
+    #             release_volunteer(BUSES_VOLUNTEERS[bus])
+    #             to_del.append(bus)
+    #     for bus_del in to_del:
+    #         BUSES_VOLUNTEERS.pop(bus_del)
+    #
+    #     # check if the AVs need to switch to TemporalHD
+    #     for vehID in vehIDs:
+    #         laneID = traci.vehicle.getLaneID(vehID)
+    #         typeID = traci.vehicle.getTypeID(vehID)
+    #         was_THD = False
+    #         if typeID.find("TemporalHD") != -1:
+    #             switch_to_AV(vehID)
+    #             was_THD = True
+    #         if typeID.startswith("AV") or was_THD:
+    #             for stopped_bus in BUSES_VOLUNTEERS:
+    #                 if BUSES_VOLUNTEERS[stopped_bus]:
+    #                     if vehicles_distance(vehID, BUSES_VOLUNTEERS[stopped_bus]) > 0 and \
+    #                             vehicles_distance(vehID, stopped_bus) < 0 and \
+    #                             not laneID.endswith("0") and \
+    #                             not laneID.find(".S") != -1:
+    #                         switch_to_temporalHD(vehID)
+    #                         break
+    #                 elif (0 < vehicles_distance(stopped_bus, vehID) < BUS_STOPPING_TIME * MAX_ALLOWED_SPEED and
+    #                       not laneID.endswith("0") and not laneID.find(".S") != -1
+    #                       and vehID not in BUSES_VOLUNTEERS.values()):
+    #                     switch_to_temporalHD(vehID)
+    #                     break
+    # if policy_name.startswith("FastLane"):
+    #     dist_features = int(policy_name.split("_")[1])
+    #     num_avs_max = int(policy_name.split("_")[2])
+    #     num_buses_max = int(policy_name.split("_")[3])
+    #     num_avs, num_buses = count_avs_buses(dist_features)
+    #     insert_vehicles = num_avs <= num_avs_max and num_buses <= num_buses_max
+    #
+    #     for vehID in traci.vehicle.getIDList():
+    #         pos = traci.vehicle.getPosition(vehID)[0]
+    #         vType = traci.vehicle.getTypeID(vehID)
+    #         laneID = traci.vehicle.getLaneID(vehID)
+    #         if vType.startswith("AV") and pos < 7800:
+    #             if 100 < pos and not laneID.endswith("0"):
+    #                 switch_to_temporalHD(vehID)
+    #             else:
+    #                 if insert_vehicles:
+    #                     if not laneID.endswith("0"):
+    #                         traci.vehicle.changeLane(vehID, 0, 1)
+    #                     elif pos > 0:
+    #                         switch_to_allowedTemporalHD(vehID)
+    #                 else:
+    #                     switch_to_temporalHD(vehID)
+    #         if vType.find("TemporalHD") != -1 and pos > 7800:
+    #             switch_to_AV(vehID)
+    #
+    # if policy_name.startswith("EnterClear"):
+    #     dist = int(policy_name.split("_")[1])
+    #     vehIDs = traci.vehicle.getIDList()
+    #     for vehID in vehIDs:
+    #         laneID = traci.vehicle.getLaneID(vehID)
+    #         typeID = traci.vehicle.getTypeID(vehID)
+    #         pos = traci.vehicle.getPosition(vehID)[0]
+    #         if typeID.startswith("Bus") and pos < -450:
+    #             for vehID2 in vehIDs:
+    #                 typeID2 = traci.vehicle.getTypeID(vehID2)
+    #                 pos2 = traci.vehicle.getPosition(vehID2)[0]
+    #                 if typeID2.startswith("AV") and pos < pos2 < pos + dist:
+    #                     switch_to_temporalHD(vehID2)
+    #             break
+    #     for vehID in vehIDs:
+    #         typeID = traci.vehicle.getTypeID(vehID)
+    #         if typeID.find("TemporalHD") != -1 and traci.vehicle.getPosition(vehID)[0] > 1500:
+    #             switch_to_AV(vehID)
 
     global CONTROL_MIN_START
     if policy_name.startswith("StaticNumPass"):
         min_num_pass = int(policy_name.split("_")[1][0])
         CONTROL_MIN_START = min_num_pass
-        allow_min_pass(policy_name, CONTROL_MIN_START)
+        if policy_name.startswith("StaticNumPassFL"):
+            allow_min_pass(policy_name, CONTROL_MIN_START, EndToEnd=True)
+        else:
+            allow_min_pass(policy_name, CONTROL_MIN_START)
 
 
     if log_rate and t % log_rate == 0:
-        if t == 0:
+        if t == 0 and not seed:
             init_wandb_logger(policy_name, av_rate, delete_older=DELETE_OLDER)
-
-        log_msg = log_features(policy_name + exp_name + "_" + str(av_rate) + ".xml", t, LOG_RATE)
+        output_file_name = policy_name + exp_name + "_" + str(av_rate) + ".xml"
+        if seed:
+            output_file_name = f"{seed}/{output_file_name}"
+        log_msg = log_features(output_file_name, t, LOG_RATE)
 
         if policy_name.startswith("Control") and log_msg:
             control_var = policy_name.split()[1]
@@ -339,8 +345,8 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE):
                 if delay < optimal_delay:
                     optimal_delay = delay
                     CONTROL_MIN_START = min_pass
-        if log_msg:
+        if log_msg and not seed:
             log_msg["MinPassNum"] = CONTROL_MIN_START
             wandb.log(log_msg)
     if policy_name.startswith("Control") or policy_name.startswith("Trained"):
-        allow_min_pass(policy_name, CONTROL_MIN_START)
+        allow_min_pass(policy_name, CONTROL_MIN_START, EndToEnd=True)

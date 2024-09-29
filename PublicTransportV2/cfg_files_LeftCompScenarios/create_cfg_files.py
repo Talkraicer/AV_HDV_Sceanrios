@@ -12,7 +12,7 @@ def set_cfg_file(av_prob, seed):
 
     # set route file
     route_file = root.find("input").find('route-files')
-    route_file.set('value', f'../rou_files_LeftCompScenarios/LeftCompScenarios_av{av_prob}.rou.xml')
+    route_file.set('value', f'../rou_files_LeftCompScenarios/LeftCompScenarios_av{av_prob}_{seed}.rou.xml')
 
 
 
@@ -25,11 +25,13 @@ def set_cfg_file(av_prob, seed):
     seed_element.set('value', str(seed))
 
     # Save the changes back to the file
-    tree.write(f'{exp_name}_av{av_prob}.sumocfg')
+    tree.write(f'{exp_name}_av{av_prob}_{seed}.sumocfg')
 
-if __name__ == '__main__':
-    seed = np.random.randint(0, 10000)
+def create_cfg_files(seed=None):
+    if not seed:
+        seed = np.random.randint(0, 10000)
     for av_prob in [0.1,0.2,0.3,0.4,0.6,0.8]:
         set_cfg_file(av_prob, seed)
 
-    set_cfg_file(0.5, seed)
+if __name__ == "__main__":
+    create_cfg_files()

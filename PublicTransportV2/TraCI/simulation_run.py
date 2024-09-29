@@ -7,6 +7,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 from joblib import parallel_backend
 
+from PublicTransportV2.TraCI.results_utils import parse_all_output_files
 from utils import *
 import traci
 import optuna
@@ -20,14 +21,16 @@ GUI = False
 SIM_DURATION = 86400
 NUM_PROCESSES = 70
 AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-EXP_NAME_TAG = exp_name
 
-# POLICIES = ["Plus", "Control mean_speed_in_end_PTL", "Nothing", "StaticNumPassFL","Control mean_speed_in_PTL"]
-# POLICIES += ["ControlClipped mean_speed_in_PTL","ControlClipped mean_speed_in_end_PTL"]
-# POLICIES = ["Trained_LRSimFeat", "Trained_TreesSimFeat"]
-POLICIES = ["Trained_TreesSimFeatUnbounded", "Trained_RFSimFeat","Trained_XGBoostSimFeat","Trained_MLPRegressorSimFeat"]
-# POLICIES = ["Plus"]
-# POLICIES = ["Nothing"]
+POLICIES = []
+POLICIES += ["Nothing"]
+POLICIES += ["Plus"]
+POLICIES += ["StaticNumPass"]
+POLICIES += ["StaticNumPassFL"]
+POLICIES += ["Control mean_speed_in_end_PTL", "Control mean_speed_in_PTL"]
+POLICIES += ["ControlClipped mean_speed_in_end_PTL", "ControlClipped mean_speed_in_PTL"]
+models = ["XGBoostSimFeatWP","MLPRegressorSimFeatWP","RFSimFeatWP","TreesSimFeatUnboundedWP","TreesSimFeatWP","LRSimFeatWP"]
+POLICIES += ["Trained_"+x for x in models]
 CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]
 CONTROL_SPEED_RANGES += [(10, 18), (10, 20), (14, 20), (16, 22), (8, 15), (8, 20), (8, 18)]
 CONTROL_SPEED_RANGES += [(12, 20)]
@@ -66,8 +69,16 @@ else:
 
 def init_simulation(arg):
     policy_name, sumoCfg = arg
+    if len(sumoCfg) == 2:
+        sumoCfg, seed = sumoCfg
+    else:
+        seed = None
     sumoCmd = [sumoBinary, "-c", sumoCfg, "--tripinfo-output"]
-    exp_output_name = "results_reps/" + policy_name + ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + ".xml"
+    exp_output_name = "results_reps/"
+    if seed:
+        exp_output_name += f"{seed}/"
+        os.makedirs(exp_output_name, exist_ok=True)
+    exp_output_name += policy_name + ".".join(sumoCfg.split("/")[-1].split(".")[:-1]) + ".xml"
     av_rate = ".".join(sumoCfg.split("/")[-1].split(".")[:-1]).split("_")[-1]
     sumoCmd.append(exp_output_name)
     traci.start(sumoCmd)
@@ -76,12 +87,15 @@ def init_simulation(arg):
 
 def simulate(arg, log_wandb=True):
     policy_name, sumoCfg, av_rate = init_simulation(arg)
+    seed = None
+    if len(arg[1]) == 2:
+        seed = arg[1][1]
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         if log_wandb:
-            handle_step(step, policy_name, av_rate)
+            handle_step(step, policy_name, av_rate,seed=seed)
         else:
-            handle_step(step, policy_name, av_rate, log_rate=0)
+            handle_step(step, policy_name, av_rate, log_rate=0,seed=seed)
         traci.simulationStep(step)
         step += 1
     traci.close()
@@ -176,21 +190,35 @@ def parse_results():
         # parse_all_pairwise(policy_names, AV_rates)
 
 
-def main():
+def run_random_experiments():
     sumoCfgPaths = []
-    for sumoCfg in os.listdir(f"../cfg_files_{EXP_NAME_TAG}"):
+    for folder in os.listdir(f"../cfg_files_{exp_name}"):
+        if folder.isdigit():
+            for sumoCfg in os.listdir(f"../cfg_files_{exp_name}/{folder}"):
+                if sumoCfg.endswith(".sumocfg"):
+                    sumoCfgPath = f"../cfg_files_{exp_name}/{folder}/{sumoCfg}"
+                    sumoCfgPaths.append((sumoCfgPath, folder))
+    print("Number of sumoCfg files: ", len(sumoCfgPaths))
+    if GUI:
+        sumoCfgPaths = [sumoCfgPaths[3]]
+    simulate_policies(sumoCfgPaths)
+
+
+def run_normal_experiments():
+    sumoCfgPaths = []
+    for sumoCfg in os.listdir(f"../cfg_files_{exp_name}"):
         if sumoCfg.endswith(".sumocfg"):
-            if "0.5" not in sumoCfg:
-                sumoCfgPath = f"../cfg_files_{EXP_NAME_TAG}/{sumoCfg}"
-                sumoCfgPaths.append(sumoCfgPath)
+            sumoCfgPath = f"../cfg_files_{exp_name}/{sumoCfg}"
+            sumoCfgPaths.append(sumoCfgPath)
 
     print("Number of sumoCfg files: ", len(sumoCfgPaths))
     if GUI:
         sumoCfgPaths = [sumoCfgPaths[3]]
-    # optuna_simulation([f"../cfg_files_{EXP_NAME_TAG}/LeftCompDaily_av0.5.sumocfg"])
-    # with Pool(len(sumoCfgPaths)) as p:
-    # p.map(optuna_simulation, sumoCfgPaths)
     simulate_policies(sumoCfgPaths)
+
+
+def main():
+    run_random_experiments()
 
 
 if __name__ == "__main__":
