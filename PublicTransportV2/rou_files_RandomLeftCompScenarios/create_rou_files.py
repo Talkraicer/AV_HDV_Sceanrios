@@ -137,5 +137,3 @@ def set_rou_file(av_prob, HOUR_LEN = 3600):
 if __name__ == '__main__':
     for av_prob in [0.1,0.2,0.3,0.4,0.6,0.8]:
         set_rou_file(av_prob, HOUR_LEN = 1800)
-
-    set_rou_file(0.5, HOUR_LEN = 15)
