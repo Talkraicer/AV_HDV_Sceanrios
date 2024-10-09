@@ -11,6 +11,7 @@ import wandb
 import time
 from log_utils import log_features, init_wandb_logger
 import pickle
+
 NUM_PROCESSES = 70
 GUI = False
 results_folder = "results_csvs"
@@ -38,10 +39,11 @@ CONTROL_MIN_START = 1
 NUM_VEHS_PTL_MIN = 10
 NUM_VEHS_PTL_MAX = 60
 
-
 # Trained models
 LOADED_MODELS = dict()
 USED_FEATURES = []
+
+
 def clear_front_of_vehicle(vehID, lane, limit=np.inf):
     leader = traci.vehicle.getLeader(vehID, 0)
     dist_emer = 0
@@ -149,7 +151,7 @@ def count_avs_buses(dist):
     return num_AVs, num_buses
 
 
-def allow_min_pass(policy_name, control_min_start, EndToEnd = False):
+def allow_min_pass(policy_name, control_min_start, EndToEnd=False):
     vehIDs = traci.vehicle.getIDList()
     for vehID in vehIDs:
         typeID = traci.vehicle.getTypeID(vehID)
@@ -162,12 +164,15 @@ def allow_min_pass(policy_name, control_min_start, EndToEnd = False):
             if loc < 300:
                 traci.vehicle.setVehicleClass(vehID, "private")
 
+
 def load_models_and_features(model_name):
-    global LOADED_MODELS,USED_FEATURES
+    global LOADED_MODELS, USED_FEATURES
     possible_min_pass = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-    LOADED_MODELS = {min_pass: pickle.load(open(f"Training/{model_name}/model_{min_pass}.pkl", "rb")) for min_pass in possible_min_pass}
+    LOADED_MODELS = {min_pass: pickle.load(open(f"Training/{model_name}/model_{min_pass}.pkl", "rb")) for min_pass in
+                     possible_min_pass}
     with open(f"Training/{model_name}/used_features.txt", "r") as f:
         USED_FEATURES = f.read().split(",")
+
 
 def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE, seed=None):
     # global BUSES_VOLUNTEERS
@@ -298,7 +303,6 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE, seed=None):
         else:
             allow_min_pass(policy_name, CONTROL_MIN_START)
 
-
     if log_rate and t % log_rate == 0:
         if t == 0 and not seed:
             init_wandb_logger(policy_name, av_rate, delete_older=DELETE_OLDER)
@@ -332,7 +336,7 @@ def handle_step(t, policy_name, av_rate, log_rate=LOG_RATE, seed=None):
             if LOADED_MODELS == {}:
                 load_models_and_features(model)
             optimal_delay = np.inf
-            X = pd.DataFrame(log_msg,index=[0])
+            X = pd.DataFrame(log_msg, index=[0])
             X["av_rate"] = av_rate[2:]
             X["closed"] = int("Closed" in exp_name)
             X = X[USED_FEATURES].astype(float)

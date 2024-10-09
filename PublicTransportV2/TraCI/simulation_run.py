@@ -29,8 +29,10 @@ POLICIES += ["StaticNumPass"]
 POLICIES += ["StaticNumPassFL"]
 POLICIES += ["Control mean_speed_in_end_PTL", "Control mean_speed_in_PTL"]
 POLICIES += ["ControlClipped mean_speed_in_end_PTL", "ControlClipped mean_speed_in_PTL"]
-models = ["XGBoostSimFeatWP","MLPRegressorSimFeatWP","RFSimFeatWP","TreesSimFeatUnboundedWP","TreesSimFeatWP","LRSimFeatWP"]
-POLICIES += ["Trained_"+x for x in models]
+models = ["XGBoostSimFeatWP", "MLPRegressorSimFeatWP", "RFSimFeatWP", "TreesSimFeatUnboundedWP", "TreesSimFeatWP",
+          "LRSimFeatWP"]
+POLICIES += ["Trained_" + x for x in models]
+
 CONTROL_SPEED_RANGES = [(13, 20), (16, 21), (16, 20), (15, 22), (14, 22)]
 CONTROL_SPEED_RANGES += [(10, 18), (10, 20), (14, 20), (16, 22), (8, 15), (8, 20), (8, 18)]
 CONTROL_SPEED_RANGES += [(12, 20)]
@@ -93,13 +95,13 @@ def simulate(arg, log_wandb=True):
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         if log_wandb:
-            handle_step(step, policy_name, av_rate,seed=seed)
+            handle_step(step, policy_name, av_rate, seed=seed)
         else:
-            handle_step(step, policy_name, av_rate, log_rate=0,seed=seed)
+            handle_step(step, policy_name, av_rate, log_rate=0, seed=seed)
         traci.simulationStep(step)
         step += 1
     traci.close()
-    wandb.finish()
+    # wandb.finish()
 
 
 def parallel_simulation(args):

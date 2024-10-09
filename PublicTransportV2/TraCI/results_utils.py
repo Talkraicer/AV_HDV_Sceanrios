@@ -377,6 +377,64 @@ def unify_results_tables():
     large_df_clean.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified_clean.pkl")
     styled_large_df_clean.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_clean.xlsx")
 
+def parse_LeftCompDaily_file(output_file):
+    file_name = output_file.split("/")[-1]
+    policy_name = file_name[:file_name.find(exp_name)]
+    av_idx = file_name.find("av")
+    av_rate = file_name[av_idx:av_idx + 5]
+    try:
+        df_file = output_file_to_df(output_file)
+    except:
+        print(f"Error in file {output_file}")
+        return None
+    total_delay_timestamp = calc_stats_metric(df_file, "totalDelay", diff=False)
+    mean_pass_delay_total = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
+    return policy_name, av_rate, mean_pass_delay_total
+def parse_RandomLeftCompDaily():
+    np.random.seed(42)
+    seeds = [np.random.randint(0, 10000) for _ in range(10)]
+    output_files_seed = [results_reps_folder+f"/{seeds[0]}/" + p for p in os.listdir(results_reps_folder+f"/{seeds[0]}") if p.find("RandomLeftCompDaily") != -1]
+    policy_names = []
+    av_rates = []
+    for output_file in output_files_seed:
+        file_name = output_file.split("/")[-1]
+        policy_name = file_name[:file_name.find(exp_name)]
+        av_idx = file_name.find("av")
+        av_rate = file_name[av_idx:av_idx+5]
+        policy_names.append(policy_name)
+        av_rates.append(av_rate)
+    av_rates = sorted(list(set(av_rates)))
+    policy_names = sorted(list(set(policy_names)))
+
+    df_dict = {"policy": [], "av_rate": [], "mean_pass_delay": []}
+    output_files = [results_reps_folder+f"/{seed}/" + p for seed in seeds
+                    for p in os.listdir(results_reps_folder+f"/{seed}") if p.find("RandomLeftCompDaily") != -1]
+    with Pool(NUM_PROCESSES) as pool:
+        results = list(tqdm(pool.imap(parse_LeftCompDaily_file, output_files), total=len(output_files)))
+    for policy_name, av_rate, mean_pass_delay_total in results:
+        df_dict["policy"].append(policy_name)
+        df_dict["av_rate"].append(av_rate)
+        df_dict["mean_pass_delay"].append(mean_pass_delay_total)
+    df = pd.DataFrame(df_dict)
+    # write result as mean +- std
+    df_grouped = df.groupby(by=["policy", "av_rate"]).agg(["mean", "std"]).reset_index()
+    df_final = pd.DataFrame(columns=pd.MultiIndex.from_product([["mean", "std"], av_rates]),
+                                                               index=policy_names)
+    for index, row in df_grouped.iterrows():
+        policy_name = row["policy"]
+        av_rate = row["av_rate"]
+        mean = row["mean"]
+        std = row["std"]
+        df_final.loc[policy_name, ("mean", av_rate)] = mean
+        df_final.loc[policy_name, ("std", av_rate)] = std
+    df_final.to_csv(f"{results_folder}/RandomLeftCompDaily.csv")
+    df_final.to_pickle(f"{results_folder}/RandomLeftCompDaily.pkl")
+
+    styled_df = df_final.style.apply(highlight_min, subset=[("mean", av_rate) for av_rate in av_rates])
+    styled_df.to_excel(f"{results_folder}/RandomLeftCompDaily.xlsx")
+
+
+
 def main():
     results_files = []
     for result in os.listdir(results_reps_folder):
