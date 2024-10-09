@@ -15,12 +15,13 @@ results_reps_folder = "results_reps"
 METRICS = ["duration", "departDelay", "speed", "timeLoss", "totalDelay"]
 VTYPES = ["AV", "HD", "Bus", "all"]
 
+
 def output_file_to_df(output_file, num_reps=1):
     # Parse the XML file into pd dataframe
     tree = ET.parse(output_file)
     root = tree.getroot()
 
-    dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": [], "id": [], "depart":[]}
+    dict = {"duration": [], "departDelay": [], "routeLength": [], "vType": [], "timeLoss": [], "id": [], "depart": []}
     for tripinfo in root.findall('tripinfo'):
         for key in dict.keys():
             dict[key].append(tripinfo.get(key))
@@ -189,7 +190,8 @@ def parse_output_files_pairwise(args):
         output_file2 = f"results_reps/{policy_baseline}{exp_name}_av{av_rate2_dyn}.xml"
         df_rep1 = output_file_to_df(output_file1)
         df_rep2 = output_file_to_df(output_file2)
-        df_rep = pd.merge(df_rep1, df_rep2, on=["id"], suffixes=[f"_{policy_name1}{av_rate}", f"_{policy_baseline}{av_rate2_dyn}"], how="inner")
+        df_rep = pd.merge(df_rep1, df_rep2, on=["id"],
+                          suffixes=[f"_{policy_name1}{av_rate}", f"_{policy_baseline}{av_rate2_dyn}"], how="inner")
         # calculate difference
         try:
             assert len(df_rep) == len(df_rep1) == len(df_rep2)
@@ -202,7 +204,8 @@ def parse_output_files_pairwise(args):
             print("*" * 50)
 
         for metric in METRICS:
-            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{policy_name1}{av_rate}"] - df_rep[f"{metric}_{policy_baseline}{av_rate2_dyn}"]) /
+            df_rep[f"{metric}_diff"] = ((df_rep[f"{metric}_{policy_name1}{av_rate}"] - df_rep[
+                f"{metric}_{policy_baseline}{av_rate2_dyn}"]) /
                                         df_rep[f"{metric}_{policy_baseline}{av_rate2_dyn}"]) * 100
         df_rep.drop(columns=[f"{metric}_{policy_name1}{av_rate}" for metric in METRICS], inplace=True)
         df_rep.drop(columns=[f"{metric}_{policy_baseline}{av_rate2_dyn}" for metric in METRICS], inplace=True)
@@ -273,6 +276,7 @@ def highlight_min(s):
     is_min = s == s.min()
     return ['background-color: yellow' if v else '' for v in is_min]
 
+
 def reset_style(s):
     return ['' for v in s]
 
@@ -294,8 +298,10 @@ def filter_strongly_dominated_rows(df):
     return df[~pd.Series(dominated_mask)]
 
 
-SCENARIO_START_TIMES = [0,10800,16200,23400,30600, np.inf]
-SCENARIO_NAMES = ["RUSH_HOUR_EXT","PEAK","MID_DAY","WEEKEND", "MODERATE_RUSH_HOUR", "TOTAL"]
+SCENARIO_START_TIMES = [0, 10800, 16200, 23400, 30600, np.inf]
+SCENARIO_NAMES = ["RUSH_HOUR_EXT", "PEAK", "MID_DAY", "WEEKEND", "MODERATE_RUSH_HOUR", "TOTAL"]
+
+
 def parse_scenarios(output_files):
     policy_names = []
     av_rates = []
@@ -303,7 +309,7 @@ def parse_scenarios(output_files):
         file_name = output_file.split("/")[-1]
         policy_name = file_name[:file_name.find(exp_name)]
         av_idx = file_name.find("av")
-        av_rate = file_name[av_idx:av_idx+5]
+        av_rate = file_name[av_idx:av_idx + 5]
         policy_names.append(policy_name)
         av_rates.append(av_rate)
     av_rates = sorted(list(set(av_rates)))
@@ -334,6 +340,7 @@ def parse_scenarios(output_files):
     styled_df_without_plus_rl.to_excel(f"{results_folder}/scenarios_{exp_name}_without_plus_rl.xlsx")
     df_without_plus_rl.to_pickle(f"{results_folder}/scenarios_{exp_name}_without_plus_rl.pkl")
 
+
 def parse_scenarios_file(output_file):
     file_results = []
     file_name = output_file.split("/")[-1]
@@ -359,6 +366,7 @@ def parse_scenarios_file(output_file):
     file_results.append((policy_name, "TOTAL", av_rate, mean_pass_delay_total))
     return file_results
 
+
 def unify_results_tables():
     large_df = pd.DataFrame()
     for experiment in exp_names:
@@ -377,6 +385,7 @@ def unify_results_tables():
     large_df_clean.to_pickle(f"{results_folder}/scenarios_{exp_names}_unified_clean.pkl")
     styled_large_df_clean.to_excel(f"{results_folder}/scenarios_{exp_names}_unified_clean.xlsx")
 
+
 def parse_LeftCompDaily_file(output_file):
     file_name = output_file.split("/")[-1]
     policy_name = file_name[:file_name.find(exp_name)]
@@ -390,25 +399,28 @@ def parse_LeftCompDaily_file(output_file):
     total_delay_timestamp = calc_stats_metric(df_file, "totalDelay", diff=False)
     mean_pass_delay_total = total_delay_timestamp.loc["avg_totalDelay", "Passenger"]
     return policy_name, av_rate, mean_pass_delay_total
+
+
 def parse_RandomLeftCompDaily():
     np.random.seed(42)
     seeds = [np.random.randint(0, 10000) for _ in range(10)]
-    output_files_seed = [results_reps_folder+f"/{seeds[0]}/" + p for p in os.listdir(results_reps_folder+f"/{seeds[0]}") if p.find("RandomLeftCompDaily") != -1]
+    output_files_seed = [results_reps_folder + f"/{seeds[0]}/" + p for p in
+                         os.listdir(results_reps_folder + f"/{seeds[0]}") if p.find("RandomLeftCompDaily") != -1]
     policy_names = []
     av_rates = []
     for output_file in output_files_seed:
         file_name = output_file.split("/")[-1]
         policy_name = file_name[:file_name.find(exp_name)]
         av_idx = file_name.find("av")
-        av_rate = file_name[av_idx:av_idx+5]
+        av_rate = file_name[av_idx:av_idx + 5]
         policy_names.append(policy_name)
         av_rates.append(av_rate)
     av_rates = sorted(list(set(av_rates)))
     policy_names = sorted(list(set(policy_names)))
 
     df_dict = {"policy": [], "av_rate": [], "mean_pass_delay": []}
-    output_files = [results_reps_folder+f"/{seed}/" + p for seed in seeds
-                    for p in os.listdir(results_reps_folder+f"/{seed}") if p.find("RandomLeftCompDaily") != -1]
+    output_files = [results_reps_folder + f"/{seed}/" + p for seed in seeds
+                    for p in os.listdir(results_reps_folder + f"/{seed}") if p.find("RandomLeftCompDaily") != -1]
     with Pool(NUM_PROCESSES) as pool:
         results = list(tqdm(pool.imap(parse_LeftCompDaily_file, output_files), total=len(output_files)))
     for policy_name, av_rate, mean_pass_delay_total in results:
@@ -421,8 +433,8 @@ def parse_RandomLeftCompDaily():
     df_final = pd.DataFrame(columns=pd.MultiIndex.from_product([["mean", "std"], av_rates]),
                             index=policy_names)
 
-    df_final.to_csv(f"{results_folder}/RandomLeftCompDaily.csv")
-    df_final.to_pickle(f"{results_folder}/RandomLeftCompDaily.pkl")
+    df_grouped.to_csv(f"{results_folder}/RandomLeftCompDaily.csv")
+    df_grouped.to_pickle(f"{results_folder}/RandomLeftCompDaily.pkl")
     for index, row in df_grouped.iterrows():
         policy_name = row["policy"]
         av_rate = row["av_rate"]
@@ -435,7 +447,6 @@ def parse_RandomLeftCompDaily():
     styled_df.to_excel(f"{results_folder}/RandomLeftCompDaily.xlsx")
 
 
-
 def main():
     results_files = []
     for result in os.listdir(results_reps_folder):
@@ -445,6 +456,8 @@ def main():
             results_files.append(f"{results_reps_folder}/{result}")
     parse_scenarios(results_files)
     unify_results_tables()
+
+
 if __name__ == '__main__':
     # Example usage
     # AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
