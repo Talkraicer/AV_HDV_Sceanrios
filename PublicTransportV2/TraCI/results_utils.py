@@ -419,7 +419,10 @@ def parse_RandomLeftCompDaily():
     # write result as mean +- std
     df_grouped = df.groupby(by=["policy", "av_rate"]).agg(["mean", "std"]).reset_index()
     df_final = pd.DataFrame(columns=pd.MultiIndex.from_product([["mean", "std"], av_rates]),
-                                                               index=policy_names)
+                            index=policy_names)
+
+    df_final.to_csv(f"{results_folder}/RandomLeftCompDaily.csv")
+    df_final.to_pickle(f"{results_folder}/RandomLeftCompDaily.pkl")
     for index, row in df_grouped.iterrows():
         policy_name = row["policy"]
         av_rate = row["av_rate"]
@@ -427,8 +430,6 @@ def parse_RandomLeftCompDaily():
         std = row["std"]
         df_final.loc[policy_name, ("mean", av_rate)] = mean
         df_final.loc[policy_name, ("std", av_rate)] = std
-    df_final.to_csv(f"{results_folder}/RandomLeftCompDaily.csv")
-    df_final.to_pickle(f"{results_folder}/RandomLeftCompDaily.pkl")
 
     styled_df = df_final.style.apply(highlight_min, subset=[("mean", av_rate) for av_rate in av_rates])
     styled_df.to_excel(f"{results_folder}/RandomLeftCompDaily.xlsx")
