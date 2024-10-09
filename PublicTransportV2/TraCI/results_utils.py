@@ -459,4 +459,4 @@ if __name__ == '__main__':
     # policies = ["DisallowBack"]
     # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in policies for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
     # create_all_results_tables(AV_rates, policy_names)
-    main()
+    parse_RandomLeftCompDaily()
