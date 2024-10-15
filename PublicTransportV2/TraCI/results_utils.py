@@ -431,21 +431,20 @@ def parse_RandomLeftCompDaily():
     df = pd.DataFrame(df_dict)
     # write result as mean +- std
     df_grouped = df.groupby(by=["policy", "av_rate"]).agg(["mean", "std"]).reset_index()
-    df_final = pd.DataFrame(columns=pd.MultiIndex.from_product([["mean", "std"], av_rates]),
+    df_final = pd.DataFrame(columns=pd.MultiIndex.from_product([av_rates, ["mean", "std"]]),
                             index=policy_names)
 
-    df_grouped.to_csv(f"{results_folder}/RandomLeftCompDaily.csv")
-    df_grouped.to_pickle(f"{results_folder}/RandomLeftCompDaily.pkl")
     for index, row in df_grouped.iterrows():
         policy_name = row["policy"]
         av_rate = row["av_rate"]
-        mean = row["mean"]
-        std = row["std"]
-        df_final.loc[policy_name, ("mean", av_rate)] = mean
-        df_final.loc[policy_name, ("std", av_rate)] = std
+        mean = row["mean_pass_delay", "mean"]
+        std = row["mean_pass_delay", "std"]
+        df_final.loc[policy_name, (av_rate, "mean")] = mean
+        df_final.loc[policy_name, (av_rate, "std")] = std
 
-    styled_df = df_final.style.apply(highlight_min, subset=[("mean", av_rate) for av_rate in av_rates])
-    styled_df.to_excel(f"{results_folder}/RandomLeftCompDaily.xlsx")
+    df_final.to_pickle(f"results_csvs/RandomLeftCompDaily.pkl")
+    styled_df = df_final.style.apply(highlight_min, subset=[(av_rate, "mean") for av_rate in av_rates])
+    styled_df.to_excel(f"results_csvs/RandomLeftCompDaily.xlsx")
 
 
 def main():
