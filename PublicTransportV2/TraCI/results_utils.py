@@ -100,7 +100,7 @@ def calc_stats_metric(df, metric, diff=False):
     if "Passenger" not in stats.keys():
         stats["Passenger"] = {}
         # multiply each metric by the number of passengers
-        stats["Passenger"][f"avg_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).median()
+        stats["Passenger"][f"avg_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).mean()
         stats["Passenger"][f"std_{metric}"] = df.apply(lambda x: x[metric] * x["numPass"], axis=1).std(ddof=1)
         stats["Passenger"]["count"] = df["numPass"].sum()
     return pd.DataFrame(stats)
@@ -275,6 +275,7 @@ def convert_all_flows_to_av_rates(policies, policy_name2, flows, av_rates):
 def highlight_min(s):
     is_min = s == s.min()
     return ['background-color: yellow' if v else '' for v in is_min]
+
 
 
 def reset_style(s):
@@ -459,18 +460,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # Example usage
-    # AV_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    #
-    # policies = ["Nothing"]+[f"StaticNumPass_{i}" for i in range(1, 6)]
-    # # parse_all_output_files(AV_rates, 1, policies)
-    # policies.remove("Nothing")
-    # parse_all_pairwise(policies, AV_rates)
-    # policies.remove("Nothing")
-    # create_all_results_tables(AV_rates, policies)
-    # STOP_FROM_RANGE = [300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
-    # STOP_TO_RANGE = [0, 100, 200]
-    # policies = ["DisallowBack"]
-    # policy_names = [f"{policy}_{stop_from}_{stop_to}" for policy in policies for stop_from in STOP_FROM_RANGE for stop_to in STOP_TO_RANGE]
-    # create_all_results_tables(AV_rates, policy_names)
+
     parse_RandomLeftCompDaily()

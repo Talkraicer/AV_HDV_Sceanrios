@@ -13,7 +13,7 @@ def set_cfg_file(av_prob, seed):
 
     # set route file
     route_file = root.find("input").find('route-files')
-    route_file.set('value', f'../rou_files_RandomClosedLeftCompScenarios/RandomClosedLeftCompScenarios_av{av_prob}.rou.xml')
+    route_file.set('value', f'../../rou_files_RandomClosedLeftCompScenarios/RandomClosedLeftCompScenarios_av{av_prob}.rou.xml')
 
 
 
